@@ -1,0 +1,149 @@
+```
+# gradle/libs.versions.toml — বই খাতা
+#
+# নীতি (BUILD.md §৭):
+# ১. কোনো ইনলাইন ভার্সন-স্ট্রিং নয় — সব এখান দিয়ে।
+# ২. নতুন ডিপেন্ডেন্সি যোগ = আগে DECISIONS.md এন্ট্রি।
+# ৩. ⚠ VERIFY এন্ট্রি: Phase 0 শুরুর আগে লাইভ-উৎসে যাচাই করে এই কমেন্ট-ব্লক আপডেট করো —
+#    অনুমানে "ঠিক করে দেওয়া" নিষিদ্ধ। যাচাই-উৎস: mvnrepository.com / প্রকল্পের নিজস্ব release-পেজ।
+# ৪. যা ব্যবহার হয় না (okhttp, sentry, detekt, ktlint, security-crypto) সচেতনভাবে বাদ —
+#    ফিরিয়ে আনতে চাইলে DECISIONS.md-এন্ট্রি লাগবে।
+
+[versions]
+# ── Toolchain ───────────────────────────────────────────────────────────────
+agp = "9.1.1"                         # যাচাইকৃত (ভেন্ডর-টোমল বহাল) — AGP 9.x বিল্ট-ইন Kotlin-সাপোর্ট
+kotlin = "2.4.0"                      # বহাল — 2.4.20 RC, ব্যবহার নিষিদ্ধ
+ksp = "2.3.11-1.0.32"                 # ⚠ VERIFY সাফিক্স: github.com/google/ksp/releases (Kotlin-ভার্সনের সাথে হুবহু মিলতে হবে)
+
+# ── Compose ─────────────────────────────────────────────────────────────────
+composeBom = "2026.08.00"             # বহাল — Compose 1.12-ম্যাপিং
+
+# ── Android SDK ─────────────────────────────────────────────────────────────
+compileSdk = "37"
+targetSdk = "37"
+minSdk = "26"                         # লকড — Blueprint ডিভাইস-স্পেক (Android 8)
+
+# ── DI ──────────────────────────────────────────────────────────────────────
+hilt = "2.60.1"                       # বহাল; কম্পাইলার-আর্টিফ্যাক্ট না পেলে উভয়ই 2.59.2-এ নামাও
+androidxHilt = "1.2.0"                # ⚠ VERIFY — developer.android.com/jetpack/androidx/releases/hilt
+
+# ── Local DB ────────────────────────────────────────────────────────────────
+room = "2.8.4"                        # বহাল — Room 3.x আলফা, নিষিদ্ধ
+
+# ── Background work ─────────────────────────────────────────────────────────
+workManager = "2.11.1"                # বহাল
+
+# ── Firebase (Spark-স্ট্যাক: Auth + Firestore — BUILD.md §২) ────────────────
+firebaseBom = "33.10.0"               # ⚠ VERIFY — স্মৃতি-ভিত্তিক প্লেসহোল্ডার; সর্বশেষ BOM: firebase.google.com/docs/android/setup
+googleServices = "4.4.2"              # ⚠ VERIFY — mvnrepository.com/artifact/com.google.gms/google-services
+
+# ── AndroidX বেস (Compose-সহচর) ───────────────────────────────────────────
+coreKtx = "1.15.0"                    # ⚠ VERIFY
+activityCompose = "1.9.3"             # ⚠ VERIFY
+lifecycle = "2.8.7"                   # ⚠ VERIFY
+navigationCompose = "2.8.5"           # ⚠ VERIFY
+biometric = "1.1.0"                   # বহাল
+
+# ── Serialization / coroutines ──────────────────────────────────────────────
+kotlinxSerialization = "1.9.0"        # ⚠ VERIFY — github.com/Kotlin/kotlinx.serialization/releases
+kotlinxCoroutines = "1.10.2"          # ⚠ VERIFY — github.com/Kotlin/kotlinx.coroutines/releases
+
+# ── Testing ─────────────────────────────────────────────────────────────────
+junit4 = "4.13.2"                     # দীর্ঘ-স্থিতিশীল
+androidxTestExt = "1.2.1"             # ⚠ VERIFY
+androidxTestRunner = "1.6.2"          # ⚠ VERIFY
+robolectric = "4.14.1"                # ⚠ VERIFY
+mockk = "1.13.13"                     # ⚠ VERIFY
+turbine = "1.2.0"                     # ⚠ VERIFY (Flow-টেস্ট)
+truth = "1.4.4"                       # ⚠ VERIFY
+
+[libraries]
+# — Compose (BOM-মুক্ত ভার্সন) —
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+
+# — AndroidX বেস —
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
+
+# — DI —
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "androidxHilt" }
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "androidxHilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "androidxHilt" }
+
+# — Room —
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
+
+# — WorkManager —
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
+androidx-work-testing = { group = "androidx.work", name = "work-testing", version.ref = "workManager" }
+
+# — Firebase —
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
+firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+
+# — Serialization / coroutines —
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+
+# — Testing —
+junit = { group = "junit", name = "junit", version.ref = "junit4" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExt" }
+androidx-test-runner = { group = "androidx.test", name = "runner", version.ref = "androidxTestRunner" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+
+[bundles]
+compose-core = [
+    "androidx-compose-ui",
+    "androidx-compose-ui-graphics",
+    "androidx-compose-ui-tooling-preview",
+    "androidx-compose-foundation",
+    "androidx-compose-material3",
+    "androidx-compose-runtime",
+]
+compose-test = [ "androidx-compose-ui-test-junit4" ]
+room = [ "androidx-room-runtime", "androidx-room-ktx" ]
+firebase = [ "firebase-auth", "firebase-firestore" ]
+unit-test-core = [ "junit", "mockk", "truth", "turbine", "kotlinx-coroutines-test" ]
+instrumented-test-core = [ "androidx-test-ext-junit", "androidx-test-runner", "androidx-room-testing", "androidx-work-testing" ]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 0-এর আগে যাচাই-বাধ্য এন্ট্রি: ksp, androidxHilt, firebaseBom, googleServices,
+# coreKtx, activityCompose, lifecycle, navigationCompose, kotlinxSerialization,
+# kotlinxCoroutines, androidxTestExt, androidxTestRunner, robolectric, mockk,
+# turbine, truth — সব যাচাই শেষে এই কমেন্ট-ব্লক মুছে দাও।
+# বাদ-দেওয়া (ফিরতে DECISIONS লাগবে): okhttp-পরিবার (REST নেই), sentry (স্থগিত),
+# detekt/ktlint (CI-পরে), security-crypto (raw Keystore ব্যবহার)।
+# ═══════════════════════════════════════════════════════════════════════════
+```
