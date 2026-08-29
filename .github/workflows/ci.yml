@@ -1,12 +1,20 @@
 name: Android CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,7 +32,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Android 37 SDK packages
-        run: sdkmanager "platforms;android-37" "build-tools;37.0.0"
+        run: sdkmanager --install "platform-tools" "platforms;android-37.0" "build-tools;37.0.0"
 
       - name: Build
-        run: ./gradlew build
+        run: chmod +x gradlew && ./gradlew build --stacktrace
