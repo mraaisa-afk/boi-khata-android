@@ -14,6 +14,7 @@
 | স্তর | পছন্দ | বিকল্প নিষিদ্ধ |
 |---|---|---|
 | ভাষা/UI | Kotlin + Jetpack Compose (Material 3), minSdk 26 | Java নয়, XML-view নয় |
+| ডিজাইন-সিস্টেম | **Lal Khata Theme** (Primary: `#800000`, Bg: `#FDFAF6`), Big Typography, 56dp+ touch targets | Default Material 3 ghost buttons, pure white bg, small text |
 | লোকাল DB | Room (সত্যের একমাত্র উৎস) | Realm/raw-SQLite নয় |
 | ক্লাউড | **Firebase: Auth (Phone) + Firestore** — শুধু পরিচয়+লাইসেন্স+ব্যাকআপ+মাস্টার-ক্যাটালগ | কাস্টম REST-সার্ভার নয়; Crashlytics/FCM/Functions/Analytics নয় (Spark-ফ্রি-শর্ত) |
 | DI | Hilt | Koin/ম্যানুয়াল নয় |
@@ -32,7 +33,7 @@ core/cloud/             FirebaseAuth/Firestore ইম্প্ল, টেন্�
 core/designsystem/      থিম, বাংলা-ফন্ট, NumberFormatter (০১২/012), Lite-UI
 core/common/            স্ট্রিং/ডেট-টুল, Result-র‍্যাপার
 feature/home|sale|catalog|khata|expense|supplier|reports|subscription|melamode|support/
-shared/receipt/         WhatsApp টেক্সট/PNG বিল্ডার (দ্বৈত-অঙ্ক)
+shared/receipt/         WhatsApp টেক্সট/PDF বিল্ডার (দ্বৈত-অঙ্ক, PNG/Bitmap নিষিদ্ধ OOM এড়াতে)
 vendorapp/              ভবিষ্যৎ (এখন নয়)
 ```
 নিয়ম: `feature/*` শুধু `core/*`+`shared/*`-কে দেখে; feature↔feature সরাসরি নিষিদ্ধ।
