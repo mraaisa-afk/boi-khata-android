@@ -1,0 +1,9 @@
+<resources>
+    <string name="total_due">মোট বাকি</string>
+    <string name="today_sales">আজকের বিক্রি</string>
+    <string name="due_customers">বাকি আছে %1$d জনের</string>
+    <string name="today_bills">আজ %1$dটি বিল</string>
+    <string name="top_due">সর্বোচ্চ বাকি (top ৫)</string>
+    <string name="no_due">কারো বাকি নেই</string>
+    <string name="age_days">%1$d দিন আগে</string>
+</resources>

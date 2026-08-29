@@ -1,0 +1,9 @@
+<resources>
+    <string name="total_due">Total Due</string>
+    <string name="today_sales">Today\'s Sales</string>
+    <string name="due_customers">%1$d customers have dues</string>
+    <string name="today_bills">%1$d bills today</string>
+    <string name="top_due">Top Dues (top 5)</string>
+    <string name="no_due">No dues</string>
+    <string name="age_days">%1$d days ago</string>
+</resources>

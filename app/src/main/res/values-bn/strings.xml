@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">বই খাতা</string>
     <string name="phase_zero_ready">ফেজ ০ স্কেলেটন প্রস্তুত</string>
+    <string name="enter_pin">পিন লিখুন</string>
+    <string name="login">প্রবেশ</string>
+    <string name="wrong_pin">ভুল পিন</string>
+    <string name="locked">লক হয়েছে — আবার লগইন করুন</string>
 </resources>

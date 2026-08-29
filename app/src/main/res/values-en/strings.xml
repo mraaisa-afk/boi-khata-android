@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Boi Khata</string>
     <string name="phase_zero_ready">Phase 0 skeleton ready</string>
+    <string name="enter_pin">Enter PIN</string>
+    <string name="login">Login</string>
+    <string name="wrong_pin">Wrong PIN</string>
+    <string name="locked">Locked — please log in again</string>
 </resources>
