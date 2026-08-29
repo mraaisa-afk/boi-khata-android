@@ -1,4 +1,3 @@
-```
 # gradle/libs.versions.toml — বই খাতা
 #
 # নীতি (BUILD.md §৭):
@@ -13,7 +12,7 @@
 # ── Toolchain ───────────────────────────────────────────────────────────────
 agp = "9.1.1"                         # যাচাইকৃত (ভেন্ডর-টোমল বহাল) — AGP 9.x বিল্ট-ইন Kotlin-সাপোর্ট
 kotlin = "2.4.0"                      # বহাল — 2.4.20 RC, ব্যবহার নিষিদ্ধ
-ksp = "2.3.11-1.0.32"                 # ⚠ VERIFY সাফিক্স: github.com/google/ksp/releases (Kotlin-ভার্সনের সাথে হুবহু মিলতে হবে)
+ksp = "2.3.11"                        # যাচাইকৃত: Maven metadata-তে এই প্লাগইন-ভার্সন বিদ্যমান; পুরনো suffix-যুক্ত মান অরিজলভেবল ছিল
 
 # ── Compose ─────────────────────────────────────────────────────────────────
 composeBom = "2026.08.00"             # বহাল — Compose 1.12-ম্যাপিং
@@ -133,17 +132,18 @@ instrumented-test-core = [ "androidx-test-ext-junit", "androidx-test-runner", "a
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 
 # ═══════════════════════════════════════════════════════════════════════════
-# Phase 0-এর আগে যাচাই-বাধ্য এন্ট্রি: ksp, androidxHilt, firebaseBom, googleServices,
+# Phase 0-এর আগে যাচাই-বাধ্য এন্ট্রি: androidxHilt, firebaseBom, googleServices,
 # coreKtx, activityCompose, lifecycle, navigationCompose, kotlinxSerialization,
 # kotlinxCoroutines, androidxTestExt, androidxTestRunner, robolectric, mockk,
 # turbine, truth — সব যাচাই শেষে এই কমেন্ট-ব্লক মুছে দাও।
 # বাদ-দেওয়া (ফিরতে DECISIONS লাগবে): okhttp-পরিবার (REST নেই), sentry (স্থগিত),
 # detekt/ktlint (CI-পরে), security-crypto (raw Keystore ব্যবহার)।
 # ═══════════════════════════════════════════════════════════════════════════
-```

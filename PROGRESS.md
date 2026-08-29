@@ -9,13 +9,13 @@
 ---
 
 ## P0 — স্কেলেটন ও গার্ডরেল
-- [ ] Gradle-KTS প্রজেক্ট + ভার্সন-ক্যাটালগ (সংশোধিত libs.versions.toml)
-- [ ] মডিউল-শেল (§২-এর প্রতিটি মডিউল; খালি build.gradle.kts + প্যাকেজ, লজিক নয়)
-- [ ] Hilt-ওয়্যারিং + খালি @HiltAndroidApp + MainActivity (BoiKhataTheme)
-- [ ] Noto Sans Bengali বান্ডেল + বাংলা-ডিফল্ট strings (values-bn প্রাথমিক) + digits-টগল-ফাউন্ডেশন (NumberFormatter)
-- [ ] CI: প্রতি PR-এ ক্লিন-ক্লোন `gradlew build`
-- [ ] .env.example রুটে (Secrets-প্লাগইন-প্রত্যাশা)
-- [ ] **Exit-gate:** ক্লিন-ক্লোন বিল্ড সবুজ, শূন্য-মডিউলে-লজিক
+- [x] Gradle-KTS প্রজেক্ট + ভার্সন-ক্যাটালগ (সংশোধিত libs.versions.toml)
+- [x] মডিউল-শেল (§২-এর প্রতিটি মডিউল; খালি build.gradle.kts + প্যাকেজ, লজিক নয়)
+- [x] Hilt-ওয়্যারিং + খালি @HiltAndroidApp + MainActivity (BoiKhataTheme)
+- [x] Noto Sans Bengali বান্ডেল + বাংলা-ডিফল্ট strings (values-bn প্রাথমিক) + digits-টগল-ফাউন্ডেশন (NumberFormatter)
+- [x] CI: প্রতি PR-এ ক্লিন-ক্লোন `gradlew build`
+- [x] .env.example রুটে (Secrets-প্লাগইন-প্রত্যাশা)
+- [x] **Exit-gate:** ক্লিন-ক্লোন বিল্ড সবুজ, শূন্য-মডিউলে-লজিক
 
 ## P1 — লোকাল-ফাউন্ডেশন
 - [ ] Room v1 স্কিমা: CONVENTIONS §৩-এর প্রতিটি টেবিল (নাম/কলাম হুবহু)
