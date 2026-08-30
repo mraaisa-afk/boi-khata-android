@@ -53,6 +53,8 @@ dependencies {
     implementation(project(":feature:home"))
     implementation(project(":feature:catalog"))
     implementation(project(":feature:khata"))
+    implementation(project(":feature:sale"))
+    implementation(project(":shared:receipt"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

@@ -1,9 +1,9 @@
 package com.boikhata.core.database.di
 
-import com.boikhata.core.database.repository.BillRepositoryImpl
 import com.boikhata.core.database.repository.BookRepositoryImpl
 import com.boikhata.core.database.repository.KhataRepositoryImpl
 import com.boikhata.core.database.repository.LicenseRepositoryImpl
+import com.boikhata.core.database.repository.SaleRepositoryImpl
 import com.boikhata.core.database.repository.UserRepositoryImpl
 import com.boikhata.core.domain.repository.BillRepository
 import com.boikhata.core.domain.repository.BookRepository
@@ -30,7 +30,7 @@ abstract class RepositoryBindingsModule {
     abstract fun bindKhataRepository(impl: KhataRepositoryImpl): KhataRepository
 
     @Binds @Singleton
-    abstract fun bindBillRepository(impl: BillRepositoryImpl): BillRepository
+    abstract fun bindBillRepository(impl: SaleRepositoryImpl): BillRepository
 
     @Binds @Singleton
     abstract fun bindLicenseRepository(impl: LicenseRepositoryImpl): LicenseRepository

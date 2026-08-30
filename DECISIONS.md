@@ -208,3 +208,57 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ---
 
 *(Next entry starts at D19. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*
+
+---
+
+## D19 — VAT calculation: per-line, category-based (books 0% / stationery 15%)
+**Date:** 2026-08-30
+**Phase:** 2b
+**Context:** Blueprint §7.3 and §8 mandate "ভ্যাট (বই ০% / স্টেশনারি ১৫%)". The `bills` table has `vatAmount` and `bill_lines` has `vatAmount` per line. VAT must be calculated per line based on the book's `category` enum, then summed to the bill-level `vatAmount`. A `VatCalculator` pure domain service handles this.
+**Decision:** `VatCalculator` in `core/domain/sale` — a pure function `calculateLineVat(unitPrice: Double, quantity: Int, category: BookCategory): Double`. Books (TEXTBOOK, GENERAL) = 0% VAT. Stationery = 15% VAT. OTHER = 0% (conservative default — stationery is the only explicitly taxed category per Blueprint). Line VAT = unitPrice × quantity × vatRate. Bill VAT = sum of line VATs. Discount is applied AFTER VAT calculation (discount reduces the total, not the per-line VAT — this matches typical BD bookshop practice where discount is a bill-level adjustment, not per-line). The `vatAmount` on the bill is the pre-discount total VAT; the `totalAmount` = subtotal + vatAmount − discountAmount.
+**Alternatives considered:** Bill-level VAT with a single blended rate (rejected: loses per-line audit trail, and mixed carts of books + stationery are common); discount applied before VAT (rejected: reduces VAT collected, which is a tax-compliance issue); OTHER = 15% (rejected: too aggressive — books that don't fit TEXTBOOK/GENERAL but aren't stationery shouldn't default to taxed).
+**Supersedes:** —
+
+---
+
+## D20 — Bill number format: INV-YYYYMMDD-NNNN (date-prefixed, zero-padded sequence)
+**Date:** 2026-08-30
+**Phase:** 2b
+**Context:** Blueprint §7.3 mandates "বিল-নম্বর-জেনারেটর". The `bills` table has `billNumber` as a String. Bill numbers must be human-readable, sequential, and sortable. A shopkeeper needs to reference bills by number verbally ("বিল নম্বর ১-২-৩"). The generator must be offline-safe (no server round-trip) and handle concurrent sales within the same day (though a single-device single-user shop is the primary persona).
+**Decision:** `BillNumberGenerator` in `core/domain/sale` — generates `INV-YYYYMMDD-NNNN` where YYYYMMDD is the current date and NNNN is a zero-padded sequence number that resets daily. The sequence is determined by querying the max existing bill number for that date from Room (`SELECT MAX(billNumber) FROM bills WHERE tenantId = ? AND billNumber LIKE 'INV-YYYYMMDD-%'`) and incrementing. This is a pure function that takes the current max sequence + date and produces the next number. The repository calls Room to get the max, then calls the generator. Example: first bill on 2026-08-30 = `INV-20260830-0001`.
+**Alternatives considered:** UUID-based (rejected: not human-readable, shopkeeper can't reference it); global auto-increment (rejected: a single int column would need a migration and loses date context); tenant-prefixed `t_1-INV-001` (rejected: single-tenant app, prefix is redundant noise for the shopkeeper).
+**Supersedes:** —
+
+---
+
+## D21 — Receipt format: Unicode plain-text, dual digits, WhatsApp-shareable (D2-compliant)
+**Date:** 2026-08-30
+**Phase:** 2b
+**Context:** D2 bans PNG/Bitmap (OOM risk on 3GB devices). Blueprint §7.3 says "WhatsApp-শেয়ার (টেক্সট/PNG) = প্রাথমিক" — but PNG is banned by D2, so text is the only path. The `shared/receipt` module is the designated home per ARCHITECTURE §2. The receipt must show: shop name, bill number, date, customer (if any), line items (title, qty, unit price, line total), subtotal, discount, VAT, total, paid, due, payment method — in Bengali, with dual digits per NumberFormatter.
+**Decision:** `ReceiptBuilder` in `shared/receipt` — a pure function `buildReceiptText(bill, lines, shopName, formatAmount, formatDate): String`. Structure: shop header → bill number + date → customer name (if any) → separator → line items (title × qty @ unitPrice = lineTotal) → separator → subtotal → discount (if any) → VAT (if any) → total → paid → due (if any) → payment method label → footer ("ধন্যবাদ"). Dual digits handled by injected `formatAmount`/`formatDate` lambdas (the ViewModel passes NumberFormatter with the current DigitStyle). Sharing uses `Intent.ACTION_SEND` with `text/plain` — same pattern as the khata statement (D14). No PDF this phase (PDF is P3 accounting-pack scope).
+**Alternatives considered:** HTML-formatted text (rejected: WhatsApp strips HTML in plain-text share); lightweight PDF (rejected: `shared/receipt` PDF builder is P3 scope per D14); Compose-rendered image (rejected: D2 bans PNG/Bitmap).
+**Supersedes:** —
+
+---
+
+## D22 — Partial payment → auto-khata wiring: CREDIT entry linked via khataEntryId
+**Date:** 2026-08-30
+**Phase:** 2b
+**Context:** Blueprint §7.3 mandates "আংশিক-পেমেন্ট → অটো-খাতা (এক লেনদেনে বিক্রি+বাকি)" — the one-transaction sale+দাক-রসিদ promise. When a customer pays less than the total, the `dueAmount` must automatically become a CREDIT entry on their khata, linked to the bill via `khataEntryId` on the bill and `referenceBillId` on the khata entry. The `bills` table has `customerId?`, `paymentMethod`, `paidAmount`, `dueAmount`, and `khataEntryId?` — all the columns needed. Payment method `CREDIT` means the entire bill is on khata (paidAmount=0, dueAmount=total).
+**Decision:** The `SaleRepository.createBill` method handles the entire transaction in one Room `@Transaction`: (1) insert bill entity, (2) insert bill_lines, (3) insert stock_ledger entries (SALE, negative quantity) for each line, (4) if `dueAmount > 0` AND `customerId != null`, insert a `KhataEntryEntity` with `type=CREDIT`, `amount=dueAmount`, `referenceBillId=billId`, `description="বিক্রি বাকি"` and write its ID back to `bill.khataEntryId`. If `paymentMethod == CREDIT`, the entire `totalAmount` goes to khata (paidAmount=0). The customer must exist in khata_customers before the sale (the POS screen offers a customer picker; walk-in customers have `customerId=null` and must pay full amount — no khata without a customer). This is a single atomic Room transaction — either the bill + lines + stock + khata entry all succeed, or none do.
+**Alternatives considered:** Two-step (create bill, then manually add khata entry) (rejected: breaks the "one transaction" promise and risks orphaned bills if step 2 fails); negative stock on bill creation (rejected: stock is decremented via stock_ledger append-only entries, not by updating books.initialStock); auto-create customer from walk-in (rejected: khata_customers creation is OWNER-only per CONVENTIONS §4 — the POS screen can't create customers, only select existing ones).
+**Supersedes:** —
+
+---
+
+## D23 — Discount type: PERCENTAGE or FIXED (bills.discountType stores which)
+**Date:** 2026-08-30
+**Phase:** 2b
+**Context:** The `bills` table has `discountAmount` (Double) and `discountType` (String). Blueprint §7.3 mentions "ছাড়" but doesn't specify the type. The shopkeeper needs both: percentage discount ("১০% ছাড়") for seasonal promotions, and fixed discount ("৳৫০ ছাড়") for individual negotiations. The UI must offer both modes, and the bill must store which was used for audit trail.
+**Decision:** `discountType` stores either `"PERCENTAGE"` or `"FIXED"`. For PERCENTAGE, `discountAmount` stores the calculated discount value (not the percentage rate — the percentage is entered in the UI, calculated to amount, and the amount is stored for financial correctness). The POS screen has a discount input that toggles between percentage and fixed mode. For PERCENTAGE: `discountAmount = subtotal × (percentage / 100)`. For FIXED: `discountAmount = entered amount`. In both cases, discount is capped at `subtotal + vatAmount` (can't discount below zero). The stored `discountAmount` is always the final calculated amount, not the input rate — this ensures the bill's financial records are always correct even if the book prices later change.
+**Alternatives considered:** Storing the percentage rate (rejected: if book prices change later, historical bills would recalculate incorrectly); only fixed discount (rejected: BD bookshops commonly use percentage discounts during seasonal promotions); only percentage (rejected: individual negotiation discounts are often fixed amounts).
+**Supersedes:** —
+
+---
+
+*(Next entry starts at D24. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*

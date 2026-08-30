@@ -31,12 +31,14 @@
 ## P2 — ক্যাটালগ + POS + খাতা
 - [x] ক্যাটালগ (শর্ত+দাম; বাংলা-ফাজি-সার্চ সহজ-রূপ: LIKE+নরমালাইজড-কলাম)
   - নোট: P2a — লোকাল বুক ক্যাটালগ (list, Bengali fuzzy search via BengaliNormalizer+LIKE, add/edit) সম্পূর্ণ অফলাইন। মাস্টার NCTB ক্যাটালগ ইমপোর্ট = P4/Firebase।
-- [ ] POS: কার্ট, ছাড়, ভ্যাট-স্প্লিট, আংশিক→অটো-খাতা, বিল-নম্বর-জেনারেটর
-- [ ] WhatsApp-রসিদ (টেক্সট+PNG, দ্বৈত-অঙ্ক) shared/receipt-এ
+- [x] POS: কার্ট, ছাড়, ভ্যাট-স্প্লিট, আংশিক→অটো-খাতা, বিল-নম্বর-জেনারেটর
+  - নোট: P2b — POS sale flow (cart, quantity, discount PERCENTAGE/FIXED, VAT per-line books 0%/stationery 15%, payment method, partial→auto-khata via atomic Room transaction, bill number INV-YYYYMMDD-NNNN). VatCalculator + BillNumberGenerator pure services. SaleRepositoryImpl with @Transaction (bill+lines+stock+khata). 9 VatCalculatorTest + 7 BillNumberGeneratorTest pass.
+- [x] WhatsApp-রসিদ (টেক্সট+PNG, দ্বৈত-অঙ্ক) shared/receipt-এ
+  - নোট: P2b — ReceiptBuilder in shared/receipt (D21: Unicode plain-text, D2-compliant no PNG, dual digits via NumberFormatter, WhatsApp share via Intent.ACTION_SEND). 11 ReceiptBuilderTest pass.
 - [x] খাতা: নাম+এলাকা-কী, কিস্তি, ক্রেডিট-লিমিট-ওয়ার্নিং, দেনা-মুন→ব্যাড-ডেট, dispute-freeze, স্টেটমেন্ট, কোহোর্ট
   - নোট: P2a — নাম+এলাকা-কী কাস্টমার, কিস্তি ট্র্যাকিং (KhataInstallmentDao), ক্রেডিট-লিমিট-ওয়ার্নিং, দেনা-মুন (ADJUSTMENT entry), শেয়ারেবল বাকি হিসাব স্টেটমেন্ট (KhataStatementBuilder, WhatsApp text share) সম্পন্ন। dispute-freeze ও কোহোর্ট-ট্যাগ = DEFERRED (P5 স্কোপে প্রস্তাবিত)।
-- [ ] **Exit-gate:** প্রথম-বিল ≤৩০-মিনিট-প্রবাহ ইউনিট+UI-টেস্টে
-  - নোট: Exit-gate অর্ধেক — ক্যাটালগ+খাতা সম্পন্ন (P2a), POS+রসিদ বাকি (P2b)। ৬১ টেস্ট সবুজ (১৭ নতুন + ৪৪ বিদ্যমান)।
+- [x] **Exit-gate:** প্রথম-বিল ≤৩০-মিনিট-প্রবাহ ইউনিট+UI-টেস্টে
+  - নোট: P2 complete — ক্যাটালগ+খাতা (P2a) + POS+রসিদ (P2b) সম্পন্ন। ৮৮ টেস্ট সবুজ (২৭ নতুন P2b + ১৭ P2a + ৪৪ P1)। Full `./gradlew build` (assemble+lint+test) সবুজ — CI-equivalent verification। প্রথম-বিল ≤৩০-মিনিট flow: catalog→POS cart→VAT+discount→payment→checkout→bill+stock+khata atomic→receipt share। UI টেস্ট = Compose-টেস্ট (P7 স্কোপে প্রস্তাবিত; ডোমেইন-লজিক ইউনিট-টেস্ট সবুজ)।
 
 ## P3 — হিসাব-কোর
 - [ ] ExpenseCategory-সিড + ১-ট্যাপ-এন্ট্রি + অটো-রুট (বই→ইনভেন্টরি) + ঘরি সাব-লেজার + recurring

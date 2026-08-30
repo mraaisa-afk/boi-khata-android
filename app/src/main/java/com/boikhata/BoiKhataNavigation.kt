@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -16,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,10 +30,14 @@ import com.boikhata.feature.home.HomeScreen
 import com.boikhata.feature.khata.KhataAddCustomerScreen
 import com.boikhata.feature.khata.KhataCustomerDetailScreen
 import com.boikhata.feature.khata.KhataCustomerListScreen
+import com.boikhata.feature.sale.BillDetailScreen
+import com.boikhata.feature.sale.BillHistoryScreen
+import com.boikhata.feature.sale.PosScreen
 
 /**
- * D18: Bottom navigation (Home/Catalog/Khata) via Navigation-Compose.
+ * D18: Bottom navigation (Home/Catalog/Khata/Sale) via Navigation-Compose.
  * Blueprint §2: দৃশ্যমান Bottom Navigation Bar (সর্বোচ্চ ৪ ট্যাব) — no hamburger.
+ * P2b: 4th tab (বিক্রয়) added.
  */
 @Composable
 fun BoiKhataMainScreen(tenantId: String, shopName: String) {
@@ -43,6 +47,7 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String) {
         NavTab("home", R.string.nav_home, Icons.Default.Home),
         NavTab("catalog", R.string.nav_catalog, Icons.Default.Book),
         NavTab("khata", R.string.nav_khata, Icons.Default.People),
+        NavTab("sale", R.string.nav_sale, Icons.Default.PointOfSale),
     )
 
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -121,6 +126,36 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String) {
                     customerId = customerId,
                     shopName = shopName,
                     onBack = { navController.popBackStack() },
+                )
+            }
+            // P2b: POS sale screen
+            composable("sale") {
+                PosScreen(
+                    tenantId = tenantId,
+                    onCheckoutComplete = { billId ->
+                        navController.navigate("bill_detail/$billId")
+                    },
+                )
+            }
+            // P2b: Bill history
+            composable("bill_history") {
+                BillHistoryScreen(
+                    tenantId = tenantId,
+                    onBillClick = { billId -> navController.navigate("bill_detail/$billId") },
+                )
+            }
+            // P2b: Bill detail
+            composable(
+                route = "bill_detail/{billId}",
+                arguments = listOf(navArgument("billId") { type = NavType.StringType }),
+            ) { entry ->
+                val billId = entry.arguments?.getString("billId") ?: return@composable
+                BillDetailScreen(
+                    tenantId = tenantId,
+                    billId = billId,
+                    shopName = shopName,
+                    onBack = { navController.popBackStack() },
+                    onNewSale = { navController.navigate("sale") },
                 )
             }
         }
