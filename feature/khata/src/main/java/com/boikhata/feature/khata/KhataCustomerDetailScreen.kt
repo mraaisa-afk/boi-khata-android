@@ -40,6 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -193,7 +194,11 @@ private fun DetailContent(
     onAddInstallment: () -> Unit,
     onMarkInstallmentPaid: (String) -> Unit,
 ) {
-    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val configuration = LocalConfiguration.current
+    val dateFormat = remember(configuration) {
+        val locale = if (configuration.locales.isEmpty) Locale.getDefault() else configuration.locales[0]
+        SimpleDateFormat("dd/MM/yyyy", locale)
+    }
     val stmt = state.statement
 
     LazyColumn(
