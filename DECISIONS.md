@@ -262,3 +262,57 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ---
 
 *(Next entry starts at D24. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*
+
+---
+
+## D24 — Purchase auto-routing: book purchase → stock_ledger (PURCHASE), non-book → expense
+**Date:** 2026-08-30
+**Phase:** 3a
+**Context:** Blueprint §7.8 mandates "অটো-রুট: বই-ক্রয় → ইনভেন্টরি (COGS), খরচ নয়।" A catalog-item purchase (buying books for the shop) must increase inventory via a stock_ledger entry (reason=PURCHASE, positive quantity), NOT create an expense. Non-book purchases (stationery for office use, tea, etc.) are expenses. This routing rule is a core accounting-correctness guarantee — without it, P&L would show book purchases as expenses, inflating expenses and hiding COGS.
+**Decision:** A `PurchaseRouter` pure domain service in `core/domain/accounting` — `fun shouldRouteToInventory(itemType: PurchaseItemType): Boolean`. `PurchaseItemType` is an enum: BOOK_PURCHASE (→ stock_ledger) vs NON_BOOK_PURCHASE (→ expense). The repository layer calls this router to decide: if BOOK_PURCHASE, insert a `StockLedgerEntity` with `reason="PURCHASE"`, `changeQuantity=+quantity`, and do NOT create an expense. If NON_BOOK_PURCHASE, insert an `ExpenseEntity` and do NOT touch stock_ledger. The UI presents this as a toggle: "বই ক্রয়" vs "অন্যান্য খরচ". Both paths also create a `CashbookEntryEntity` (EXPENSE type, matching account) for the money outflow — the cashbook always reflects the payment, regardless of routing.
+**Alternatives considered:** Always create expense + stock entry (rejected: double-counts — the expense inflates P&L while the stock entry correctly handles inventory; COGS is recognized at sale time, not purchase time); let the user manually decide (rejected: the whole point is auto-routing — the shopkeeper shouldn't need to understand COGS vs expense); no cashbook entry for book purchases (rejected: the money still left the cash/bKash account — cashbook must reflect it).
+**Supersedes:** —
+
+---
+
+## D25 — Cashbook auto-population: every money flow creates a cashbook entry
+**Date:** 2026-08-30
+**Phase:** 3a
+**Context:** Blueprint §7.6/§7.7 mandates cashbook auto-populate from bills, expenses, and khata collections. The `cashbook_entries` table is 🔒 append-only with `account` (CASH/BKASH/BANK), `type` (INCOME/EXPENSE/TRANSFER), `amount`, `referenceId?`, `description`. Every money flow in the app must automatically create a cashbook entry — this is the single-source-of-truth for cash position. Manual entries are also allowed for adjustments the shopkeeper makes outside the app.
+**Decision:** Auto-population rules (implemented in the repository layer, not in a separate service — the routing is tightly coupled to each transaction): (1) Bill payment: if `paymentMethod=CASH` → CASH/INCOME; if `BKASH` → BKASH/INCOME; amount = `paidAmount` (not total — only what was actually paid). (2) Expense entry: `account` chosen by user (CASH or BKASH), `type=EXPENSE`, amount = expense amount. (3) Khata collection (PAYMENT entry): `account` chosen by user, `type=INCOME`, amount = payment amount. (4) Owner drawing: `account=CASH` (drawings are typically cash), `type=EXPENSE`, amount = drawing amount. (5) Book purchase: `account` chosen by user, `type=EXPENSE` (money outflow regardless of inventory routing per D24). The `referenceId` on each auto-entry links back to the source entity (bill ID, expense ID, khata entry ID, drawing ID) for audit trail. Auto-population happens in the same Room `@Transaction` as the source operation — atomic.
+**Alternatives considered:** A scheduled reconciliation job that scans all tables and creates cashbook entries (rejected: not real-time, risks missing entries if the job fails); a separate CashbookService that other repositories call (rejected: adds a layer of indirection — the repository that creates the bill/expense is the right place to also create the cashbook entry, in the same transaction); no auto-populate, only manual (rejected: Blueprint explicitly mandates auto-populate).
+**Supersedes:** —
+
+---
+
+## D26 — ঘরি (staff advance) sub-ledger: expense with special category + per-user balance
+**Date:** 2026-08-30
+**Phase:** 3a
+**Context:** Blueprint §7.8 lists "ঘরি/অ্যাডভান্স" as a BD-specific expense category. ঘরি = money advanced to staff (an asset, not a pure expense — it's expected to be recovered via salary deduction or repayment). The expenses table has `categoryId` — a ঘরি entry is an expense with a special category. But ঘরি needs a per-user sub-ledger balance (how much has each staff member taken as advance, how much has been recovered). The CONVENTIONS §3 schema has no separate ঘরি table — so the sub-ledger is derived from expenses filtered by the ঘরি category.
+**Decision:** Seed an `expense_categories` row with `nameBn="ঘরি"` and `icon="advance"`. A ঘরি entry is a regular `ExpenseEntity` with this category. A `GoriBalanceCalculator` pure domain service in `core/domain/accounting` computes per-user balance: SUM of all expenses with ঘরি categoryId for a given userId (advance given) minus SUM of expenses with ঘরি categoryId and `description` containing "ঘরি ফেরত" (advance returned). The UI shows a per-staff ঘরি balance list. Recovery is recorded as a new expense entry with description "ঘরি ফেরত" (which the calculator treats as a reduction). No UPDATE/DELETE — append-only, consistent with the money-table rule. No separate table — derived from expenses, consistent with ARCHITECTURE §4 "Balances = derived."
+**Alternatives considered:** A separate `ghori_entries` table (rejected: adds schema complexity for a derived balance; the expenses table already has the columns needed); a TRANSFER cashbook entry for recovery (rejected: CashbookEntryType has no ADJUSTMENT per CONVENTIONS §2, and TRANSFER is account-to-account, not advance-recovery); treating ঘরি as a pure expense with no sub-ledger (rejected: Blueprint specifically calls it a sub-ledger).
+**Supersedes:** —
+
+---
+
+## D27 — Recurring expense template: next-due computation + manual trigger
+**Date:** 2026-08-30
+**Phase:** 3a
+**Context:** Blueprint §7.8 mentions "Recurring-টেমপ্লেট + মাসিক বাজেট-অ্যালার্ট". The CONVENTIONS §3 schema has no `recurring_expenses` table — recurring templates must fit within the existing schema. A recurring expense is a template that generates actual expense entries on a schedule. Since there's no WorkManager-based auto-trigger this phase (that's P3b/P3c scope with the accounting engine), the template stores the recurrence pattern and the UI offers a "apply now" button to create the actual expense entry.
+**Decision:** Store recurring templates as `expense_categories` rows with `icon="recurring"` — NO, this doesn't work (categories are categories, not templates). Instead: a `RecurringExpense` domain model (not a Room entity — no new table) that the UI uses to present recurring templates. The templates are stored as JSON in a SharedPreferences-like key-value store... NO — that breaks offline-first-single-source-of-truth. **Final decision:** Defer the recurring template persistence to P3b. This phase implements the `RecurringExpenseCalculator` pure domain service (next-due computation from a frequency + last-applied date) + unit tests, but does NOT persist templates yet. The UI shows a "recurring" badge on expenses that were created from a template (via `description` prefix "মাসিক:"), and the calculator is unit-tested and ready for P3b to wire. This is honest scoping: the calculator is the pure-logic piece, the persistence + auto-trigger is P3b.
+**Alternatives considered:** A new `recurring_expenses` table (rejected: needs a schema migration this phase, and the auto-trigger (WorkManager) is P3b scope — building the table without the trigger is half a feature); storing templates as expense rows with a `isRecurring` flag (rejected: no such column in CONVENTIONS §3, and adding it needs a migration); JSON in SharedPreferences (rejected: breaks Room-as-truth).
+**Supersedes:** —
+
+---
+
+## D28 — Owner drawing (মালিকের তোলা): separate table, OWNER-only, cashbook EXPENSE
+**Date:** 2026-08-30
+**Phase:** 3a
+**Context:** Blueprint §7.8 and CONVENTIONS §3 have a separate `owner_drawings` table (id, tenantId, amount, description, drawingDate, userId, idempotencyKey). Owner drawings are NOT expenses — they're equity withdrawals, a different accounting category. Firestore rules (Firebase-Project-Context §4) confirm: `owner_drawings` is create-only (🔒 append-only), read/write is OWNER-only. The `expenses` table is for business expenses; mixing drawings into expenses would inflate expenses and understate equity.
+**Decision:** `OwnerDrawingRepository` in `core/domain` with `createDrawing(tenantId, amount, description, userId)` and `getDrawings(tenantId, startDate, endDate)`. The repository impl creates: (1) `OwnerDrawingEntity` (append-only), (2) `CashbookEntryEntity` with `account=CASH`, `type=EXPENSE`, `amount=drawing amount`, `referenceId=drawing ID` — in one Room `@Transaction` (D25 auto-populate). RBAC: OWNER-only per Firestore rules — the repository's `requireRole(OWNER)` gate. The UI is a simple form: amount + description + date, with an OWNER-only access check.
+**Alternatives considered:** Treating drawings as expenses with a "মালিকের তোলা" category (rejected: drawings are equity withdrawals, not expenses — mixing them inflates expenses and corrupts P&L; the separate table exists in the schema for this reason); no cashbook entry for drawings (rejected: money left the cash account — cashbook must reflect it per D25); allowing MANAGER to create drawings (rejected: Firestore rules say OWNER-only).
+**Supersedes:** —
+
+---
+
+*(Next entry starts at D29. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*

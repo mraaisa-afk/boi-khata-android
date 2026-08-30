@@ -59,6 +59,7 @@ import com.boikhata.feature.sale.R
 fun PosScreen(
     tenantId: String,
     onCheckoutComplete: (String) -> Unit,
+    onExpenseClick: () -> Unit = {},
     viewModel: SaleViewModel = hiltViewModel(),
 ) {
     val cartState by viewModel.cartState.collectAsState()
@@ -70,6 +71,16 @@ fun PosScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
+        topBar = {
+            androidx.compose.material3.TopAppBar(
+                title = { Text(stringResource(R.string.pos_title)) },
+                actions = {
+                    TextButton(onClick = onExpenseClick) {
+                        Text(stringResource(R.string.expense_button))
+                    }
+                },
+            )
+        },
         floatingActionButton = {
             if (cartState.items.isNotEmpty()) {
                 FloatingActionButton(onClick = { showCheckoutConfirm = true }) {

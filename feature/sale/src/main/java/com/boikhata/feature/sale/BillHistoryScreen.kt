@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,7 +48,6 @@ fun BillHistoryScreen(
 
     val uiState by viewModel.historyState.collectAsState()
     val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) }
-
     when (val state = uiState) {
         is HistoryUiState.Loading -> {
             Row(
@@ -125,6 +125,3 @@ private fun BillCard(bill: BillSummary, dateFormat: SimpleDateFormat, onClick: (
         }
     }
 }
-
-@Composable
-private fun <T> remember(calculation: () -> T): T = androidx.compose.runtime.remember(calculation = calculation)

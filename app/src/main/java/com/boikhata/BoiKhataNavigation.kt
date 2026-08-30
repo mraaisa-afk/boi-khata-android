@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.boikhata.feature.catalog.BookAddEditScreen
 import com.boikhata.feature.catalog.CatalogScreen
+import com.boikhata.feature.expense.ExpenseScreen
 import com.boikhata.feature.home.HomeScreen
 import com.boikhata.feature.khata.KhataAddCustomerScreen
 import com.boikhata.feature.khata.KhataCustomerDetailScreen
@@ -135,7 +136,12 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String) {
                     onCheckoutComplete = { billId ->
                         navController.navigate("bill_detail/$billId")
                     },
+                    onExpenseClick = { navController.navigate("expense") },
                 )
+            }
+            // P3a: Expense + Cashbook + Owner Drawing
+            composable("expense") {
+                ExpenseScreen(tenantId = tenantId)
             }
             // P2b: Bill history
             composable("bill_history") {
