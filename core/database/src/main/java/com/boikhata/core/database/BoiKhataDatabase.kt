@@ -9,6 +9,7 @@ import com.boikhata.core.database.dao.CloudSyncStateDao
 import com.boikhata.core.database.dao.DeviceDao
 import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
+import com.boikhata.core.database.dao.KhataInstallmentDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.dao.TenantDao
 import com.boikhata.core.database.dao.UserDao
@@ -58,7 +59,7 @@ import com.boikhata.core.database.entity.UserEntity
         MasterCatalogEntity::class,
         AuditLogEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class BoiKhataDatabase : RoomDatabase() {
@@ -71,6 +72,7 @@ abstract class BoiKhataDatabase : RoomDatabase() {
     abstract fun billDao(): BillDao
     abstract fun khataCustomerDao(): KhataCustomerDao
     abstract fun khataEntryDao(): KhataEntryDao
+    abstract fun khataInstallmentDao(): KhataInstallmentDao
     abstract fun auditLogDao(): AuditLogDao
 
     companion object {

@@ -1,0 +1,130 @@
+package com.boikhata
+
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.boikhata.feature.catalog.BookAddEditScreen
+import com.boikhata.feature.catalog.CatalogScreen
+import com.boikhata.feature.home.HomeScreen
+import com.boikhata.feature.khata.KhataAddCustomerScreen
+import com.boikhata.feature.khata.KhataCustomerDetailScreen
+import com.boikhata.feature.khata.KhataCustomerListScreen
+
+/**
+ * D18: Bottom navigation (Home/Catalog/Khata) via Navigation-Compose.
+ * Blueprint §2: দৃশ্যমান Bottom Navigation Bar (সর্বোচ্চ ৪ ট্যাব) — no hamburger.
+ */
+@Composable
+fun BoiKhataMainScreen(tenantId: String, shopName: String) {
+    val navController = rememberNavController()
+
+    val tabs = listOf(
+        NavTab("home", R.string.nav_home, Icons.Default.Home),
+        NavTab("catalog", R.string.nav_catalog, Icons.Default.Book),
+        NavTab("khata", R.string.nav_khata, Icons.Default.People),
+    )
+
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = backStackEntry?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                tabs.forEach { tab ->
+                    val selected = currentRoute?.startsWith(tab.route) == true ||
+                        (tab.route == "home" && currentRoute == null)
+                    NavigationBarItem(
+                        selected = selected,
+                        onClick = {
+                            navController.navigate(tab.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = { Icon(tab.icon, contentDescription = stringResource(tab.labelRes)) },
+                        label = { Text(stringResource(tab.labelRes)) },
+                    )
+                }
+            }
+        }
+    ) { padding ->
+        NavHost(
+            navController = navController,
+            startDestination = "home",
+            modifier = Modifier.fillMaxSize().padding(padding),
+        ) {
+            composable("home") {
+                HomeScreen(tenantId = tenantId)
+            }
+            composable("catalog") {
+                CatalogScreen(
+                    tenantId = tenantId,
+                    onAddBook = { navController.navigate("book_add_edit/null") },
+                    onEditBook = { bookId -> navController.navigate("book_add_edit/$bookId") },
+                )
+            }
+            composable(
+                route = "book_add_edit/{bookId}",
+                arguments = listOf(navArgument("bookId") { type = NavType.StringType }),
+            ) { entry ->
+                val bookIdArg = entry.arguments?.getString("bookId")
+                val bookId = if (bookIdArg == "null") null else bookIdArg
+                BookAddEditScreen(
+                    tenantId = tenantId,
+                    bookId = bookId,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable("khata") {
+                KhataCustomerListScreen(
+                    tenantId = tenantId,
+                    onAddCustomer = { navController.navigate("khata_add_customer") },
+                    onCustomerClick = { customerId -> navController.navigate("khata_detail/$customerId") },
+                )
+            }
+            composable("khata_add_customer") {
+                KhataAddCustomerScreen(
+                    onBack = { navController.popBackStack() },
+                )
+            }
+            composable(
+                route = "khata_detail/{customerId}",
+                arguments = listOf(navArgument("customerId") { type = NavType.StringType }),
+            ) { entry ->
+                val customerId = entry.arguments?.getString("customerId") ?: return@composable
+                KhataCustomerDetailScreen(
+                    tenantId = tenantId,
+                    customerId = customerId,
+                    shopName = shopName,
+                    onBack = { navController.popBackStack() },
+                )
+            }
+        }
+    }
+}
+
+private data class NavTab(val route: String, val labelRes: Int, val icon: ImageVector)

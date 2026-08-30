@@ -10,9 +10,11 @@ import com.boikhata.core.database.dao.CloudSyncStateDao
 import com.boikhata.core.database.dao.DeviceDao
 import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
+import com.boikhata.core.database.dao.KhataInstallmentDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.dao.TenantDao
 import com.boikhata.core.database.dao.UserDao
+import com.boikhata.core.database.migration.Migration1To2
 import com.boikhata.core.database.seed.DatabaseSeeder
 import dagger.Module
 import dagger.Provides
@@ -28,13 +30,13 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): BoiKhataDatabase {
-        // CONVENTIONS §1: `.addMigrations(...)` mandatory — v1 has no migration yet.
+        // D16: Migration v1→v2 (normalized columns for Bengali fuzzy search)
         return Room.databaseBuilder(
             context,
             BoiKhataDatabase::class.java,
             BoiKhataDatabase.DATABASE_NAME
         )
-            .addMigrations() // empty for v1; future versions add Migration classes here
+            .addMigrations(Migration1To2)
             .fallbackToDestructiveMigrationOnDowngrade()
             .build()
     }
@@ -48,6 +50,7 @@ object DatabaseModule {
     @Provides fun provideBillDao(db: BoiKhataDatabase): BillDao = db.billDao()
     @Provides fun provideKhataCustomerDao(db: BoiKhataDatabase): KhataCustomerDao = db.khataCustomerDao()
     @Provides fun provideKhataEntryDao(db: BoiKhataDatabase): KhataEntryDao = db.khataEntryDao()
+    @Provides fun provideKhataInstallmentDao(db: BoiKhataDatabase): KhataInstallmentDao = db.khataInstallmentDao()
     @Provides fun provideAuditLogDao(db: BoiKhataDatabase): AuditLogDao = db.auditLogDao()
 
     @Provides

@@ -51,6 +51,8 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:database"))
     implementation(project(":feature:home"))
+    implementation(project(":feature:catalog"))
+    implementation(project(":feature:khata"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
@@ -58,6 +60,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

@@ -5,4 +5,7 @@
     <string name="login">প্রবেশ</string>
     <string name="wrong_pin">ভুল পিন</string>
     <string name="locked">লক হয়েছে — আবার লগইন করুন</string>
+    <string name="nav_home">হোম</string>
+    <string name="nav_catalog">ক্যাটালগ</string>
+    <string name="nav_khata">খাতা</string>
 </resources>

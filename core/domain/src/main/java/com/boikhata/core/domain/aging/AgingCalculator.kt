@@ -15,6 +15,8 @@ data class KhataEntry(
     val type: KhataEntryType,
     val amount: Double,
     val date: Long, // epoch-millis
+    val description: String = "",
+    val referenceBillId: String? = null,
 )
 
 data class AgingResult(

@@ -145,4 +145,66 @@ Never resolve a merge conflict in this file by picking one side automatically �
 
 ---
 
-*(Next entry starts at D13. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*
+---
+
+## D13 — Bengali fuzzy search: normalized-title column + LIKE + BengaliNormalizer
+**Date:** 2026-08-29
+**Phase:** 2a
+**Context:** PROGRESS P2 item 1 calls for "বাংলা-ফাজি-সার্চ সহজ-রূপ: LIKE+নরমালাইজড-কলাম". Bengali spelling variations (diacritics, bindu, hasanta, vowel signs) make exact LIKE matching unreliable. A shopkeeper searching "বাংলা" should find "বাংলা", "বঙ্গ", "বাংলাা" etc. Need a lightweight, offline, Room-compatible approach — no ICU/FTS4 (overkill for a single-tenant phone).
+**Decision:** Add a `titleBnNormalized` TEXT column to the `books` table, populated on insert/update by a `BengaliNormalizer` domain service. The normalizer strips vowel signs (া ি ী ু ূ ে ৈ ো ৌ ৃ), chandrabindu/bindu/visarga (ঁ ং ঃ), hasanta (্), and converts Bengali digits to Latin — leaving only base consonant skeleton. Search uses `LIKE '%normalizedQuery%'` on `titleBnNormalized`. The normalizer lives in `core/domain` (pure function, no Android deps, unit-testable). The normalized column is also applied to `khata_customers.nameBn` for customer search — but since `khata_customers` already exists in v1, the column is added via the same migration (ALTER-ADD, per CONVENTIONS §3 rule).
+**Alternatives considered:** Room FTS4 full-text search (rejected: adds complexity, separate FTS table, overkill for <10k books on a single phone); SQLite ICU collation (rejected: not available on all Android versions, unreliable); manual Soundex-like phonetic matching (rejected: Bengali phonetics are too complex for a simple Soundex; the normalized-skeleton approach is simpler and "good enough" per the PROGRESS "সহজ-রূপ" qualifier).
+**Supersedes:** —
+
+---
+
+## D14 — Khata statement format: plain-text, WhatsApp-shareable, dual digits
+**Date:** 2026-08-29
+**Phase:** 2a
+**Context:** Blueprint §7.4 mandates "খাতা-স্টেটমেন্ট (বাকি হিসাব): শেয়ারেবল স্টেটমেন্ট". D2 banned PNG/Bitmap (OOM risk on 3GB devices). The statement must be shareable via WhatsApp — plain text is the lightest, most reliable format for WhatsApp sharing. The statement is the "দোকানী-কাস্টমার মিলনের মুহূর্ত" — it needs to be clear, show all entries with a running balance, and end with the current total due.
+**Decision:** Generate the khata statement as a Unicode plain-text string (Bengali default, dual digits toggle-aware via NumberFormatter). Structure: shop header (tenant name) → customer name + area → date range → entry list (date, type label in Bengali, amount, running balance) → total due line. The statement builder is a pure domain service `KhataStatementBuilder` in `core/domain` (no Android deps, unit-testable). Sharing uses Android's `Intent.ACTION_SEND` with `text/plain` — no PDF/PNG this phase (PDF is P3 accounting-pack scope).
+**Alternatives considered:** Lightweight PDF (rejected for P2a — the receipt/PDF builder module is `shared/receipt` which is P2b scope; text is sufficient for বাকি হিসাব matching); HTML-formatted text (rejected: WhatsApp strips HTML in plain-text share).
+**Supersedes:** —
+
+---
+
+## D15 — দেনা-মুন accounting treatment: ADJUSTMENT entry bringing balance to zero
+**Date:** 2026-08-29
+**Phase:** 2a
+**Context:** Blueprint §7.4: "১-ট্যাপ দেনা মুন → bad-debt জার্নাল-এন্ট্রি (হিসাবে দেখা যায়)". The দেনা-মুন (debt forgiveness) operation must be recorded in the khata ledger, not silently delete the due. Since khata_entries is append-only (🔒, no UPDATE/DELETE per CONVENTIONS §3 and Firestore rules), the only way to zero out a balance is to insert a new ADJUSTMENT entry. The full accounting visibility (bad-debt journal entry in P&L) is P3 — this phase creates the khata-side entry only.
+**Decision:** দেনা-মুন inserts a new `KhataEntryEntity` with `type = "ADJUSTMENT"`, `amount = currentDue` (positive — the AgingCalculator treats positive ADJUSTMENT as adding credit, so we need a NEGATIVE adjustment to reduce due; but per Firebase rules, `amount > 0` is enforced — so we store the magnitude as positive and the AgingCalculator must treat ADJUSTMENT with description "দেনা মুন" as a reduction). Wait — re-examining: the AgingCalculator already handles negative ADJUSTMENT (`if (e.amount >= 0) credits.add(...) else allocatePayment(...)`), but Firestore rules require `amount > 0`. The Firestore constraint doc (Firebase-Project-Context §6.4) says negatives are uploaded as magnitude + "Negative Adj: " prefix. So locally, we CAN store negative amounts (Room has no such constraint), and the cloud backup layer (P4) handles the sign-flip. **Final decision:** দেনা-মুন inserts an ADJUSTMENT entry with `amount = -currentDue` (negative, reducing the balance to zero) and `description = "দেনা মুন"`. The local AgingCalculator handles this correctly (treats it as a payment allocation). The P4 backup mapper will apply the "Negative Adj: " prefix + sign-flip when uploading. This phase is offline-only so no Firestore constraint applies yet.
+**Alternatives considered:** Storing positive magnitude + special type (rejected: would require AgingCalculator changes and doesn't match the existing ADJUSTMENT semantics); deleting entries (forbidden: append-only); a separate "forgiven" flag on customer (rejected: loses the audit trail — the entry must be visible in the statement).
+**Superedes:** —
+
+---
+
+## D16 — Room migration v1→v2: ALTER-ADD titleBnNormalized + nameBnNormalized columns
+**Date:** 2026-08-29
+**Phase:** 2a
+**Context:** D13 adds `titleBnNormalized` to `books` and `nameBnNormalized` to `khata_customers`. Both tables exist in v1 — a proper Room Migration is required (CONVENTIONS §3: "মাইগ্রেশন = Room-Migration ক্লাস, টেব্ল-ড্রপ নিষিদ্ধ"). The database version must bump from 1 to 2.
+**Decision:** Create `Migration1To2` extending `Migration(1, 2)` with two `ALTER TABLE ... ADD COLUMN` statements: `books.titleBnNormalized TEXT NOT NULL DEFAULT ''` and `khata_customers.nameBnNormalized TEXT NOT NULL DEFAULT ''`. Register it in `DatabaseModule.provideDatabase` via `.addMigrations(Migration1To2)`. Bump `@Database(version = 2)`. Existing rows get empty strings (normalized columns populate on next add/edit). The entities get the new nullable-with-default fields.
+**Alternatives considered:** `fallbackToDestructiveMigration` (forbidden: drops user data — violates the "ফোন হারালেও ডেটা থাকে" promise); separate FTS table (rejected in D13).
+**Supersedes:** —
+
+---
+
+## D17 — KhataInstallmentDao: new DAO for the existing khata_installments table
+**Date:** 2026-08-29
+**Phase:** 2a
+**Context:** The `khata_installments` table and `KhataInstallmentEntity` were defined in v1 (CONVENTIONS §3, registered in `@Database`), but no DAO interface or `abstract fun` existed in `BoiKhataDatabase` — P1 only created the schema, not the data access. A previous agent session reportedly hit a KSP/Hilt error trying to add this DAO; root cause was never confirmed. This phase needs installment tracking (PROGRESS P2 item 4: "কিস্তি") so the DAO must be added.
+**Decision:** Add `KhataInstallmentDao` interface with `@Insert`, `@Query` for get-by-customer, get-by-entry, and mark-paid (UPDATE — khata_installments is NOT 🔒 append-only per CONVENTIONS §3, so UPDATE is allowed on `isPaid` only). Add `abstract fun khataInstallmentDao(): KhataInstallmentDao` to `BoiKhataDatabase`. Provide in `DatabaseModule`. The key KSP risk avoidance: ensure the DAO interface is in the same package as other DAOs, properly imported in the database class, and the abstract function is declared before the companion object. No new table — no migration needed for this (table already exists in v1/v2).
+**Alternatives considered:** Treating installments as khata_entries (rejected: installments have different columns — dueDate, isPaid — and are planned-future entries, not actual transactions); deferring installments to P5 (rejected: PROGRESS P2 item 4 explicitly lists "কিস্তি").
+**Supersedes:** —
+
+---
+
+## D18 — P2a navigation: bottom nav (Home/Catalog/Khata) via Navigation-Compose
+**Date:** 2026-08-29
+**Phase:** 2a
+**Context:** Blueprint §2 mandates "দৃশ্যমান Bottom Navigation Bar (সর্বোচ্চ ৪ ট্যাব)" — no hamburger menu. P1 wired MainActivity to show HomeScreen directly with no navigation. P2a adds two new feature screens (catalog, khata) that must be accessible. Navigation-Compose is already in the catalog (navigationCompose = "2.8.5") and declared as a dependency in app + feature/home.
+**Decision:** Add a `BoiKhataNavHost` in the `app` module with three routes: `home`, `catalog`, `khata`. A `BoiKhataBottomBar` composable with three NavigationBarItems (Home, ক্যাটালগ, খাতা) — Bengali labels from strings.xml. The NavHost + BottomBar live in a `BoiKhataMainScreen` composable in `app`. Feature screens are called via their public composables. The tenantId (`t_1`) is passed as a nav argument. This stays within P2a scope because navigation is the minimal infrastructure needed to access the two P2a feature screens — not a new feature itself. The 4th tab (POS/Sale) is deferred to P2b.
+**Alternatives considered:** A single-screen with tabs (rejected: feature screens are complex enough to warrant full-screen routes); top-level tabs (rejected: Blueprint mandates bottom nav); deferring navigation to P2b (rejected: P2a screens would be unreachable).
+**Supersedes:** —
+
+---
+
+*(Next entry starts at D19. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*

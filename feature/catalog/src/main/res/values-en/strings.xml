@@ -1,0 +1,22 @@
+<resources>
+    <string name="search_books">Search books (name, author, ISBN)…</string>
+    <string name="add_book">Add Book</string>
+    <string name="edit_book">Edit Book</string>
+    <string name="no_books">No books yet. Tap + to add one.</string>
+    <string name="stock_count">Stock: %1$d</string>
+    <string name="title_bn">Book Title (Bengali)</string>
+    <string name="title_en">Book Title (English)</string>
+    <string name="author">Author</string>
+    <string name="publisher">Publisher</string>
+    <string name="isbn">ISBN</string>
+    <string name="class_level">Class</string>
+    <string name="subject">Subject</string>
+    <string name="edition_year">Edition Year</string>
+    <string name="category">Category</string>
+    <string name="condition">Condition</string>
+    <string name="purchase_price">Purchase Price</string>
+    <string name="selling_price">Selling Price (MRP)</string>
+    <string name="initial_stock">Initial Stock</string>
+    <string name="low_stock_threshold">Low Stock Threshold</string>
+    <string name="save">Save</string>
+</resources>
