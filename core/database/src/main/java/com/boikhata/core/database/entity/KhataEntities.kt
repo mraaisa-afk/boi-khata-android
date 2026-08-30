@@ -14,6 +14,7 @@ data class KhataCustomerEntity(
     val address: String?,
     val creditLimit: Double,
     val isActive: Boolean,
+    val nameBnNormalized: String = "",
     val createdAt: Long,
     val updatedAt: Long,
 )

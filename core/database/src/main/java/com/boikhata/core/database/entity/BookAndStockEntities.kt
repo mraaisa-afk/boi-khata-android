@@ -25,6 +25,7 @@ data class BookEntity(
     val initialStock: Int,
     val lowStockThreshold: Int,
     val isActive: Boolean,
+    val titleBnNormalized: String = "",
     val createdAt: Long,
     val updatedAt: Long,
 )

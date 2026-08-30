@@ -5,4 +5,7 @@
     <string name="login">Login</string>
     <string name="wrong_pin">Wrong PIN</string>
     <string name="locked">Locked — please log in again</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_catalog">Catalog</string>
+    <string name="nav_khata">Khata</string>
 </resources>

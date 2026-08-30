@@ -1,0 +1,29 @@
+<resources>
+    <string name="search_customers">Search customers (name, area, phone)…</string>
+    <string name="add_customer">Add Customer</string>
+    <string name="no_customers">No customers yet. Tap + to add one.</string>
+    <string name="customer_name">Customer Name</string>
+    <string name="area_address">Area / Address</string>
+    <string name="phone_optional">Phone (optional)</string>
+    <string name="credit_limit">Credit Limit (৳)</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="total_due">Total Due</string>
+    <string name="age_days">%1$d days ago</string>
+    <string name="share_statement">Share Statement</string>
+    <string name="credit_limit_warning">⚠ Credit limit exceeded (limit: %1$s)</string>
+    <string name="add_credit">Add Credit</string>
+    <string name="add_payment">Add Payment</string>
+    <string name="add_installment">Add Installment</string>
+    <string name="forgive_debt">Forgive Debt</string>
+    <string name="forgive_debt_confirm">Forgive total due of %1$s? This will be recorded as bad debt.</string>
+    <string name="amount">Amount</string>
+    <string name="description">Description</string>
+    <string name="entry_history">Transaction History</string>
+    <string name="no_entries">No transactions yet</string>
+    <string name="installments">Installments</string>
+    <string name="paid">Paid</string>
+    <string name="mark_paid">Mark Paid</string>
+    <string name="due_after_days">Due after (days)</string>
+</resources>

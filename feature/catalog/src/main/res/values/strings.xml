@@ -1,0 +1,22 @@
+<resources>
+    <string name="search_books">বই খুঁজুন (নাম, লেখক, ISBN)…</string>
+    <string name="add_book">বই যোগ করুন</string>
+    <string name="edit_book">বই সম্পাদনা</string>
+    <string name="no_books">কোনো বই নেই। + চিহ্নে ক্লিক করে বই যোগ করুন।</string>
+    <string name="stock_count">স্টক: %1$d</string>
+    <string name="title_bn">বইয়ের নাম (বাংলা)</string>
+    <string name="title_en">বইয়ের নাম (ইংরেজি)</string>
+    <string name="author">লেখক</string>
+    <string name="publisher">প্রকাশক</string>
+    <string name="isbn">ISBN</string>
+    <string name="class_level">শ্রেণি</string>
+    <string name="subject">বিষয়</string>
+    <string name="edition_year">সংস্করণ সাল</string>
+    <string name="category">শ্রেণি</string>
+    <string name="condition">অবস্থা</string>
+    <string name="purchase_price">ক্রয় মূল্য</string>
+    <string name="selling_price">বিক্রয় মূল্য (MRP)</string>
+    <string name="initial_stock">প্রাথমিক স্টক</string>
+    <string name="low_stock_threshold">স্টক সতর্কা সীমা</string>
+    <string name="save">সেভ করুন</string>
+</resources>
