@@ -135,4 +135,14 @@ Never resolve a merge conflict in this file by picking one side automatically �
 
 ---
 
-*(Next entry starts at D12. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*
+## D12 — Gradle JVM memory raised for AGP 9 lint engine (640m/512m → 2g/1g)
+**Date:** 2026-08-30
+**Phase:** 1
+**Context:** CI run #3 (PR #3 merge, `586b7a8`) failed in 5m 9s during `:feature:home:lintAnalyzeDebug` — "Unexpected failure during lint analysis". The `gradle.properties` had `-Xmx640m -XX:MaxMetaspaceSize=512m`, set minimally for a low-end build machine. AGP 9's lint engine analyzing a Compose module with the full dependency graph exhausts 512MB Metaspace on the CI runner (ubuntu-latest, 7GB RAM). The sandbox reproduced the Metaspace edge ("Daemon will expire after running out of JVM Metaspace") but did not hard-fail because the sandbox has more physical RAM than the JVM allocation, letting the OS absorb the overflow.
+**Decision:** Raise `org.gradle.jvmargs` to `-Xmx2g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8`. 2g heap / 1g Metaspace is the standard floor for AGP 9 + Compose + lint; the CI runner's 7GB RAM handles it comfortably. Keep `workers.max=1` and `parallel=false` (single-threaded, low-end-friendly). No lint checks are disabled — this is a memory fix, not a check-weakening.
+**Alternatives considered:** Disabling lint on CI (rejected — BUILD.md §6 mandates `gradlew build` which includes lint; blanket lint-disable violates the constitution); lint task isolation via `lintOptions.checkOnly` (rejected — narrows real checks); reducing the Compose dependency graph (rejected — the deps are required by P1).
+**Supersedes:** —
+
+---
+
+*(Next entry starts at D13. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*
