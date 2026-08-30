@@ -8,6 +8,8 @@ import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.model.Book
 import com.boikhata.core.domain.model.KhataCustomer
 import com.boikhata.core.domain.model.KhataInstallment
+import com.boikhata.core.domain.model.Bill
+import com.boikhata.core.domain.model.BillLine
 
 /**
  * Repository interfaces — core/domain owns the contracts; core/database + core/cloud
@@ -106,10 +108,35 @@ interface KhataRepository {
     suspend fun markInstallmentPaid(id: String)
 }
 
+// ── P2b: POS / Billing ───────────────────────────────────────────────────────
+
 interface BillRepository {
     suspend fun getBillsByDate(tenantId: String, startOfDay: Long, endOfDay: Long): List<com.boikhata.core.domain.model.BillSummary>
     suspend fun getTopBills(tenantId: String, limit: Int): List<com.boikhata.core.domain.model.BillSummary>
+    suspend fun getAllBills(tenantId: String): List<com.boikhata.core.domain.model.BillSummary>
+    suspend fun getBill(tenantId: String, billId: String): Bill?
+    suspend fun getBillLines(billId: String): List<BillLine>
+    suspend fun createBill(
+        tenantId: String,
+        customerId: String?,
+        customerNameBn: String,
+        customerPhone: String?,
+        userId: String,
+        lines: List<BillLineInput>,
+        discountAmount: Double,
+        discountType: String,
+        paymentMethod: com.boikhata.core.domain.enums.PaymentMethod,
+        paidAmount: Double,
+    ): String
 }
+
+data class BillLineInput(
+    val bookId: String,
+    val bookTitleBn: String,
+    val quantity: Int,
+    val unitPrice: Double,
+    val category: com.boikhata.core.domain.enums.BookCategory,
+)
 
 interface LicenseRepository {
     suspend fun getLicenseState(tenantId: String): com.boikhata.core.domain.enums.LicenseState

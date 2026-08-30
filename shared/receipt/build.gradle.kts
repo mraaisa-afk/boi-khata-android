@@ -15,8 +15,17 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-
     testOptions {
         unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.failOnNoDiscoveredTests = false
+        }
     }
+}
+
+dependencies {
+    implementation(project(":core:domain"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.truth)
 }

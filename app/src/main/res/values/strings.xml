@@ -8,4 +8,5 @@
     <string name="nav_home">হোম</string>
     <string name="nav_catalog">ক্যাটালগ</string>
     <string name="nav_khata">খাতা</string>
+    <string name="nav_sale">বিক্রয়</string>
 </resources>

@@ -8,4 +8,5 @@
     <string name="nav_home">Home</string>
     <string name="nav_catalog">Catalog</string>
     <string name="nav_khata">Khata</string>
+    <string name="nav_sale">Sale</string>
 </resources>

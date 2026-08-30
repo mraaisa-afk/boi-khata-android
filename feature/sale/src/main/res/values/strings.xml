@@ -1,0 +1,31 @@
+<resources>
+    <string name="checkout">বিক্রি সম্পন্ন</string>
+    <string name="customer">ক্রেতা</string>
+    <string name="walk_in_customer">হাটি ক্রেতা</string>
+    <string name="select">নির্বাচন</string>
+    <string name="select_customer">ক্রেতা নির্বাচন</string>
+    <string name="cart_items">কার্ট (%1$d আইটেম)</string>
+    <string name="cart_empty">কার্ট খালি</string>
+    <string name="add_books">বই যোগ করুন</string>
+    <string name="add_more_books">আরও বই যোগ করুন</string>
+    <string name="search_books">বই খুঁজুন…</string>
+    <string name="search_customers">ক্রেতা খুঁজুন…</string>
+    <string name="discount">ছাড়</string>
+    <string name="payment_method">পেমেন্ট মাধ্যম</string>
+    <string name="paid_amount">জমা পরিমাণ</string>
+    <string name="subtotal">উপমুট</string>
+    <string name="vat">ভ্যাট</string>
+    <string name="total">মোট</string>
+    <string name="due">বাকি</string>
+    <string name="confirm_checkout">বিক্রি নিশ্চিত করুন</string>
+    <string name="confirm_checkout_msg">মোট: %1$s\nবাকি: %2$s\nনিশ্চিত করতে চান?</string>
+    <string name="confirm">নিশ্চিত</string>
+    <string name="cancel">বাতিল</string>
+    <string name="no_bills">কোনো বিল নেই।</string>
+    <string name="due_label">বাকি: %1$s</string>
+    <string name="paid_label">পরিশোধিত</string>
+    <string name="bill_detail">বিল বিবরণ</string>
+    <string name="share_receipt">রসিদ শেয়ার</string>
+    <string name="new_sale">নতুন বিক্রি</string>
+    <string name="loading">লোড হচ্ছে…</string>
+</resources>
