@@ -41,9 +41,11 @@
   - নোট: P2 complete — ক্যাটালগ+খাতা (P2a) + POS+রসিদ (P2b) সম্পন্ন। ৮৮ টেস্ট সবুজ (২৭ নতুন P2b + ১৭ P2a + ৪৪ P1)। Full `./gradlew build` (assemble+lint+test) সবুজ — CI-equivalent verification। প্রথম-বিল ≤৩০-মিনিট flow: catalog→POS cart→VAT+discount→payment→checkout→bill+stock+khata atomic→receipt share। UI টেস্ট = Compose-টেস্ট (P7 স্কোপে প্রস্তাবিত; ডোমেইন-লজিক ইউনিট-টেস্ট সবুজ)।
 
 ## P3 — হিসাব-কোর
-- [ ] ExpenseCategory-সিড + ১-ট্যাপ-এন্ট্রি + অটো-রুট (বই→ইনভেন্টরি) + ঘরি সাব-লেজার + recurring
-- [ ] Cashbook ৩-অ্যাকাউন্ট + ম্যানুয়াল-এন্ট্রি + অটো-পপুলেট (বিল/খরচ/আদায়)
-- [ ] OwnerDrawing
+- [x] ExpenseCategory-সিড + ১-ট্যাপ-এন্ট্রি + অটো-রুট (বই→ইনভেন্টরি) + ঘরি সাব-লেজার + recurring
+  - নোট: P3a — 8 BD expense categories seeded (ভাড়া, বিদ্যুৎ, ইন্টারনেট, বেতন, ঘরি/অ্যাডভান্স, পরিবহন, MFS-ফি, অন্যান্য). ১-ট্যাপ expense entry with category + amount + cashbook auto-populate. D24: PurchaseRouter (book→stock_ledger PURCHASE, non-book→expense). D26: ঘরি sub-ledger via GoriBalanceCalculator (advances − returns, description "ঘরি ফেরত"). D27: RecurringExpenseCalculator pure service (next-due logic unit-tested; persistence + auto-trigger = P3b). 4 PurchaseRouterTest + 6 CashbookBalanceCalculatorTest + 5 GoriBalanceCalculatorTest + 7 RecurringExpenseCalculatorTest = 22 new tests pass.
+- [x] Cashbook ৩-অ্যাকাউন্ট + ম্যানুয়াল-এন্ট্রি + অটো-পপুলেট (বিল/খরচ/আদায়)
+  - নোট: P3a — CashbookBalanceCalculator (নগদ/বিকাশ/ব্যাংক, derived balances). D25: every money flow creates a cashbook entry (expense→EXPENSE, bill payment→INCOME, khata collection→INCOME, owner drawing→EXPENSE) in same Room @Transaction. Manual entry UI with INCOME/EXPENSE/TRANSFER + account selection. Auto-populate wired for expenses + drawings; bill/khata auto-populate = P3b (requires SaleRepositoryImpl + KhataRepositoryImpl updates, not in P3a scope).
+- [x] OwnerDrawing
 - [ ] P&L (মাসিক) + বাংলা-বর্ষ-রোলআপ + ব্যালেন্স-শিট-লাইট + COGS-স্প্লিট (কনসাইনমেন্ট/ক্রয়)
 - [ ] হিসাব-প্যাক PDF + পিরিয়ড-লক
 - [ ] ক্যাশ-ক্লোজ "আজকের হিসাব" (MFS-ফি-অটোলাইন + ভ্যারিয়েন্স)

@@ -5,11 +5,15 @@ import androidx.room.RoomDatabase
 import com.boikhata.core.database.dao.AuditLogDao
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BookDao
+import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.CloudSyncStateDao
 import com.boikhata.core.database.dao.DeviceDao
+import com.boikhata.core.database.dao.ExpenseCategoryDao
+import com.boikhata.core.database.dao.ExpenseDao
 import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.KhataInstallmentDao
+import com.boikhata.core.database.dao.OwnerDrawingDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.dao.TenantDao
 import com.boikhata.core.database.dao.UserDao
@@ -73,6 +77,10 @@ abstract class BoiKhataDatabase : RoomDatabase() {
     abstract fun khataCustomerDao(): KhataCustomerDao
     abstract fun khataEntryDao(): KhataEntryDao
     abstract fun khataInstallmentDao(): KhataInstallmentDao
+    abstract fun expenseCategoryDao(): ExpenseCategoryDao
+    abstract fun expenseDao(): ExpenseDao
+    abstract fun cashbookDao(): CashbookDao
+    abstract fun ownerDrawingDao(): OwnerDrawingDao
     abstract fun auditLogDao(): AuditLogDao
 
     companion object {

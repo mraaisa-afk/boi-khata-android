@@ -28,4 +28,6 @@
     <string name="share_receipt">রসিদ শেয়ার</string>
     <string name="new_sale">নতুন বিক্রি</string>
     <string name="loading">লোড হচ্ছে…</string>
+    <string name="pos_title">বিক্রয়</string>
+    <string name="expense_button">খরচ</string>
 </resources>

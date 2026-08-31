@@ -1,15 +1,24 @@
 package com.boikhata.core.domain.repository
 
+import com.boikhata.core.domain.aging.KhataEntry
 import com.boikhata.core.domain.enums.BookCategory
 import com.boikhata.core.domain.enums.BookCondition
-import com.boikhata.core.domain.aging.KhataEntry
+import com.boikhata.core.domain.enums.CashbookAccount
+import com.boikhata.core.domain.enums.CashbookEntryType
+import com.boikhata.core.domain.enums.KhataEntryType
+import com.boikhata.core.domain.enums.PaymentMethod
 import com.boikhata.core.domain.license.GraceState
 import com.boikhata.core.domain.license.LicenseWriteGuard
-import com.boikhata.core.domain.model.Book
-import com.boikhata.core.domain.model.KhataCustomer
-import com.boikhata.core.domain.model.KhataInstallment
 import com.boikhata.core.domain.model.Bill
 import com.boikhata.core.domain.model.BillLine
+import com.boikhata.core.domain.model.Book
+import com.boikhata.core.domain.model.CashbookBalance
+import com.boikhata.core.domain.model.CashbookEntry
+import com.boikhata.core.domain.model.Expense
+import com.boikhata.core.domain.model.ExpenseCategory
+import com.boikhata.core.domain.model.KhataCustomer
+import com.boikhata.core.domain.model.KhataInstallment
+import com.boikhata.core.domain.model.OwnerDrawing
 
 /**
  * Repository interfaces — core/domain owns the contracts; core/database + core/cloud
@@ -144,4 +153,62 @@ interface LicenseRepository {
     fun getWriteGuard(): LicenseWriteGuard
     suspend fun setWifiOnlySync(tenantId: String, enabled: Boolean)
     suspend fun isWifiOnlySync(tenantId: String): Boolean
+}
+
+// ── P3a: Expense ─────────────────────────────────────────────────────────────
+
+interface ExpenseRepository {
+    suspend fun getCategories(tenantId: String): List<ExpenseCategory>
+    suspend fun getExpenses(tenantId: String): List<Expense>
+    suspend fun getExpensesByDateRange(tenantId: String, start: Long, end: Long): List<Expense>
+    suspend fun getExpensesByCategory(tenantId: String, categoryId: String): List<Expense>
+    suspend fun getExpensesByCategoryAndUser(tenantId: String, categoryId: String, userId: String): List<Expense>
+    suspend fun addExpense(
+        tenantId: String,
+        categoryId: String,
+        amount: Double,
+        description: String,
+        expenseDate: Long,
+        receiptPhotoPath: String?,
+        userId: String,
+        cashbookAccount: CashbookAccount,
+    ): String
+    suspend fun addBookPurchase(
+        tenantId: String,
+        bookId: String,
+        quantity: Int,
+        unitPrice: Double,
+        description: String,
+        userId: String,
+        cashbookAccount: CashbookAccount,
+    ): String
+}
+
+// ── P3a: Cashbook ────────────────────────────────────────────────────────────
+
+interface CashbookRepository {
+    suspend fun getEntries(tenantId: String): List<CashbookEntry>
+    suspend fun getEntriesByDateRange(tenantId: String, start: Long, end: Long): List<CashbookEntry>
+    suspend fun getBalances(tenantId: String): List<CashbookBalance>
+    suspend fun addManualEntry(
+        tenantId: String,
+        account: CashbookAccount,
+        type: CashbookEntryType,
+        amount: Double,
+        description: String,
+        userId: String,
+    ): String
+}
+
+// ── P3a: Owner Drawing ──────────────────────────────────────────────────────
+
+interface OwnerDrawingRepository {
+    suspend fun getDrawings(tenantId: String): List<OwnerDrawing>
+    suspend fun getDrawingsByDateRange(tenantId: String, start: Long, end: Long): List<OwnerDrawing>
+    suspend fun createDrawing(
+        tenantId: String,
+        amount: Double,
+        description: String,
+        userId: String,
+    ): String
 }

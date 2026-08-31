@@ -28,4 +28,6 @@
     <string name="share_receipt">Share Receipt</string>
     <string name="new_sale">New Sale</string>
     <string name="loading">Loading…</string>
+    <string name="pos_title">Sale</string>
+    <string name="expense_button">Expense</string>
 </resources>

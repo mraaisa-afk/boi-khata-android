@@ -6,11 +6,15 @@ import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.AuditLogDao
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BookDao
+import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.CloudSyncStateDao
 import com.boikhata.core.database.dao.DeviceDao
+import com.boikhata.core.database.dao.ExpenseCategoryDao
+import com.boikhata.core.database.dao.ExpenseDao
 import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.KhataInstallmentDao
+import com.boikhata.core.database.dao.OwnerDrawingDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.dao.TenantDao
 import com.boikhata.core.database.dao.UserDao
@@ -51,6 +55,10 @@ object DatabaseModule {
     @Provides fun provideKhataCustomerDao(db: BoiKhataDatabase): KhataCustomerDao = db.khataCustomerDao()
     @Provides fun provideKhataEntryDao(db: BoiKhataDatabase): KhataEntryDao = db.khataEntryDao()
     @Provides fun provideKhataInstallmentDao(db: BoiKhataDatabase): KhataInstallmentDao = db.khataInstallmentDao()
+    @Provides fun provideExpenseCategoryDao(db: BoiKhataDatabase): ExpenseCategoryDao = db.expenseCategoryDao()
+    @Provides fun provideExpenseDao(db: BoiKhataDatabase): ExpenseDao = db.expenseDao()
+    @Provides fun provideCashbookDao(db: BoiKhataDatabase): CashbookDao = db.cashbookDao()
+    @Provides fun provideOwnerDrawingDao(db: BoiKhataDatabase): OwnerDrawingDao = db.ownerDrawingDao()
     @Provides fun provideAuditLogDao(db: BoiKhataDatabase): AuditLogDao = db.auditLogDao()
 
     @Provides
@@ -59,5 +67,6 @@ object DatabaseModule {
         tenantDao: TenantDao,
         userDao: UserDao,
         cloudSyncStateDao: CloudSyncStateDao,
-    ): DatabaseSeeder = DatabaseSeeder(tenantDao, userDao, cloudSyncStateDao)
+        expenseCategoryDao: ExpenseCategoryDao,
+    ): DatabaseSeeder = DatabaseSeeder(tenantDao, userDao, cloudSyncStateDao, expenseCategoryDao)
 }
