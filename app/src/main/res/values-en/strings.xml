@@ -9,4 +9,33 @@
     <string name="nav_catalog">Catalog</string>
     <string name="nav_khata">Khata</string>
     <string name="nav_sale">Sale</string>
+
+    <!-- P4a: Phone OTP Login -->
+    <string name="login_title">Boi Khata — Login</string>
+    <string name="enter_phone">Enter your phone number</string>
+    <string name="phone_hint">+8801XXXXXXXXX</string>
+    <string name="send_otp">Send OTP</string>
+    <string name="enter_otp">Enter OTP code</string>
+    <string name="otp_hint">6-digit code</string>
+    <string name="verify_otp">Verify</string>
+    <string name="otp_sent">OTP sent</string>
+    <string name="otp_failed">Failed to send OTP</string>
+    <string name="verify_failed">Wrong code or verification failed</string>
+    <string name="resend_otp">Resend</string>
+
+    <!-- P4a: Pending Activation -->
+    <string name="pending_title">Account Not Activated</string>
+    <string name="pending_msg">Your account has not been activated yet. Please contact the vendor to activate:</string>
+    <string name="vendor_phone">+8801711468027</string>
+    <string name="retry">Check Again</string>
+    <string name="sign_out">Sign Out</string>
+
+    <!-- P4a: License Banner -->
+    <string name="license_active">License Active</string>
+    <string name="license_grace">Grace Period — %1$d days left</string>
+    <string name="license_soft_locked">License Expired — new entries blocked</string>
+    <string name="license_suspended">License Suspended — new entries blocked</string>
+    <string name="license_refresh">Refresh</string>
+    <string name="license_syncing">Verifying license…</string>
+    <string name="license_offline">Offline — showing last known state</string>
 </resources>

@@ -12,6 +12,7 @@ import com.boikhata.core.database.repository.OwnerDrawingRepositoryImpl
 import com.boikhata.core.database.repository.PeriodLockCheckerImpl
 import com.boikhata.core.database.repository.RecurringExpenseRepositoryImpl
 import com.boikhata.core.database.repository.SaleRepositoryImpl
+import com.boikhata.core.database.repository.TenantRebindRepositoryImpl
 import com.boikhata.core.database.repository.UserRepositoryImpl
 import com.boikhata.core.domain.accounting.PeriodLockChecker
 import com.boikhata.core.domain.repository.AccountingRepository
@@ -25,6 +26,7 @@ import com.boikhata.core.domain.repository.KhataRepository
 import com.boikhata.core.domain.repository.LicenseRepository
 import com.boikhata.core.domain.repository.OwnerDrawingRepository
 import com.boikhata.core.domain.repository.RecurringExpenseRepository
+import com.boikhata.core.domain.repository.TenantRebindRepository
 import com.boikhata.core.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
@@ -75,4 +77,7 @@ abstract class RepositoryBindingsModule {
 
     @Binds @Singleton
     abstract fun bindCashCloseRepository(impl: CashCloseRepositoryImpl): CashCloseRepository
+
+    @Binds @Singleton
+    abstract fun bindTenantRebindRepository(impl: TenantRebindRepositoryImpl): TenantRebindRepository
 }

@@ -9,4 +9,33 @@
     <string name="nav_catalog">ক্যাটালগ</string>
     <string name="nav_khata">খাতা</string>
     <string name="nav_sale">বিক্রয়</string>
+
+    <!-- P4a: Phone OTP Login -->
+    <string name="login_title">বই খাতা — লগইন</string>
+    <string name="enter_phone">আপনার ফোন নম্বর লিখুন</string>
+    <string name="phone_hint">+8801XXXXXXXXX</string>
+    <string name="send_otp">ওটিপি পাঠান</string>
+    <string name="enter_otp">ওটিপি কোড লিখুন</string>
+    <string name="otp_hint">৬ সংখ্যার কোড</string>
+    <string name="verify_otp">যাচাই করুন</string>
+    <string name="otp_sent">ওটিপি পাঠানো হয়েছে</string>
+    <string name="otp_failed">ওটিপি পাঠাতে সমস্যা</string>
+    <string name="verify_failed">ভুল কোড বা যাচাই ব্যর্থ</string>
+    <string name="resend_otp">আবার পাঠান</string>
+
+    <!-- P4a: Pending Activation -->
+    <string name="pending_title">অ্যাকাউন্ট সক্রিয় করা হয়নি</string>
+    <string name="pending_msg">আপনার অ্যাকাউন্ট এখনো সক্রিয় করা হয়নি। অ্যাক্টিভেশনের জন্য যোগাযোগ করুন:</string>
+    <string name="vendor_phone">+8801711468027</string>
+    <string name="retry">আবার চেক করুন</string>
+    <string name="sign_out">সাইন আউট</string>
+
+    <!-- P4a: License Banner -->
+    <string name="license_active">লাইসেন্স সক্রিয়</string>
+    <string name="license_grace">গ্রেস পিরিয়ড — %1$d দিন বাকি</string>
+    <string name="license_soft_locked">লাইসেন্স মেয়াদোত্তীর্ণ — নতুন এন্ট্রি বন্ধ</string>
+    <string name="license_suspended">লাইসেন্স স্থগিত — নতুন এন্ট্রি বন্ধ</string>
+    <string name="license_refresh">রিফ্রেশ</string>
+    <string name="license_syncing">লাইসেন্স যাচাই হচ্ছে…</string>
+    <string name="license_offline">অফলাইন — শেষ অবস্থা দেখানো হচ্ছে</string>
 </resources>

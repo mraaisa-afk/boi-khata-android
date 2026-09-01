@@ -5,3 +5,4 @@ google-services.json
 .gradle/
 **/build/
 local.properties
+.kotlin/

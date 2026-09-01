@@ -268,3 +268,21 @@ interface CashCloseRepository {
         countedCash: Double,
     ): com.boikhata.core.domain.model.CashCloseReport
 }
+
+// ── P4a: Cloud Auth + License Sync + Tenant Rebind ──────────────────────────
+
+interface AuthRepository {
+    suspend fun startPhoneVerification(phone: String): Boolean
+    suspend fun verifyOtp(code: String): Boolean
+    suspend fun getCurrentCloudUser(): com.boikhata.core.domain.model.CloudUser?
+    suspend fun signOut()
+    fun isSignedIn(): Boolean
+}
+
+interface LicenseSyncRepository {
+    suspend fun syncLicense(tenantId: String, role: com.boikhata.core.domain.enums.Role): com.boikhata.core.domain.model.LicenseSyncResult
+}
+
+interface TenantRebindRepository {
+    suspend fun rebind(oldTenantId: String, newTenantId: String): Int
+}
