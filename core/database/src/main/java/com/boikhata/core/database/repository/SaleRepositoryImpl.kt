@@ -3,12 +3,15 @@ package com.boikhata.core.database.repository
 import androidx.room.withTransaction
 import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.BillDao
+import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.entity.BillEntity
 import com.boikhata.core.database.entity.BillLineEntity
+import com.boikhata.core.database.entity.CashbookEntryEntity
 import com.boikhata.core.database.entity.KhataEntryEntity
 import com.boikhata.core.database.entity.StockLedgerEntity
+import com.boikhata.core.domain.accounting.PeriodLockChecker
 import com.boikhata.core.domain.enums.KhataEntryType
 import com.boikhata.core.domain.enums.PaymentMethod
 import com.boikhata.core.domain.license.LicenseWriteGuard
@@ -25,13 +28,17 @@ import javax.inject.Inject
 /**
  * P2b: BillRepository implementation with POS sale flow.
  * D22: createBill is an atomic Room transaction — bill + lines + stock + khata.
+ * D32: Period-lock check before write.
+ * D34: Cashbook auto-populate from bill payment (INCOME, account from paymentMethod).
  */
 class SaleRepositoryImpl @Inject constructor(
     private val db: BoiKhataDatabase,
     private val billDao: BillDao,
     private val stockLedgerDao: StockLedgerDao,
     private val khataEntryDao: KhataEntryDao,
+    private val cashbookDao: CashbookDao,
     private val writeGuard: LicenseWriteGuard,
+    private val periodLockChecker: PeriodLockChecker,
 ) : BillRepository {
 
     override suspend fun getBillsByDate(tenantId: String, startOfDay: Long, endOfDay: Long): List<BillSummary> {
@@ -83,8 +90,10 @@ class SaleRepositoryImpl @Inject constructor(
         paidAmount: Double,
     ): String {
         writeGuard.assertWriteAllowed()
-
+        // D32: Period-lock check — the bill date must not fall in a locked period
         val now = System.currentTimeMillis()
+        periodLockChecker.assertNotLocked(tenantId, now)
+
         val billId = UUID.randomUUID().toString()
 
         // D20: Generate bill number
@@ -189,6 +198,34 @@ class SaleRepositoryImpl @Inject constructor(
                 )
                 // Link khata entry back to bill
                 billDao.updateKhataEntryId(billId, khataEntryId)
+            }
+
+            // 5. D34: Cashbook auto-populate — bill payment creates INCOME entry
+            // Account from paymentMethod: CASH→CASH, BKASH→BKASH. Amount = actualPaid.
+            // Only when actualPaid > 0 (pure-credit bill with paidAmount=0 → no money moved).
+            if (actualPaid > 0.01) {
+                val cashbookAccount = when (paymentMethod) {
+                    PaymentMethod.CASH -> "CASH"
+                    PaymentMethod.BKASH -> "BKASH"
+                    PaymentMethod.NAGAD -> "BKASH" // NAGAD treated as mobile-money → BKASH bucket
+                    PaymentMethod.CREDIT -> null     // pure credit → no cashbook entry
+                }
+                if (cashbookAccount != null) {
+                    cashbookDao.insert(
+                        CashbookEntryEntity(
+                            id = UUID.randomUUID().toString(),
+                            tenantId = tenantId,
+                            account = cashbookAccount,
+                            type = "INCOME",
+                            amount = actualPaid,
+                            description = "বিক্রি ($billNumber)",
+                            referenceId = billId,
+                            date = now,
+                            userId = userId,
+                            idempotencyKey = UUID.randomUUID().toString(),
+                        )
+                    )
+                }
             }
         }
 
