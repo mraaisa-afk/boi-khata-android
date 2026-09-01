@@ -55,6 +55,7 @@ dependencies {
     implementation(project(":feature:khata"))
     implementation(project(":feature:sale"))
     implementation(project(":feature:expense"))
+    implementation(project(":feature:reports"))
     implementation(project(":shared:receipt"))
 
     implementation(platform(libs.androidx.compose.bom))

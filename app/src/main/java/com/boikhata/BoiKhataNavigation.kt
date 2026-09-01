@@ -31,6 +31,8 @@ import com.boikhata.feature.home.HomeScreen
 import com.boikhata.feature.khata.KhataAddCustomerScreen
 import com.boikhata.feature.khata.KhataCustomerDetailScreen
 import com.boikhata.feature.khata.KhataCustomerListScreen
+import com.boikhata.feature.reports.CashCloseScreen
+import com.boikhata.feature.reports.ReportsScreen
 import com.boikhata.feature.sale.BillDetailScreen
 import com.boikhata.feature.sale.BillHistoryScreen
 import com.boikhata.feature.sale.PosScreen
@@ -137,11 +139,21 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String) {
                         navController.navigate("bill_detail/$billId")
                     },
                     onExpenseClick = { navController.navigate("expense") },
+                    onReportsClick = { navController.navigate("reports") },
+                    onCashCloseClick = { navController.navigate("cash_close") },
                 )
             }
             // P3a: Expense + Cashbook + Owner Drawing
             composable("expense") {
                 ExpenseScreen(tenantId = tenantId)
+            }
+            // P3c: Accounting reports (P&L + balance-sheet + period-lock + budget)
+            composable("reports") {
+                ReportsScreen(tenantId = tenantId)
+            }
+            // P3c: Daily cash-close "আজকের হিসাব"
+            composable("cash_close") {
+                CashCloseScreen(tenantId = tenantId)
             }
             // P2b: Bill history
             composable("bill_history") {

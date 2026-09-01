@@ -30,4 +30,6 @@
     <string name="loading">Loading…</string>
     <string name="pos_title">Sale</string>
     <string name="expense_button">Expense</string>
+    <string name="cash_close_button">Today\'s Close</string>
+    <string name="reports_button">Reports</string>
 </resources>
