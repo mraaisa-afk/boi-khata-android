@@ -60,6 +60,8 @@ fun PosScreen(
     tenantId: String,
     onCheckoutComplete: (String) -> Unit,
     onExpenseClick: () -> Unit = {},
+    onReportsClick: () -> Unit = {},
+    onCashCloseClick: () -> Unit = {},
     viewModel: SaleViewModel = hiltViewModel(),
 ) {
     val cartState by viewModel.cartState.collectAsState()
@@ -75,6 +77,12 @@ fun PosScreen(
             androidx.compose.material3.TopAppBar(
                 title = { Text(stringResource(R.string.pos_title)) },
                 actions = {
+                    TextButton(onClick = onCashCloseClick) {
+                        Text(stringResource(R.string.cash_close_button))
+                    }
+                    TextButton(onClick = onReportsClick) {
+                        Text(stringResource(R.string.reports_button))
+                    }
                     TextButton(onClick = onExpenseClick) {
                         Text(stringResource(R.string.expense_button))
                     }

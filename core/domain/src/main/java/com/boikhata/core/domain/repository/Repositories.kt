@@ -256,3 +256,15 @@ interface BudgetRepository {
     suspend fun setBudget(tenantId: String, categoryId: String, monthlyLimit: Double): String
     suspend fun getMonthlyAlerts(tenantId: String, year: Int, month: Int): List<com.boikhata.core.domain.accounting.BudgetAlertCalculator.BudgetAlert>
 }
+
+// ── P3c: Cash-close (D36) ────────────────────────────────────────────────────
+
+interface CashCloseRepository {
+    suspend fun getDailyClose(
+        tenantId: String,
+        startOfDay: Long,
+        endOfDay: Long,
+        mfsFeeRate: Double,
+        countedCash: Double,
+    ): com.boikhata.core.domain.model.CashCloseReport
+}

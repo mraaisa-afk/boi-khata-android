@@ -30,4 +30,6 @@
     <string name="loading">লোড হচ্ছে…</string>
     <string name="pos_title">বিক্রয়</string>
     <string name="expense_button">খরচ</string>
+    <string name="cash_close_button">আজকের হিসাব</string>
+    <string name="reports_button">রিপোর্ট</string>
 </resources>
