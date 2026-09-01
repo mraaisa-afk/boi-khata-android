@@ -172,6 +172,9 @@ class KhataViewModel @Inject constructor(
                     KhataEntryType.PAYMENT, description.ifBlank { "জমা" },
                     referenceBillId = null,
                     collectedByUserId = "u_1",
+                    // D34: khata collection → cashbook INCOME. Default to CASH (most common).
+                    // The UI can later let the user choose CASH/BKASH.
+                    cashbookAccount = com.boikhata.core.domain.enums.CashbookAccount.CASH,
                 )
                 loadDetail(currentTenantId, customerId)
                 onDone()

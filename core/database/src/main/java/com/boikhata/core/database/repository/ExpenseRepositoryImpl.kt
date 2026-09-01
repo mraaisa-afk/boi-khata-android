@@ -9,6 +9,7 @@ import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.entity.CashbookEntryEntity
 import com.boikhata.core.database.entity.ExpenseEntity
 import com.boikhata.core.database.entity.StockLedgerEntity
+import com.boikhata.core.domain.accounting.PeriodLockChecker
 import com.boikhata.core.domain.accounting.PurchaseRouter
 import com.boikhata.core.domain.enums.CashbookAccount
 import com.boikhata.core.domain.license.LicenseWriteGuard
@@ -22,6 +23,7 @@ import javax.inject.Inject
  * P3a: ExpenseRepository implementation.
  * D24: Book purchase → stock_ledger (PURCHASE), non-book → expense.
  * D25: Every money flow creates a cashbook entry (atomic).
+ * D32: Period-lock check before write.
  */
 class ExpenseRepositoryImpl @Inject constructor(
     private val db: BoiKhataDatabase,
@@ -30,6 +32,7 @@ class ExpenseRepositoryImpl @Inject constructor(
     private val stockLedgerDao: StockLedgerDao,
     private val cashbookDao: CashbookDao,
     private val writeGuard: LicenseWriteGuard,
+    private val periodLockChecker: PeriodLockChecker,
 ) : ExpenseRepository {
 
     override suspend fun getCategories(tenantId: String): List<ExpenseCategory> {
@@ -68,6 +71,9 @@ class ExpenseRepositoryImpl @Inject constructor(
         cashbookAccount: CashbookAccount,
     ): String {
         writeGuard.assertWriteAllowed()
+        // D32: Period-lock check
+        periodLockChecker.assertNotLocked(tenantId, expenseDate)
+
         val expenseId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
 
@@ -119,10 +125,13 @@ class ExpenseRepositoryImpl @Inject constructor(
         cashbookAccount: CashbookAccount,
     ): String {
         writeGuard.assertWriteAllowed()
+        // D32: Period-lock check
+        val now = System.currentTimeMillis()
+        periodLockChecker.assertNotLocked(tenantId, now)
+
         val stockEntryId = UUID.randomUUID().toString()
         val cashbookEntryId = UUID.randomUUID().toString()
         val totalAmount = unitPrice * quantity
-        val now = System.currentTimeMillis()
 
         db.withTransaction {
             // D24: Route to inventory (stock_ledger PURCHASE)

@@ -97,6 +97,7 @@ interface KhataRepository {
         description: String,
         referenceBillId: String?,
         collectedByUserId: String,
+        cashbookAccount: CashbookAccount? = null, // D34: for PAYMENT type — the account the customer paid into
     ): String
 
     suspend fun forgiveDebt(
@@ -211,4 +212,47 @@ interface OwnerDrawingRepository {
         description: String,
         userId: String,
     ): String
+}
+
+// ── P3b: Accounting (P&L + balance sheet + period-lock) ──────────────────────
+
+interface AccountingRepository {
+    // P&L
+    suspend fun getMonthlyPnL(tenantId: String, year: Int, month: Int): com.boikhata.core.domain.model.PnLReport
+    // Balance sheet lite
+    suspend fun getBalanceSheet(tenantId: String, asOfDate: Long): com.boikhata.core.domain.model.BalanceSheetLite
+    // Period lock
+    suspend fun isPeriodLocked(tenantId: String, year: Int, month: Int): Boolean
+    suspend fun lockPeriod(tenantId: String, year: Int, month: Int, userId: String): String
+    suspend fun getLockedPeriods(tenantId: String): List<com.boikhata.core.domain.model.PeriodLock>
+    // Khata aging summary
+    suspend fun getKhataAgingSummary(tenantId: String, asOfDate: Long): com.boikhata.core.domain.model.KhataAgingSummary
+    // VAT summary
+    suspend fun getVatSummary(tenantId: String, start: Long, end: Long): com.boikhata.core.domain.model.VatSummary
+    // Full হিসাব-প্যাক
+    suspend fun getHisabPack(tenantId: String, year: Int, month: Int, shopName: String): com.boikhata.core.domain.model.HisabPack
+}
+
+// ── P3b: Recurring Expense (D35) ─────────────────────────────────────────────
+
+interface RecurringExpenseRepository {
+    suspend fun getTemplates(tenantId: String): List<com.boikhata.core.domain.model.RecurringExpenseTemplate>
+    suspend fun addTemplate(
+        tenantId: String,
+        categoryId: String,
+        amount: Double,
+        description: String,
+        frequency: com.boikhata.core.domain.accounting.RecurringExpenseCalculator.Frequency,
+        userId: String,
+    ): String
+    suspend fun applyTemplate(id: String, userId: String, cashbookAccount: CashbookAccount): String
+    suspend fun getDueTemplates(tenantId: String, now: Long): List<com.boikhata.core.domain.model.RecurringExpenseTemplate>
+}
+
+// ── P3b: Budget (D35) ─────────────────────────────────────────────────────────
+
+interface BudgetRepository {
+    suspend fun getBudgets(tenantId: String): List<com.boikhata.core.domain.accounting.BudgetAlertCalculator.Budget>
+    suspend fun setBudget(tenantId: String, categoryId: String, monthlyLimit: Double): String
+    suspend fun getMonthlyAlerts(tenantId: String, year: Int, month: Int): List<com.boikhata.core.domain.accounting.BudgetAlertCalculator.BudgetAlert>
 }

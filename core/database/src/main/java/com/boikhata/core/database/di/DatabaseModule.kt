@@ -6,6 +6,7 @@ import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.AuditLogDao
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BookDao
+import com.boikhata.core.database.dao.BudgetDao
 import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.CloudSyncStateDao
 import com.boikhata.core.database.dao.DeviceDao
@@ -15,10 +16,13 @@ import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.KhataInstallmentDao
 import com.boikhata.core.database.dao.OwnerDrawingDao
+import com.boikhata.core.database.dao.PeriodLockDao
+import com.boikhata.core.database.dao.RecurringExpenseDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.dao.TenantDao
 import com.boikhata.core.database.dao.UserDao
 import com.boikhata.core.database.migration.Migration1To2
+import com.boikhata.core.database.migration.Migration2To3
 import com.boikhata.core.database.seed.DatabaseSeeder
 import dagger.Module
 import dagger.Provides
@@ -34,13 +38,13 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): BoiKhataDatabase {
-        // D16: Migration v1→v2 (normalized columns for Bengali fuzzy search)
+        // D16: Migration v1→v2 (normalized columns); D32/D35: Migration v2→v3 (accounting tables)
         return Room.databaseBuilder(
             context,
             BoiKhataDatabase::class.java,
             BoiKhataDatabase.DATABASE_NAME
         )
-            .addMigrations(Migration1To2)
+            .addMigrations(Migration1To2, Migration2To3)
             .fallbackToDestructiveMigrationOnDowngrade()
             .build()
     }
@@ -60,6 +64,9 @@ object DatabaseModule {
     @Provides fun provideCashbookDao(db: BoiKhataDatabase): CashbookDao = db.cashbookDao()
     @Provides fun provideOwnerDrawingDao(db: BoiKhataDatabase): OwnerDrawingDao = db.ownerDrawingDao()
     @Provides fun provideAuditLogDao(db: BoiKhataDatabase): AuditLogDao = db.auditLogDao()
+    @Provides fun providePeriodLockDao(db: BoiKhataDatabase): PeriodLockDao = db.periodLockDao()
+    @Provides fun provideRecurringExpenseDao(db: BoiKhataDatabase): RecurringExpenseDao = db.recurringExpenseDao()
+    @Provides fun provideBudgetDao(db: BoiKhataDatabase): BudgetDao = db.budgetDao()
 
     @Provides
     @Singleton

@@ -44,4 +44,8 @@ interface StockLedgerDao {
 
     @Query("SELECT * FROM stock_ledger WHERE tenantId = :tenantId AND bookId = :bookId ORDER BY timestamp ASC")
     suspend fun getByBook(tenantId: String, bookId: String): List<StockLedgerEntity>
+
+    /** D31: Current stock quantity for a book = SUM of all changeQuantity entries. */
+    @Query("SELECT COALESCE(SUM(changeQuantity), 0) FROM stock_ledger WHERE bookId = :bookId")
+    suspend fun getStockQuantityForBook(bookId: String): Int
 }

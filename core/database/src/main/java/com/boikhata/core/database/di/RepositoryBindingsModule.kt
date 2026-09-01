@@ -1,20 +1,28 @@
 package com.boikhata.core.database.di
 
+import com.boikhata.core.database.repository.AccountingRepositoryImpl
 import com.boikhata.core.database.repository.BookRepositoryImpl
+import com.boikhata.core.database.repository.BudgetRepositoryImpl
 import com.boikhata.core.database.repository.CashbookRepositoryImpl
 import com.boikhata.core.database.repository.ExpenseRepositoryImpl
 import com.boikhata.core.database.repository.KhataRepositoryImpl
 import com.boikhata.core.database.repository.LicenseRepositoryImpl
 import com.boikhata.core.database.repository.OwnerDrawingRepositoryImpl
+import com.boikhata.core.database.repository.PeriodLockCheckerImpl
+import com.boikhata.core.database.repository.RecurringExpenseRepositoryImpl
 import com.boikhata.core.database.repository.SaleRepositoryImpl
 import com.boikhata.core.database.repository.UserRepositoryImpl
+import com.boikhata.core.domain.accounting.PeriodLockChecker
+import com.boikhata.core.domain.repository.AccountingRepository
 import com.boikhata.core.domain.repository.BillRepository
 import com.boikhata.core.domain.repository.BookRepository
+import com.boikhata.core.domain.repository.BudgetRepository
 import com.boikhata.core.domain.repository.CashbookRepository
 import com.boikhata.core.domain.repository.ExpenseRepository
 import com.boikhata.core.domain.repository.KhataRepository
 import com.boikhata.core.domain.repository.LicenseRepository
 import com.boikhata.core.domain.repository.OwnerDrawingRepository
+import com.boikhata.core.domain.repository.RecurringExpenseRepository
 import com.boikhata.core.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
@@ -49,4 +57,17 @@ abstract class RepositoryBindingsModule {
 
     @Binds @Singleton
     abstract fun bindOwnerDrawingRepository(impl: OwnerDrawingRepositoryImpl): OwnerDrawingRepository
+
+    // P3b bindings
+    @Binds @Singleton
+    abstract fun bindPeriodLockChecker(impl: PeriodLockCheckerImpl): PeriodLockChecker
+
+    @Binds @Singleton
+    abstract fun bindAccountingRepository(impl: AccountingRepositoryImpl): AccountingRepository
+
+    @Binds @Singleton
+    abstract fun bindRecurringExpenseRepository(impl: RecurringExpenseRepositoryImpl): RecurringExpenseRepository
+
+    @Binds @Singleton
+    abstract fun bindBudgetRepository(impl: BudgetRepositoryImpl): BudgetRepository
 }

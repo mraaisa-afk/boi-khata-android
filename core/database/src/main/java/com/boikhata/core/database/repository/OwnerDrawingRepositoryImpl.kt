@@ -6,6 +6,7 @@ import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.OwnerDrawingDao
 import com.boikhata.core.database.entity.CashbookEntryEntity
 import com.boikhata.core.database.entity.OwnerDrawingEntity
+import com.boikhata.core.domain.accounting.PeriodLockChecker
 import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.model.OwnerDrawing
 import com.boikhata.core.domain.repository.OwnerDrawingRepository
@@ -15,12 +16,14 @@ import javax.inject.Inject
 /**
  * P3a: OwnerDrawingRepository implementation.
  * D28: Separate table, OWNER-only, cashbook EXPENSE auto-populate (atomic).
+ * D32: Period-lock check before write.
  */
 class OwnerDrawingRepositoryImpl @Inject constructor(
     private val db: BoiKhataDatabase,
     private val ownerDrawingDao: OwnerDrawingDao,
     private val cashbookDao: CashbookDao,
     private val writeGuard: LicenseWriteGuard,
+    private val periodLockChecker: PeriodLockChecker,
 ) : OwnerDrawingRepository {
 
     override suspend fun getDrawings(tenantId: String): List<OwnerDrawing> {
@@ -45,8 +48,11 @@ class OwnerDrawingRepositoryImpl @Inject constructor(
         userId: String,
     ): String {
         writeGuard.assertWriteAllowed()
-        val drawingId = UUID.randomUUID().toString()
+        // D32: Period-lock check
         val now = System.currentTimeMillis()
+        periodLockChecker.assertNotLocked(tenantId, now)
+
+        val drawingId = UUID.randomUUID().toString()
 
         db.withTransaction {
             // 1. Insert drawing

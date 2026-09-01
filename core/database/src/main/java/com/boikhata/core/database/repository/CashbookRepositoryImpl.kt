@@ -2,6 +2,7 @@ package com.boikhata.core.database.repository
 
 import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.domain.accounting.CashbookBalanceCalculator
+import com.boikhata.core.domain.accounting.PeriodLockChecker
 import com.boikhata.core.domain.enums.CashbookAccount
 import com.boikhata.core.domain.enums.CashbookEntryType
 import com.boikhata.core.domain.license.LicenseWriteGuard
@@ -14,10 +15,12 @@ import javax.inject.Inject
 /**
  * P3a: CashbookRepository implementation.
  * D25: Balances are derived from append-only entries.
+ * D32: Period-lock check before manual write.
  */
 class CashbookRepositoryImpl @Inject constructor(
     private val cashbookDao: CashbookDao,
     private val writeGuard: LicenseWriteGuard,
+    private val periodLockChecker: PeriodLockChecker,
 ) : CashbookRepository {
 
     override suspend fun getEntries(tenantId: String): List<CashbookEntry> {
@@ -42,6 +45,10 @@ class CashbookRepositoryImpl @Inject constructor(
         userId: String,
     ): String {
         writeGuard.assertWriteAllowed()
+        // D32: Period-lock check
+        val now = System.currentTimeMillis()
+        periodLockChecker.assertNotLocked(tenantId, now)
+
         val id = UUID.randomUUID().toString()
         cashbookDao.insert(
             com.boikhata.core.database.entity.CashbookEntryEntity(
@@ -52,7 +59,7 @@ class CashbookRepositoryImpl @Inject constructor(
                 amount = amount,
                 description = description,
                 referenceId = null,
-                date = System.currentTimeMillis(),
+                date = now,
                 userId = userId,
                 idempotencyKey = UUID.randomUUID().toString(),
             )

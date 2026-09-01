@@ -1,13 +1,17 @@
 package com.boikhata.core.database.repository
 
+import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.KhataInstallmentDao
+import com.boikhata.core.database.entity.CashbookEntryEntity
 import com.boikhata.core.database.entity.KhataCustomerEntity
 import com.boikhata.core.database.entity.KhataEntryEntity
 import com.boikhata.core.database.entity.KhataInstallmentEntity
+import com.boikhata.core.domain.accounting.PeriodLockChecker
 import com.boikhata.core.domain.aging.AgingCalculator
 import com.boikhata.core.domain.aging.KhataEntry
+import com.boikhata.core.domain.enums.CashbookAccount
 import com.boikhata.core.domain.enums.KhataEntryType
 import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.model.KhataCustomer
@@ -20,12 +24,16 @@ import javax.inject.Inject
 /**
  * P2a: KhataRepository implementation — extended with customer CRUD,
  * installment tracking, দেনা-মুন, and search (all offline Room-only).
+ * D32: Period-lock check before write.
+ * D34: Cashbook auto-populate from khata collections (PAYMENT → INCOME).
  */
 class KhataRepositoryImpl @Inject constructor(
     private val khataCustomerDao: KhataCustomerDao,
     private val khataEntryDao: KhataEntryDao,
     private val khataInstallmentDao: KhataInstallmentDao,
+    private val cashbookDao: CashbookDao,
     private val writeGuard: LicenseWriteGuard,
+    private val periodLockChecker: PeriodLockChecker,
 ) : KhataRepository {
 
     override suspend fun getCustomers(tenantId: String): List<KhataCustomer> {
@@ -80,10 +88,14 @@ class KhataRepositoryImpl @Inject constructor(
         description: String,
         referenceBillId: String?,
         collectedByUserId: String,
+        cashbookAccount: CashbookAccount?,
     ): String {
         writeGuard.assertWriteAllowed()
-        val id = UUID.randomUUID().toString()
+        // D32: Period-lock check
         val now = System.currentTimeMillis()
+        periodLockChecker.assertNotLocked(tenantId, now)
+
+        val id = UUID.randomUUID().toString()
         khataEntryDao.insert(
             KhataEntryEntity(
                 id = id,
@@ -98,6 +110,25 @@ class KhataRepositoryImpl @Inject constructor(
                 idempotencyKey = UUID.randomUUID().toString(),
             )
         )
+        // D34: Cashbook auto-populate — khata collection (PAYMENT) creates INCOME entry.
+        // Only for PAYMENT type with amount > 0 (money flowing in). CREDIT/ADJUSTMENT/OPENING
+        // do not create cashbook entries (CREDIT is a receivable, not a cash flow).
+        if (type == KhataEntryType.PAYMENT && amount > 0.01 && cashbookAccount != null) {
+            cashbookDao.insert(
+                CashbookEntryEntity(
+                    id = UUID.randomUUID().toString(),
+                    tenantId = tenantId,
+                    account = cashbookAccount.name,
+                    type = "INCOME",
+                    amount = amount,
+                    description = "খাতা আদায় ($description)",
+                    referenceId = id,
+                    date = now,
+                    userId = collectedByUserId,
+                    idempotencyKey = UUID.randomUUID().toString(),
+                )
+            )
+        }
         return id
     }
 
