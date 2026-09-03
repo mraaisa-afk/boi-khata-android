@@ -36,6 +36,7 @@ import com.boikhata.feature.reports.ReportsScreen
 import com.boikhata.feature.sale.BillDetailScreen
 import com.boikhata.feature.sale.BillHistoryScreen
 import com.boikhata.feature.sale.PosScreen
+import com.boikhata.feature.subscription.SubscriptionScreen
 
 /**
  * D18: Bottom navigation (Home/Catalog/Khata/Sale) via Navigation-Compose.
@@ -43,7 +44,7 @@ import com.boikhata.feature.sale.PosScreen
  * P2b: 4th tab (বিক্রয়) added.
  */
 @Composable
-fun BoiKhataMainScreen(tenantId: String, shopName: String) {
+fun BoiKhataMainScreen(tenantId: String, shopName: String, role: com.boikhata.core.domain.enums.Role) {
     val navController = rememberNavController()
 
     val tabs = listOf(
@@ -141,6 +142,7 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String) {
                     onExpenseClick = { navController.navigate("expense") },
                     onReportsClick = { navController.navigate("reports") },
                     onCashCloseClick = { navController.navigate("cash_close") },
+                    onSubscriptionClick = { navController.navigate("subscription") },
                 )
             }
             // P3a: Expense + Cashbook + Owner Drawing
@@ -154,6 +156,10 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String) {
             // P3c: Daily cash-close "আজকের হিসাব"
             composable("cash_close") {
                 CashCloseScreen(tenantId = tenantId)
+            }
+            // P4b: Subscription screen (manual bKash, OWNER-gated)
+            composable("subscription") {
+                SubscriptionScreen(tenantId = tenantId, role = role)
             }
             // P2b: Bill history
             composable("bill_history") {

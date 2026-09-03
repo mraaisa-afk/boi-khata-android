@@ -3,6 +3,7 @@ package com.boikhata.core.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.boikhata.core.database.dao.AuditLogDao
+import com.boikhata.core.database.dao.BackupDao
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BookDao
 import com.boikhata.core.database.dao.BudgetDao
@@ -97,6 +98,7 @@ abstract class BoiKhataDatabase : RoomDatabase() {
     abstract fun recurringExpenseDao(): RecurringExpenseDao
     abstract fun budgetDao(): BudgetDao
     abstract fun tenantRebindDao(): TenantRebindDao
+    abstract fun backupDao(): BackupDao
 
     companion object {
         const val DATABASE_NAME = "boi-khata.db"

@@ -26,4 +26,13 @@ interface CloudSyncStateDao {
 
     @Query("UPDATE cloud_sync_state SET wifiOnlySync = :enabled, updatedAt = :now WHERE id = 'primary'")
     suspend fun updateWifiOnlySync(enabled: Boolean, now: Long)
+
+    @Query("UPDATE cloud_sync_state SET lastBackupAt = :lastBackupAt, updatedAt = :now WHERE id = 'primary'")
+    suspend fun updateLastBackupAt(lastBackupAt: Long, now: Long)
+
+    @Query("UPDATE cloud_sync_state SET lastRestoreAt = :lastRestoreAt, updatedAt = :now WHERE id = 'primary'")
+    suspend fun updateLastRestoreAt(lastRestoreAt: Long, now: Long)
+
+    @Query("UPDATE cloud_sync_state SET lastCatalogSyncAt = :lastCatalogSyncAt, updatedAt = :now WHERE id = 'primary'")
+    suspend fun updateLastCatalogSyncAt(lastCatalogSyncAt: Long, now: Long)
 }

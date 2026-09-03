@@ -63,14 +63,15 @@ class MainActivity : ComponentActivity() {
                                 daysUntilSoftLock = daysUntilSoftLock,
                                 isOwner = state.role == Role.OWNER,
                                 onRefresh = {
-                                    // Re-trigger license sync via the ViewModel
-                                    // (the ViewModel handles it on next resolveAuthState)
+                                    // P4b inherited: direct license-refresh call from banner button
+                                    mainViewModel.refreshLicense()
                                 },
                             )
                             // Main app screen with claims tenantId
                             BoiKhataMainScreen(
                                 tenantId = state.tenantId,
                                 shopName = state.shopName,
+                                role = state.role,
                             )
                         }
                     }

@@ -32,4 +32,5 @@
     <string name="expense_button">খরচ</string>
     <string name="cash_close_button">আজকের হিসাব</string>
     <string name="reports_button">রিপোর্ট</string>
+    <string name="subscription_button">সাবস্ক্রিপশন</string>
 </resources>

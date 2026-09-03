@@ -1,0 +1,11 @@
+<resources>
+    <string name="subscription_title">Subscription</string>
+    <string name="subscription_bkash_info">Send bKash to this number:</string>
+    <string name="subscription_amount_info">Monthly fee: ৳%1$d</string>
+    <string name="subscription_amount_label">Amount (৳)</string>
+    <string name="subscription_trxid_label">TrxID (optional)</string>
+    <string name="subscription_note_label">Note (optional)</string>
+    <string name="subscription_submit">Record Payment</string>
+    <string name="subscription_success">Payment recorded — vendor will verify</string>
+    <string name="subscription_owner_only">Only OWNER can record payments</string>
+</resources>

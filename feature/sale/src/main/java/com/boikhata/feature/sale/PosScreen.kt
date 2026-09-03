@@ -62,6 +62,7 @@ fun PosScreen(
     onExpenseClick: () -> Unit = {},
     onReportsClick: () -> Unit = {},
     onCashCloseClick: () -> Unit = {},
+    onSubscriptionClick: () -> Unit = {},
     viewModel: SaleViewModel = hiltViewModel(),
 ) {
     val cartState by viewModel.cartState.collectAsState()
@@ -85,6 +86,9 @@ fun PosScreen(
                     }
                     TextButton(onClick = onExpenseClick) {
                         Text(stringResource(R.string.expense_button))
+                    }
+                    TextButton(onClick = onSubscriptionClick) {
+                        Text(stringResource(R.string.subscription_button))
                     }
                 },
             )
