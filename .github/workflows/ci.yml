@@ -38,7 +38,7 @@ jobs:
         run: echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > app/boi-khata-debug.keystore
 
       - name: Build
-        run: chmod +x gradlew && ./gradlew assembleDebug -PdebugKeystore=app/boi-khata-debug.keystore && ./gradlew build --stacktrace
+        run: chmod +x gradlew && ./gradlew assembleDebug -PdebugKeystore=boi-khata-debug.keystore && ./gradlew build --stacktrace
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
