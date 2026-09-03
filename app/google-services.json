@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "50145897576",
+    "firebase_url": "https://boi-khata-app-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "boi-khata-app",
+    "storage_bucket": "boi-khata-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50145897576:android:a792d98eb53dd6050c5fdd",
+        "android_client_info": {
+          "package_name": "com.boikhata"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJeviyGtby5OhsjoctdYruhvrz6gOPfZ0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
