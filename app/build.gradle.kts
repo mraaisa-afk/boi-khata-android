@@ -58,6 +58,7 @@ dependencies {
     implementation(project(":feature:sale"))
     implementation(project(":feature:expense"))
     implementation(project(":feature:reports"))
+    implementation(project(":feature:subscription"))
     implementation(project(":shared:receipt"))
 
     implementation(platform(libs.androidx.compose.bom))
@@ -77,6 +78,11 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
+    // D50: WorkManager + Hilt-Work for DailyBackupWorker
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     implementation(libs.kotlinx.coroutines.android)
 

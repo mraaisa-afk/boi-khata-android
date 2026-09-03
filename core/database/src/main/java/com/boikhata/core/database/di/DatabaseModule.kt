@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.AuditLogDao
+import com.boikhata.core.database.dao.BackupDao
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BookDao
 import com.boikhata.core.database.dao.BudgetDao
@@ -69,6 +70,7 @@ object DatabaseModule {
     @Provides fun provideRecurringExpenseDao(db: BoiKhataDatabase): RecurringExpenseDao = db.recurringExpenseDao()
     @Provides fun provideBudgetDao(db: BoiKhataDatabase): BudgetDao = db.budgetDao()
     @Provides fun provideTenantRebindDao(db: BoiKhataDatabase): TenantRebindDao = db.tenantRebindDao()
+    @Provides fun provideBackupDao(db: BoiKhataDatabase): BackupDao = db.backupDao()
 
     @Provides
     @Singleton

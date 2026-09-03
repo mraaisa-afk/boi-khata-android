@@ -286,3 +286,83 @@ interface LicenseSyncRepository {
 interface TenantRebindRepository {
     suspend fun rebind(oldTenantId: String, newTenantId: String): Int
 }
+
+// ── P4b: Backup + Restore ────────────────────────────────────────────────────
+
+/** D46: Result of an incremental backup. */
+sealed class BackupResult {
+    data class Success(val collectionsBackedUp: Int, val rowsUploaded: Int, val timestamp: Long) : BackupResult()
+    data object NotOwner : BackupResult()
+    data object RebindNeeded : BackupResult()
+    data class Error(val message: String) : BackupResult()
+    data class Partial(val collectionsBackedUp: Int, val rowsUploaded: Int, val collectionErrors: Map<String, String>) : BackupResult()
+}
+
+/** D46: Strategy for restore when both sides have data. */
+enum class RestoreStrategy {
+    CLOUD_OVERWRITES_LOCAL, // fresh device — wipe local + download all
+    KEEP_LOCAL,             // cancel — keep local data
+}
+
+/** D46: Result of a restore. */
+sealed class RestoreResult {
+    data class Success(val rowsRestored: Int) : RestoreResult()
+    data object NotOwner : RestoreResult()
+    data object BothSidesHaveData : RestoreResult() // requires user choice — never auto-merge
+    data class Error(val message: String) : RestoreResult()
+}
+
+interface BackupRepository {
+    suspend fun backup(tenantId: String, role: com.boikhata.core.domain.enums.Role): BackupResult
+}
+
+interface RestoreRepository {
+    suspend fun checkAndRestore(
+        tenantId: String,
+        role: com.boikhata.core.domain.enums.Role,
+        strategy: RestoreStrategy,
+    ): RestoreResult
+}
+
+// ── P4b: Subscription (manual bKash) ──────────────────────────────────────────
+
+/** D48: Result of recording a subscription payment. */
+sealed class SubscriptionResult {
+    data class Success(val paymentId: String) : SubscriptionResult()
+    data object NotOwner : SubscriptionResult()
+    data class Error(val message: String) : SubscriptionResult()
+}
+
+interface SubscriptionRepository {
+    suspend fun recordPayment(
+        tenantId: String,
+        role: com.boikhata.core.domain.enums.Role,
+        amount: Double,
+        trxId: String?,
+        note: String?,
+    ): SubscriptionResult
+}
+
+// ── P4b: Master Catalog Refresh (read-only) ───────────────────────────────────
+
+/** D49: Result of a master catalog refresh. */
+sealed class CatalogRefreshResult {
+    data class Success(
+        val newBooks: List<com.boikhata.core.domain.cloud.CatalogDeltaDetector.NewBook>,
+        val priceChanges: List<com.boikhata.core.domain.cloud.CatalogDeltaDetector.PriceChange>,
+        val totalInMaster: Int,
+    ) : CatalogRefreshResult()
+    data object Offline : CatalogRefreshResult()
+    data class Error(val message: String) : CatalogRefreshResult()
+}
+
+interface MasterCatalogRepository {
+    suspend fun refreshCatalog(tenantId: String): CatalogRefreshResult
+    suspend fun applyPriceChange(tenantId: String, bookId: String, newPrice: Double): Boolean
+}
+
+// ── P4b: Tenant info (shop name from Firestore) ───────────────────────────────
+
+interface TenantInfoRepository {
+    suspend fun fetchShopName(tenantId: String): String?
+}

@@ -32,4 +32,5 @@
     <string name="expense_button">Expense</string>
     <string name="cash_close_button">Today\'s Close</string>
     <string name="reports_button">Reports</string>
+    <string name="subscription_button">Subscription</string>
 </resources>
