@@ -1,5 +1,6 @@
 package com.boikhata.feature.catalog
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,8 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.boikhata.core.domain.enums.BookCategory
@@ -57,6 +56,12 @@ fun BookAddEditScreen(
 ) {
     val isEdit = bookId != null
 
+    // Ensure the ViewModel has the correct tenantId (it's a fresh instance
+    // scoped to this nav back stack entry — loadCatalog sets currentTenantId).
+    LaunchedEffect(tenantId) {
+        viewModel.loadCatalog(tenantId)
+    }
+
     var isbn by remember { mutableStateOf("") }
     var titleBn by remember { mutableStateOf("") }
     var titleEn by remember { mutableStateOf("") }
@@ -74,31 +79,27 @@ fun BookAddEditScreen(
     var isActive by remember { mutableStateOf(true) }
 
     // Load existing book for edit
-    LaunchedEffect(bookId) {
-        if (bookId != null) {
-            // The ViewModel loads from the book repository
-            // We read from the current success state
-            viewModel.uiState.collect { state ->
-                if (state is CatalogUiState.Success) {
-                    val book = state.books.find { it.id == bookId }
-                    if (book != null) {
-                        isbn = book.isbn ?: ""
-                        titleBn = book.titleBn
-                        titleEn = book.titleEn ?: ""
-                        author = book.author
-                        publisher = book.publisher
-                        classLevel = book.classLevel
-                        subject = book.subject
-                        editionYear = book.editionYear.toString()
-                        purchasePrice = book.purchasePrice.toString()
-                        sellingPrice = book.sellingPrice.toString()
-                        initialStock = book.initialStock.toString()
-                        lowStockThreshold = book.lowStockThreshold.toString()
-                        category = book.category
-                        condition = book.condition
-                        isActive = book.isActive
-                    }
-                }
+    val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(bookId, uiState) {
+        if (bookId != null && uiState is CatalogUiState.Success) {
+            val books = (uiState as CatalogUiState.Success).books
+            val book = books.find { it.id == bookId }
+            if (book != null) {
+                isbn = book.isbn ?: ""
+                titleBn = book.titleBn
+                titleEn = book.titleEn ?: ""
+                author = book.author
+                publisher = book.publisher
+                classLevel = book.classLevel
+                subject = book.subject
+                editionYear = book.editionYear.toString()
+                purchasePrice = book.purchasePrice.toString()
+                sellingPrice = book.sellingPrice.toString()
+                initialStock = book.initialStock.toString()
+                lowStockThreshold = book.lowStockThreshold.toString()
+                category = book.category
+                condition = book.condition
+                isActive = book.isActive
             }
         }
     }
@@ -290,16 +291,10 @@ private fun CategoryDropdown(selected: BookCategory, onSelect: (BookCategory) ->
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.category)) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true },
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
-            interactionSource = remember { MutableInteractionSource() }
-                .also { source ->
-                    LaunchedEffect(source) {
-                        source.interactions.collect { interaction ->
-                            if (interaction is PressInteraction.Release) expanded = true
-                        }
-                    }
-                },
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             BookCategory.entries.forEach { cat ->
@@ -321,16 +316,10 @@ private fun ConditionDropdown(selected: BookCondition, onSelect: (BookCondition)
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.condition)) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true },
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
-            interactionSource = remember { MutableInteractionSource() }
-                .also { source ->
-                    LaunchedEffect(source) {
-                        source.interactions.collect { interaction ->
-                            if (interaction is PressInteraction.Release) expanded = true
-                        }
-                    }
-                },
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             BookCondition.entries.forEach { cond ->
