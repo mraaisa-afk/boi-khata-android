@@ -19,6 +19,7 @@ import com.boikhata.core.database.dao.PeriodLockDao
 import com.boikhata.core.database.dao.RecurringExpenseDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.dao.TenantDao
+import com.boikhata.core.database.dao.TenantRebindDao
 import com.boikhata.core.database.dao.UserDao
 import com.boikhata.core.database.entity.AuditLogEntity
 import com.boikhata.core.database.entity.BillEntity
@@ -95,6 +96,7 @@ abstract class BoiKhataDatabase : RoomDatabase() {
     abstract fun periodLockDao(): PeriodLockDao
     abstract fun recurringExpenseDao(): RecurringExpenseDao
     abstract fun budgetDao(): BudgetDao
+    abstract fun tenantRebindDao(): TenantRebindDao
 
     companion object {
         const val DATABASE_NAME = "boi-khata.db"

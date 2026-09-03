@@ -20,6 +20,7 @@ import com.boikhata.core.database.dao.PeriodLockDao
 import com.boikhata.core.database.dao.RecurringExpenseDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.dao.TenantDao
+import com.boikhata.core.database.dao.TenantRebindDao
 import com.boikhata.core.database.dao.UserDao
 import com.boikhata.core.database.migration.Migration1To2
 import com.boikhata.core.database.migration.Migration2To3
@@ -67,6 +68,7 @@ object DatabaseModule {
     @Provides fun providePeriodLockDao(db: BoiKhataDatabase): PeriodLockDao = db.periodLockDao()
     @Provides fun provideRecurringExpenseDao(db: BoiKhataDatabase): RecurringExpenseDao = db.recurringExpenseDao()
     @Provides fun provideBudgetDao(db: BoiKhataDatabase): BudgetDao = db.budgetDao()
+    @Provides fun provideTenantRebindDao(db: BoiKhataDatabase): TenantRebindDao = db.tenantRebindDao()
 
     @Provides
     @Singleton
