@@ -34,8 +34,11 @@ jobs:
       - name: Install Android 37 SDK packages
         run: sdkmanager --install "platform-tools" "platforms;android-37.0" "build-tools;37.0.0"
 
+      - name: Decode debug keystore
+        run: echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > boi-khata-debug.keystore
+
       - name: Build
-        run: chmod +x gradlew && ./gradlew build --stacktrace
+        run: chmod +x gradlew && ./gradlew assembleDebug -PdebugKeystore=boi-khata-debug.keystore && ./gradlew build --stacktrace
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4

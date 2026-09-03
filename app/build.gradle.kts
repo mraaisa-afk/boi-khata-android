@@ -19,9 +19,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("sharedDebug") {
+            if (project.hasProperty("debugKeystore")) {
+                storeFile = file(project.property("debugKeystore") as String)
+                storePassword = "boikhata123"
+                keyAlias = "boikhata-debug"
+                keyPassword = "boikhata123"
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
+            if (project.hasProperty("debugKeystore")) {
+                signingConfig = signingConfigs.getByName("sharedDebug")
+            }
         }
         release {
             isMinifyEnabled = true
