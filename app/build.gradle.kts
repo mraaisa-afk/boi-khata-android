@@ -23,9 +23,10 @@ android {
         create("sharedDebug") {
             if (project.hasProperty("debugKeystore")) {
                 storeFile = file(project.property("debugKeystore") as String)
-                storePassword = "android"
+                val debugKeystorePassword = project.findProperty("debugKeystorePassword")?.toString() ?: "android"
+                storePassword = debugKeystorePassword
                 keyAlias = "androiddebugkey"
-                keyPassword = "android"
+                keyPassword = debugKeystorePassword
             }
         }
     }
