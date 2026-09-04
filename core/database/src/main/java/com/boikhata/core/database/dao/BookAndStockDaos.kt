@@ -22,6 +22,9 @@ interface BookDao {
     @Query("SELECT * FROM books WHERE tenantId = :tenantId ORDER BY titleBn")
     suspend fun getAllByTenant(tenantId: String): List<BookEntity>
 
+    @Query("SELECT COUNT(*) FROM books WHERE tenantId = :tenantId")
+    suspend fun countForTenant(tenantId: String): Int
+
     @Query("SELECT * FROM books WHERE id = :id")
     suspend fun getById(id: String): BookEntity?
 

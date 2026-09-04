@@ -96,7 +96,7 @@
 
 ## P6 — রিপোর্ট + ট্রাস্ট + ভয়েস
 - [ ] রিপোর্ট-গভীরতা (১২-মাস-ট্রেন্ড, টপ-১০, তুলনা) + মাসিক-ডেটা-কপি (CSV→শেয়ার) + ভয়েস-সেটআপ (ডিভাইস-TTS) + Lite-UI-মোড
-  - নোট: P6 partial — twelve-month trend/top-10 calculators and Reports tabs are wired from Room-backed repositories; Unicode report sharing, CSV formatting, device-local Bengali TTS controller, and Lal Khata/Lite theme foundation are added and unit/build verified. Monthly WorkManager artifact generation/share-sheet foreground handoff, first-launch/repeat voice UI, and per-user Lite toggle/settings wiring remain deferred.
+  - নোট: P6b implementation added the Room-backed monthly-copy worker + first-of-month scheduler, app-scoped CSV FileProvider handoff, repeatable Bengali setup narration, and persisted Lite toggle/settings surface. `./gradlew build` is green. ⚠ First-launch TTS audio and actual share-sheet/WorkManager behavior require a real device.
 - [ ] **Exit-gate:** ডেটা-কপি-ফ্লো E2E
   - নোট: Not run — monthly data-copy worker and on-device share-sheet flow are not yet wired; real-device verification remains required.
 
@@ -104,7 +104,7 @@
 - [ ] ট্রায়াল-মোড + anti-farm + নম্বর-মাইগ্রেশন + ডিভাইস-গ্রুপ-ম্যানেজার + ডেমো-মোড (লোকাল-রিসেটেবল)
 - [ ] অফলাইন-কাওস-স্যুট (এয়ারপ্লেন-দিন, মিড-সিঙ্ক-কিল, ৩০-দিন-সোক+সাইজ-গেট)
 - [ ] **Exit-gate:** ২০-দোকান-পাইলট APK রেডি
-  - নোট: P7 policy foundation only — `TrialPolicy` and `NumberMigrationPolicy` are implemented and unit-tested. UI integration, persistent redemption records, claims-transfer flow, device-group manager, demo reset, offline-chaos soak, and pilot APK gate remain unchecked.
+  - নোট: P7b added Room v5 `trial_redemptions` persistence with device/phone anti-farm checks, authenticated first-launch redemption, bill/catalog cap guards, usage/expiry status UI, Lite/settings surface, and a Bengali number-migration vendor-approval hand-off. Claims transfer remains vendor-side; device-group manager, demo reset, and offline-chaos soak remain deferred. Unit tests and `./gradlew build` pass; OTP/TTS/share-sheet behavior is ⚠ device-only.
 
 ## P8 — GA
 - [ ] রিলিজ: R8+সাইনড-APK+ভার্সন-সানসেট-ম্যানিফেস্ট + এজেন্ট-APK-চ্যানেল

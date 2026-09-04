@@ -59,6 +59,7 @@
 - master_catalog(id PK, isbn?, titleBn, titleEn?, author, publisher, classLevel, subject,
   editionYear, mrp, isActive, lastUpdated)
 - audit_logs 🔒(id PK, tenantId, userId, action, detail, timestamp) — LOCAL-ONLY, কখনো আপলোড নয়
+- trial_redemptions(id PK, tenantId, deviceFingerprint, phoneHash, redeemedAt) — LOCAL-ONLY anti-farm fact
 
 নিয়ম: টাকা=Double, তারিখ=epoch-millis Long, এনাম=String(name); প্রতিটি 🔒-টেবিলে idempotencyKey;
 মাইগ্রেশন = Room-Migration ক্লাস, টেবিল-ড্রপ নিষিদ্ধ (নতুন টেবিল-যোগ বা ALTER-ADD কলাম)।

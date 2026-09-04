@@ -20,6 +20,16 @@ object TrialPolicy {
 
     enum class Reason { ACTIVE, EXPIRED, BILL_CAP, BOOK_CAP, ALREADY_REDEEMED }
 
+    class CapExceededException(val reason: Reason) : IllegalStateException(reason.name)
+
+    fun assertCanAddBill(usage: Usage) {
+        if (usage.bills >= MAX_BILLS) throw CapExceededException(Reason.BILL_CAP)
+    }
+
+    fun assertCanAddBook(usage: Usage) {
+        if (usage.books >= MAX_BOOKS) throw CapExceededException(Reason.BOOK_CAP)
+    }
+
     fun evaluate(startedAt: Long, now: Long, usage: Usage): Decision {
         require(startedAt > 0)
         require(now >= startedAt)

@@ -38,4 +38,22 @@
     <string name="license_refresh">রিফ্রেশ</string>
     <string name="license_syncing">লাইসেন্স যাচাই হচ্ছে…</string>
     <string name="license_offline">অফলাইন — শেষ অবস্থা দেখানো হচ্ছে</string>
+    <string name="settings_title">সেটিংস</string>
+    <string name="trial_title">ট্রায়াল</string>
+    <string name="trial_loading">ট্রায়ালের তথ্য আসছে…</string>
+    <string name="trial_usage">বিল %1$d/%2$d · বই %3$d/%4$d</string>
+    <string name="trial_active">ট্রায়াল চালু আছে। পড়া ও লেখা খোলা আছে।</string>
+    <string name="trial_expired">ট্রায়াল শেষ — পড়া ও রপ্তানি খোলা আছে, নতুন লেখা বন্ধ।</string>
+    <string name="trial_upgrade">সাবস্ক্রিপশনে আপগ্রেড</string>
+    <string name="lite_ui">সহজ মোড</string>
+    <string name="repeat_voice_setup">ভয়েস সেটআপ আবার শুনুন</string>
+    <string name="share_monthly_copy">মাসিক ডেটা কপি শেয়ার</string>
+    <string name="number_changed">আমার নম্বর বদলেছে</string>
+    <string name="voice_setup_script">বই খাতার সেটআপ শুরু হচ্ছে</string>
+    <string name="number_migration_title">নতুন নম্বর দিয়ে অ্যাকাউন্ট উদ্ধার</string>
+    <string name="new_phone_number">নতুন ফোন নম্বর</string>
+    <string name="migration_otp_sent">নতুন নম্বরে ওটিপি পাঠানো হয়েছে</string>
+    <string name="confirm_number">নম্বর নিশ্চিত করুন</string>
+    <string name="migration_vendor_approval">রিবাইন্ড সম্পন্ন। বিক্রেতা অনুমোদন দিলে নতুন নম্বর চালু হবে।</string>
+    <string name="migration_complete">নতুন নম্বর চালু হয়েছে</string>
 </resources>

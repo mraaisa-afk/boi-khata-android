@@ -18,6 +18,7 @@ import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.model.Bill
 import com.boikhata.core.domain.model.BillLine
 import com.boikhata.core.domain.model.BillSummary
+import com.boikhata.core.domain.pilot.TrialPolicy
 import com.boikhata.core.domain.repository.BillLineInput
 import com.boikhata.core.domain.repository.BillRepository
 import com.boikhata.core.domain.sale.BillNumberGenerator
@@ -90,6 +91,7 @@ class SaleRepositoryImpl @Inject constructor(
         paidAmount: Double,
     ): String {
         writeGuard.assertWriteAllowed()
+        TrialPolicy.assertCanAddBill(TrialPolicy.Usage(billDao.countForTenant(tenantId), 0))
         // D32: Period-lock check — the bill date must not fall in a locked period
         val now = System.currentTimeMillis()
         periodLockChecker.assertNotLocked(tenantId, now)

@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -27,8 +28,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            BoiKhataTheme {
+            val preferences = remember { getSharedPreferences("boi_khata_display", MODE_PRIVATE) }
+            var liteMode by remember { mutableStateOf(preferences.getBoolean("lite_mode", false)) }
+            BoiKhataTheme(liteMode = liteMode) {
                 val mainViewModel: MainViewModel = hiltViewModel()
+                val trialViewModel: TrialViewModel = hiltViewModel()
                 val authState by mainViewModel.authState.collectAsState()
 
                 when (val state = authState) {
@@ -51,6 +55,13 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     is AuthState.Authenticated -> {
+                        LaunchedEffect(state.tenantId, state.phone) {
+                            trialViewModel.ensureTrial(state.tenantId, state.phone)
+                            MonthlyDataCopyScheduler(this@MainActivity).enqueue(
+                                tenantId = state.tenantId,
+                                shopName = state.shopName,
+                            )
+                        }
                         Column(modifier = Modifier.fillMaxSize()) {
                             // D43: License banner (driven by synced state, never blocks reads)
                             val now = remember { System.currentTimeMillis() }
@@ -72,6 +83,13 @@ class MainActivity : ComponentActivity() {
                                 tenantId = state.tenantId,
                                 shopName = state.shopName,
                                 role = state.role,
+                                phone = state.phone,
+                                liteMode = liteMode,
+                                onLiteModeChange = {
+                                    liteMode = it
+                                    preferences.edit().putBoolean("lite_mode", it).apply()
+                                },
+                                onSignOut = { mainViewModel.signOut() },
                             )
                         }
                     }

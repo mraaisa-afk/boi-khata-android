@@ -23,6 +23,7 @@ import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.dao.SupplierDao
 import com.boikhata.core.database.dao.TenantDao
 import com.boikhata.core.database.dao.TenantRebindDao
+import com.boikhata.core.database.dao.TrialRedemptionDao
 import com.boikhata.core.database.dao.UserDao
 import com.boikhata.core.database.entity.AuditLogEntity
 import com.boikhata.core.database.entity.BillEntity
@@ -46,6 +47,7 @@ import com.boikhata.core.database.entity.StockLedgerEntity
 import com.boikhata.core.database.entity.SupplierEntity
 import com.boikhata.core.database.entity.SupplierEntryEntity
 import com.boikhata.core.database.entity.TenantEntity
+import com.boikhata.core.database.entity.TrialRedemptionEntity
 import com.boikhata.core.database.entity.UserEntity
 
 /**
@@ -53,7 +55,7 @@ import com.boikhata.core.database.entity.UserEntity
  * All 19 tables from CONVENTIONS §3 + 3 P3b tables (period_locks, recurring_expenses, budgets)
  * + 1 P5 table (mela_sessions).
  * v1 = initial schema; v2 = D16 normalized columns; v3 = D32/D35 accounting tables;
- * v4 = D57 mela_sessions table.
+ * v4 = D57 mela_sessions table; v5 = D64 trial_redemptions table.
  */
 @Database(
     entities = [
@@ -80,8 +82,9 @@ import com.boikhata.core.database.entity.UserEntity
         RecurringExpenseEntity::class,
         BudgetEntity::class,
         MelaSessionEntity::class,
+        TrialRedemptionEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
 )
 abstract class BoiKhataDatabase : RoomDatabase() {
@@ -107,6 +110,7 @@ abstract class BoiKhataDatabase : RoomDatabase() {
     abstract fun backupDao(): BackupDao
     abstract fun supplierDao(): SupplierDao
     abstract fun melaDao(): MelaDao
+    abstract fun trialRedemptionDao(): TrialRedemptionDao
 
     companion object {
         const val DATABASE_NAME = "boi-khata.db"

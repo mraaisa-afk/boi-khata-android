@@ -30,6 +30,9 @@ interface BillDao {
     @Query("SELECT billNumber FROM bills WHERE tenantId = :tenantId AND billNumber LIKE :pattern ORDER BY billNumber DESC LIMIT 1")
     suspend fun getMaxBillNumber(tenantId: String, pattern: String): String?
 
+    @Query("SELECT COUNT(*) FROM bills WHERE tenantId = :tenantId")
+    suspend fun countForTenant(tenantId: String): Int
+
     @Query("UPDATE bills SET khataEntryId = :khataEntryId WHERE id = :billId")
     suspend fun updateKhataEntryId(billId: String, khataEntryId: String)
 }
