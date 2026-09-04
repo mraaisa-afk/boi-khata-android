@@ -1,5 +1,5 @@
 <resources>
-    <string name="supplier_title">Supplier & Payable Ledger</string>
+    <string name="supplier_title">Supplier &amp; Payable Ledger</string>
     <string name="add_supplier">Add Supplier</string>
     <string name="supplier_name">Supplier/Publisher name</string>
     <string name="phone">Phone</string>
