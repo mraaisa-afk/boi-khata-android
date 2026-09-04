@@ -5,6 +5,7 @@ import com.boikhata.core.domain.aging.EntryAllocation
 import com.boikhata.core.domain.enums.SupplierEntryType
 import com.boikhata.core.domain.model.Supplier
 import com.boikhata.core.domain.model.SupplierAgingResult
+import com.boikhata.core.domain.model.SupplierAgingSummary
 import com.boikhata.core.domain.model.SupplierBalance
 import com.boikhata.core.domain.model.SupplierEntry
 import com.boikhata.core.domain.model.SupplierStatement
