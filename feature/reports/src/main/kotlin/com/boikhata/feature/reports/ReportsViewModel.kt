@@ -6,8 +6,11 @@ import com.boikhata.core.domain.accounting.BengaliFiscalCalendar
 import com.boikhata.core.domain.accounting.BudgetAlertCalculator
 import com.boikhata.core.domain.model.BalanceSheetLite
 import com.boikhata.core.domain.model.PeriodLock
+import com.boikhata.core.domain.accounting.ReportDepthCalculator
 import com.boikhata.core.domain.model.PnLReport
 import com.boikhata.core.domain.repository.AccountingRepository
+import com.boikhata.core.domain.repository.BillRepository
+import com.boikhata.core.domain.repository.ExpenseRepository
 import com.boikhata.core.domain.repository.BudgetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +30,8 @@ import javax.inject.Inject
 class ReportsViewModel @Inject constructor(
     private val accountingRepository: AccountingRepository,
     private val budgetRepository: BudgetRepository,
+    private val billRepository: BillRepository,
+    private val expenseRepository: ExpenseRepository,
 ) : ViewModel() {
 
     private val _pnlState = MutableStateFlow<PnLState>(PnLState.Loading)
@@ -40,6 +45,12 @@ class ReportsViewModel @Inject constructor(
 
     private val _budgetAlertState = MutableStateFlow<BudgetAlertState>(BudgetAlertState.Loading)
     val budgetAlertState: StateFlow<BudgetAlertState> = _budgetAlertState.asStateFlow()
+
+    private val _trendState = MutableStateFlow<TrendState>(TrendState.Loading)
+    val trendState: StateFlow<TrendState> = _trendState.asStateFlow()
+
+    private val _rankingState = MutableStateFlow<RankingState>(RankingState.Loading)
+    val rankingState: StateFlow<RankingState> = _rankingState.asStateFlow()
 
     private var currentTenantId = "t_1"
     private var selectedYear: Int = 0
@@ -58,6 +69,8 @@ class ReportsViewModel @Inject constructor(
         loadBalanceSheet()
         loadPeriodLocks()
         loadBudgetAlerts()
+        loadTrend()
+        loadRankings()
     }
 
     fun selectMonth(year: Int, month: Int) {
@@ -115,6 +128,56 @@ class ReportsViewModel @Inject constructor(
         }
     }
 
+    private fun loadTrend() {
+        viewModelScope.launch {
+            _trendState.value = TrendState.Loading
+            try {
+                val months = (0..11).map { offset ->
+                    val cal = Calendar.getInstance(TimeZone.getDefault()).apply {
+                        set(Calendar.DAY_OF_MONTH, 1)
+                        add(Calendar.MONTH, -offset)
+                    }
+                    accountingRepository.getMonthlyPnL(currentTenantId, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1)
+                }
+                _trendState.value = TrendState.Success(ReportDepthCalculator.twelveMonthTrend(months))
+            } catch (e: Exception) {
+                _trendState.value = TrendState.Error(e.message ?: "ত্রুটি")
+            }
+        }
+    }
+
+    private fun loadRankings() {
+        viewModelScope.launch {
+            _rankingState.value = RankingState.Loading
+            try {
+                val bills = billRepository.getAllBills(currentTenantId)
+                val bookRows = bills.flatMap { bill ->
+                    billRepository.getBillLines(bill.id).map { line ->
+                        ReportDepthCalculator.RankedItem(line.bookTitleBn, line.quantity, line.lineTotal)
+                    }
+                }
+                val customerRows = bills.map { bill ->
+                    ReportDepthCalculator.RankedItem(bill.customerNameBn, 1, bill.totalAmount)
+                }
+                val categories = expenseRepository.getCategories(currentTenantId)
+                val expenseRows = expenseRepository.getExpenses(currentTenantId).groupBy { it.categoryId }.map { (id, rows) ->
+                    ReportDepthCalculator.RankedItem(
+                        categories.firstOrNull { it.id == id }?.nameBn ?: id,
+                        rows.size,
+                        rows.sumOf { it.amount },
+                    )
+                }
+                _rankingState.value = RankingState.Success(
+                    books = ReportDepthCalculator.topBooks(bookRows),
+                    customers = ReportDepthCalculator.topCustomers(customerRows),
+                    expenses = ReportDepthCalculator.topExpenseCategories(expenseRows),
+                )
+            } catch (e: Exception) {
+                _rankingState.value = RankingState.Error(e.message ?: "ত্রুটি")
+            }
+        }
+    }
+
     private fun loadBudgetAlerts() {
         viewModelScope.launch {
             _budgetAlertState.value = BudgetAlertState.Loading
@@ -162,4 +225,20 @@ sealed interface BudgetAlertState {
     data object Loading : BudgetAlertState
     data class Success(val alerts: List<BudgetAlertCalculator.BudgetAlert>) : BudgetAlertState
     data class Error(val message: String) : BudgetAlertState
+}
+
+sealed interface TrendState {
+    data object Loading : TrendState
+    data class Success(val points: List<ReportDepthCalculator.MonthPoint>) : TrendState
+    data class Error(val message: String) : TrendState
+}
+
+sealed interface RankingState {
+    data object Loading : RankingState
+    data class Success(
+        val books: List<ReportDepthCalculator.RankedItem>,
+        val customers: List<ReportDepthCalculator.RankedItem>,
+        val expenses: List<ReportDepthCalculator.RankedItem>,
+    ) : RankingState
+    data class Error(val message: String) : RankingState
 }
