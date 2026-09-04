@@ -686,3 +686,137 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Decision:** Keep release metadata in Gradle properties/version catalog-compatible constants, run R8 on the release variant, and use explicit keep rules only for Room/Hilt/Firestore reflection surfaces. Version availability is an offline-safe local policy with an optional vendor download/contact URL; it never gates reads or writes. Demo reset is an explicit owner-confirmed local destructive operation that clears business rows and reseeds `t_1`, while preserving no data silently. Device groups are enforced at the data layer with Lite’s two-device limit. Referral codes are deterministic tenant-derived identifiers and only communicate vendor-side eligibility; no client-side free-month entitlement or new Firebase collection is introduced. Founders Club is an informational subscription offer using the existing manual bKash flow.
 **Alternatives considered:** Client-side referral credit (rejected: vendor-side activation is authoritative); a new Firestore update collection (rejected: Spark-only locked cloud scope); automatic demo reset (rejected: violates user control); Play Store update APIs (rejected: P8 explicitly excludes Play Store and direct APK is vendor-controlled).
 **Supersedes:** —
+## D66 — এক্সিট-গেট কর্তৃত্ব ও ফেজ-লেজার পুনর্মিলন
+
+**Date:** 2026-09-05
+**Phase:** P10
+
+**Context:**
+দুই নথি এক্সিট-গেট নিয়ে পরস্পরবিরোধী। Blueprint §১২-এর রোডম্যাপ-টেবিল বলে
+P5 = "—", P6 = "—", P7 = "Activation ≥৭০%", P8 = "১০০ টেন্যান্ট-পথ"।
+PROGRESS.md বলে P5 = কনসাইনমেন্ট-সেটেলমেন্ট E2E-টেস্ট, P7 = ২০-দোকান-পাইলট
+APK রেডি, P8 = প্রথম পেইং-টেন্যান্ট লাইভ। এই সংঘর্ষ কখনো DECISIONS-এ লগ হয়নি,
+যদিও ARCHITECTURE-এর মেটা-আইন স্পষ্ট: সংঘর্ষে থামো → DECISIONS-এন্ট্রি → তারপর কোড।
+
+একই সময়ে PROGRESS.md-এর প্রকৃত অবস্থা: P5-এর আইটেম চেকড কিন্তু exit-gate
+অ-চেকড (নোট: বিল্ড কখনো চলেনি — "sandbox has NO JDK / Android-SDK / network");
+P6-এর দুটি আইটেমই অ-চেকড; P7-এর তিনটি আইটেমই অ-চেকড; অথচ P8-এর পাঁচটির চারটি
+চেকড। D59–D65 প্রমাণ করে P6/P7/P7b/P8-এর কাজ সত্যিই হয়েছে। অর্থাৎ পাঁচটি ফেজ
+একটি অপ্রমাণিত গেটের উপর দাঁড়িয়ে আছে। PROGRESS.md-এর ফুটার নিজেই বলে:
+"অ-চেকড+নোটহীন বাক্স = 'শুরু হয়নি'" — বাস্তবতা তার বিপরীত।
+
+**Decision:**
+১. **গেট-মালিকানা:** এক্সিট-গেটের একমাত্র মালিক-ফাইল = PROGRESS.md। Blueprint §১২-এর
+   গেট-কলাম রোডম্যাপ-নির্দেশক, বাধ্যকর নয়। এই একটি কলামেই PROGRESS জেতে;
+   অন্য সব ব্যবসা/প্রোডাক্ট-বিষয়ে Blueprint পূর্ববৎ সর্বোচ্চ। Blueprint §১২-এ
+   এই মর্মে এক-লাইন টীকা যোগ হবে।
+২. **P5–P8 অবস্থা:** "কোড ডেলিভারড, গেট অপ্রমাণিত"। পূর্বের চেকমার্ক মুছে ইতিহাস
+   পুনর্লিখন করা হবে না; কিন্তু গেট প্রমাণিত না হওয়া পর্যন্ত কোনো ফেজকে
+   "সম্পূর্ণ" বলা নিষিদ্ধ — রিপোর্টে সর্বদা ⚠ ফ্ল্যাগসহ।
+৩. **P10 = নতুন ফেজ, গেট-শূন্য (gate zero):** ডিজাইন-প্রয়োগ ফেজ। P10-এর গেট পার
+   না হওয়া পর্যন্ত কোনো নতুন ফিচার-ফেজ শুরু হবে না।
+৪. **গেট-প্রমাণের সংজ্ঞা:** একটি exit-gate কেবল তখনই চেকড হবে যখন (ক) কম্পাইল
+   সত্যিই চলেছে, (খ) ইউনিট-টেস্টের PASS/FAIL টেবিল আছে, (গ) ডিভাইস/Firebase-নির্ভর
+   অংশ থাকলে তা হয় প্রমাণিত, নয়তো ⚠ CANNOT VERIFY হিসেবে লেখা (BUILD §৪)।
+
+**Alternatives:**
+- *Blueprint §১২-কে গেট-মালিক করা:* বাতিল — P5/P6-এ গেট "—", অর্থাৎ কোনো
+  প্রমাণ-বাধ্যবাধকতাই থাকে না; এটি ঠিক সেই শৈথিল্য যা এই সমস্যা তৈরি করেছে।
+- *P5–P8 আন-চেক করে ফেজগুলো পুনরায় চালানো:* বাতিল — কোড সত্যিই ডেলিভারড;
+  দাবি মুছলে ইতিহাস হারায়। "গেট-অপ্রমাণিত" ফ্ল্যাগই যথেষ্ট ও সৎ।
+- *সংঘর্ষ উপেক্ষা করা:* বাতিল — ARCHITECTURE-এর মেটা-আইনের সরাসরি লঙ্ঘন।
+
+**Supersedes:** কিছুই নয়।
+
+---
+
+## D67 — অনাথ ডিজাইন-আইন দত্তক ও D2-এর CI-প্রয়োগ (P10-এর বিষয়বস্তু)
+
+**Date:** 2026-09-05
+**Phase:** P10
+
+**Context:**
+ডিভাইসে ইনস্টল-করা বিল্ডের স্ক্রিনশট দেখায়: ডিফল্ট Material 3 ল্যাভেন্ডার
+surfaceVariant কার্ড, ইংরেজি লেবেল ও বটম-নেভ, ক্লিপড ট্যাব-স্ট্রিপ
+("P&L | Balance Sheet | Period Lock | Bud…"), এবং সেল-স্ক্রিনে "Supplier"
+লেবেল উল্লম্বভাবে এক-অক্ষর-প্রতি-লাইন রেন্ডার। অথচ Lal Khata থিম তিন জায়গায়
+লকড: Blueprint §২ (ডিজাইন-আইন-টেবিল), ARCHITECTURE §১ (locked-কলাম, যেখানে
+নিষিদ্ধ-কলামে হুবহু লেখা "Default Material 3 ghost buttons, pure white bg,
+small text"), এবং D2 (2026-08-29)। D62 কারণ ব্যাখ্যা করে: core:designsystem
+এতদিন শুধু Compose UI/runtime এক্সপোজ করত, তাই P0–P5 জুড়ে BoiKhataTheme ছিল
+একটি pass-through যা কিছুই enforce করত না।
+
+উপরন্তু Blueprint §২/§৬-এর চারটি আইন কোনো ফেজ-চেকলিস্টে কখনো ঢোকেনি:
+কুইক-এন্ট্রি (আন-অথেনটিকেটেড "Quick Add" — ভিড়ের সময় ৫-সেকেন্ড আনলকের সময় নেই),
+বাধ্যতামূলক হ্যাপটিক ফিডব্যাক, ড্যাশবোর্ড-ট্রাইডেন্ট (আজকের ক্যাশ + বাজারে বাকি
++ মহাজনের পাওনা), এবং লো-ব্যাটারি-মোড (<১৫%: ছবি/সিঙ্ক বন্ধ, বড়-টেক্সট)।
+
+**Decision:**
+১. **নতুন ডিজাইন-আইন লেখা হবে না।** D2 + Blueprint §২ + ARCHITECTURE §১ ইতিমধ্যেই
+   আইন। P10 কেবল সেগুলো *বাস্তবায়ন* করে। সমস্যা আইনের অভাব নয়, প্রয়োগের অভাব।
+২. **চার অনাথ-আইন দত্তক:** হ্যাপটিক ও ড্যাশবোর্ড-ট্রাইডেন্ট → P10-এর চেকলিস্ট-আইটেম।
+   কুইক-এন্ট্রি ও লো-ব্যাটারি-মোড → P10-এ স্পেক-লক, P11-এ বাস্তবায়ন
+   (কুইক-এন্ট্রি নিরাপত্তা-সংবেদনশীল: আন-অথেনটিকেটেড রাইট-পাথ, তাই আলাদা স্পেক দাবি করে)।
+৩. **D2 grep-প্রয়োগযোগ্য হবে** — ARCHITECTURE §৮-এর নিষিদ্ধ-তালিকায় যোগ:
+   ডিফল্ট-M3 বা dynamic-color রেফারেন্স; টাইপ-স্কেলের বাইরে হার্ডকোড `sp`;
+   ৫৬dp-র কম ট্যাপ-টার্গেট; যেকোনো চার্ট-লাইব্রেরি; hamburger/NavigationDrawer
+   কম্পোনেন্ট; হার্ডকোড UI-স্ট্রিং; values-bn-এ অনুপস্থিত কী; বাংলা-UI-পাথে
+   ল্যাটিন-অঙ্ক (NumberFormatter বাইপাস)।
+৪. **স্ক্রিনশট-টেস্ট গেট:** সর্বোচ্চ font-scale-এ ট্যাব-লেবেল ক্লিপ/র‍্যাপ না হওয়া
+   এবং টার্গেট-বিচ্ছিন্নতা যাচাই — "Supplier" উল্লম্ব-রেন্ডার শ্রেণির বাগ যেন
+   CI-তেই ধরা পড়ে, ডিভাইসে নয়।
+৫. **স্ক্রিন-স্বাক্ষর নিয়ম:** কোড নয় — আগে বাংলা ওয়্যারফ্রেম + টোকেন-স্পেক
+   স্বাক্ষরিত হবে, তারপর বাস্তবায়ন (দশটি feature/* সারফেসের জন্য)।
+
+**Alternatives:**
+- *P9-এর ভিতরেই ডিজাইন ঠিক করা:* বাতিল — P9 মার্জড ও ক্লোজড; একটি
+  আইন-লঙ্ঘনের সংশোধন তার নিজস্ব ফেজ ও গেট দাবি করে।
+- *D2-কে supersede করে নতুন ডিজাইন-আইন লেখা:* বাতিল — এতে চতুর্থ
+  অ-প্রয়োগকৃত কপি তৈরি হয়, প্রয়োগ বাড়ে না।
+- *শুধু কোড-রিভিউয়ে ভরসা:* বাতিল — সাত ফেজ ধরে রিভিউ D2 ধরতে পারেনি;
+  যা grep করা যায় না, তা প্রয়োগ হয় না।
+
+**Supersedes:** কিছুই নয় (D2 বহাল ও পুনঃনিশ্চিত; D62-এর উপর নির্মিত)।
+
+---
+
+## D68 — BUILD §২ সংশোধন: google-services.json রিপোতে কমিটেড ও repo-safe
+
+**Date:** 2026-09-05
+**Phase:** P10
+
+**Context:**
+BUILD.md §২ দাবি করে: "ফাইলটি রিপোতে কমিট হয় না (.gitignore); প্রতি AI-সেশনে
+অ্যাটাচ করে app/-এ বসানো হয়।" যাচাই (main @ 802ed09):
+- `app/google-services.json` **কমিটেড** — blob `a12d0e2e`, ৭৬২ বাইট।
+- `.gitignore`-এর সম্পূর্ণ বিষয়বস্তু সাত লাইন: `.env`, `*.keystore`, `*.jks`,
+  `.gradle/`, `**/build/`, `local.properties`, `.kotlin/` — google-services.json-এর
+  কোনো উল্লেখ নেই। অর্থাৎ ফাইলটি কখনোই ইগনোরড ছিল না।
+দাবিটির দুই অংশই ভুল। ফলাফল: প্রতি সেশন একটি অস্তিত্বহীন পূর্বশর্ত মানতে গিয়ে
+সময় নষ্ট করেছে, এবং ARCHITECTURE §৮ google-services.json ছাড়া বিল্ড-দাবি নিষিদ্ধ
+করায় একটি কাল্পনিক ব্লকার তৈরি হয়েছে।
+
+নিরাপত্তা-মূল্যায়ন: এটি কোনো ঘটনা (incident) নয়।
+Firebase-Project-Context §১ স্পষ্ট: "NOT a secret file; repo-safe."
+আসল মাস্টার-চাবি `serviceAccountKey.json` ভেন্ডর-সাইডে, রিপোতে অনুপস্থিত।
+`*.keystore` / `*.jks` / `.env` যথাযথভাবে ইগনোরড; ডিবাগ-কীস্টোর CI-তে
+সিক্রেট থেকে ডিকোড হয় — এই শৃঙ্খল শুদ্ধ।
+
+**Decision:**
+১. **BUILD.md §২ সংশোধিত হবে**, কোড বা রিপো নয় — BUILD.md-এর নিজস্ব মালিকানা-নিয়ম
+   অনুসারে ("এই ফাইল সংশোধিত হয়, কোড নয়")। নতুন পাঠ্য: ফাইলটি রিপোতে কমিটেড ও
+   repo-safe; কোনো সেশনে অ্যাটাচ করার প্রয়োজন নেই।
+২. **"প্রতি সেশনে অ্যাটাচ করো" নির্দেশ বাতিল।**
+৩. `.gitignore` **অপরিবর্তিত** থাকবে — `*.keystore`, `*.jks`, `.env` ইগনোরড;
+   google-services.json ইচ্ছাকৃতভাবেই ট্র্যাকড।
+৪. স্কিল/নথিতে "google-services.json অনুপস্থিত" আর কখনো বিল্ড-ব্যর্থতার
+   ব্যাখ্যা হিসেবে ব্যবহার করা যাবে না।
+
+**Alternatives:**
+- *ফাইলটি .gitignore-এ যোগ করে রিপো থেকে সরানো:* বাতিল — Firebase-Project-Context §১
+  একে repo-safe ঘোষণা করেছে; সরালে প্রতি ক্লিন-ক্লোন ও CI বিল্ড ভাঙবে, কোনো
+  নিরাপত্তা-লাভ ছাড়াই।
+- *BUILD.md-কে সঠিক ধরে নিয়ে ফাইল সরানো:* বাতিল — নথি বাস্তবতার সঙ্গে মিলবে,
+  উল্টোটা নয়।
+
+**Supersedes:** BUILD.md §২-এর google-services.json-সংক্রান্ত বাক্য (ফাইল-সংশোধন বাকি)।
