@@ -23,13 +23,23 @@ object MelaStockCalculator {
         val changeQuantity: Int,
     )
 
-    /** Current net stock = SUM of all changeQuantity. */
-    fun netStock(moves: List<StockMove>): Int = moves.sumOf { it.changeQuantity }
+    /**
+     * Current net (on-hand) stock for a book = SUM of its non-mela changeQuantity.
+     *
+     * MELA_IN / MELA_OUT are INTERNAL transfers between the shop and the mela stall —
+     * they reallocate where stock sits but never change how many copies the shop owns.
+     * Counting them in netStock would inflate (or deflate) the total, so they are excluded.
+     */
+    fun netStock(moves: List<StockMove>): Int =
+        moves.filter { it.reason != StockChangeReason.MELA_IN && it.reason != StockChangeReason.MELA_OUT }
+            .sumOf { it.changeQuantity }
 
-    /** Aggregate mela in/out for a book from its ledger moves. */
+    /** Aggregate mela in/out for a book from its ledger moves.
+     *  MelaRepositoryImpl.moveStock records MELA_IN as +qty and MELA_OUT as −qty, so the
+     *  melaOut sum is negated back to a positive magnitude for clean reporting. */
     fun melaStockLine(bookId: String, bookTitleBn: String, moves: List<StockMove>): MelaStockLine {
         val melaIn = moves.filter { it.reason == StockChangeReason.MELA_IN }.sumOf { it.changeQuantity }
-        val melaOut = moves.filter { it.reason == StockChangeReason.MELA_OUT }.sumOf { it.changeQuantity }
+        val melaOut = -moves.filter { it.reason == StockChangeReason.MELA_OUT }.sumOf { it.changeQuantity }
         return MelaStockLine(
             bookId = bookId,
             bookTitleBn = bookTitleBn,

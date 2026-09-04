@@ -16,21 +16,22 @@ class MelaStockCalculatorTest {
         val moves = listOf(
             StockMove(StockChangeReason.PURCHASE, 10),
             StockMove(StockChangeReason.SALE, -3),
+            // MELA_IN is a shop→mela transfer: it must NOT change total on-hand stock.
             StockMove(StockChangeReason.MELA_IN, 5),
         )
-        assertThat(MelaStockCalculator.netStock(moves)).isEqualTo(12)
+        assertThat(MelaStockCalculator.netStock(moves)).isEqualTo(7)
     }
 
     @Test
     fun `should compute atMela as in minus out`() {
         val moves = listOf(
             StockMove(StockChangeReason.MELA_IN, 8),
-            StockMove(StockChangeReason.MELA_OUT, 2),
+            StockMove(StockChangeReason.MELA_OUT, -2), // signed per MelaRepositoryImpl (bring back)
         )
         val line = MelaStockCalculator.melaStockLine("b1", "বই", moves)
         assertThat(line.atMela).isEqualTo(6)
         assertThat(line.melaIn).isEqualTo(8)
-        assertThat(line.melaOut).isEqualTo(2)
+        assertThat(line.melaOut).isEqualTo(2) // magnitude
     }
 
     @Test
@@ -71,17 +72,24 @@ class MelaStockCalculatorTest {
     fun `should build per-book report across books`() {
         val movesByBook = mapOf(
             ("b1" to "বই") to listOf(
+                StockMove(StockChangeReason.PURCHASE, 10),
                 StockMove(StockChangeReason.MELA_IN, 5),
-                StockMove(StockChangeReason.MELA_OUT, 1),
+                StockMove(StockChangeReason.MELA_OUT, -1), // signed: bring 1 back
             ),
             ("b2" to "বই২") to listOf(
+                StockMove(StockChangeReason.PURCHASE, 4),
                 StockMove(StockChangeReason.MELA_IN, 2),
             ),
         )
         val report = MelaStockCalculator.buildReport(movesByBook)
         assertThat(report).hasSize(2)
         val b1 = report.first { it.bookId == "b1" }
-        assertThat(b1.atMela).isEqualTo(4)
-        assertThat(b1.netStock).isEqualTo(4)
+        assertThat(b1.atMela).isEqualTo(4)        // 5 mela-in − 1 mela-out
+        assertThat(b1.netStock).isEqualTo(10)     // purchase only; transfers excluded
+        assertThat(b1.melaIn).isEqualTo(5)
+        assertThat(b1.melaOut).isEqualTo(1)       // magnitude
+        val b2 = report.first { it.bookId == "b2" }
+        assertThat(b2.atMela).isEqualTo(2)
+        assertThat(b2.netStock).isEqualTo(4)
     }
 }

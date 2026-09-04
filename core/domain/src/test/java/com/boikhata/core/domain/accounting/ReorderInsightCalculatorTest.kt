@@ -10,13 +10,21 @@ import org.junit.Test
  */
 class ReorderInsightCalculatorTest {
 
+    /** Look up a publisher's insight, failing with a clear message instead of NoSuchElementException. */
+    private fun insight(
+        insights: List<com.boikhata.core.domain.accounting.ReorderInsightCalculator.ReorderInsight>,
+        publisher: String,
+    ): com.boikhata.core.domain.accounting.ReorderInsightCalculator.ReorderInsight =
+        insights.firstOrNull { it.publisher == publisher }
+            ?: throw AssertionError("Reorder insight for publisher '$publisher' not found. Got: $insights")
+
     @Test
     fun `should flag REORDER when this-year grew over 25 percent`() {
         val insights = ReorderInsightCalculator.compare(
             thisYear = listOf(SaleLine("রাইসা", 130), SaleLine("অন্যপ্রকাশ", 10)),
             lastYear = listOf(SaleLine("রাইসা", 100), SaleLine("অন্যপ্রকাশ", 5)),
         )
-        val raisa = insights.first { it.publisher == "রাইসা" }
+        val raisa = insight(insights, "রাইসা")
         assertThat(raisa.growthPercent).isEqualTo(30.0)
         assertThat(raisa.suggestion).isEqualTo(Suggestion.REORDER)
     }
@@ -27,7 +35,9 @@ class ReorderInsightCalculatorTest {
             thisYear = listOf(SaleLine("রাইসা", 110)),
             lastYear = listOf(SaleLine("রাইসা", 100)),
         )
-        assertThat(insights.first { it.publisher == "রাইসา" }.suggestion).isEqualTo(Suggestion.HOLD)
+        val raisa = insight(insights, "রাইসা")
+        assertThat(raisa.growthPercent).isEqualTo(10.0)
+        assertThat(raisa.suggestion).isEqualTo(Suggestion.HOLD)
     }
 
     @Test
@@ -36,7 +46,9 @@ class ReorderInsightCalculatorTest {
             thisYear = listOf(SaleLine("রাইসা", 60)),
             lastYear = listOf(SaleLine("রাইসা", 100)),
         )
-        assertThat(insights.first { it.publisher == "রাইসা" }.suggestion).isEqualTo(Suggestion.DROP)
+        val raisa = insight(insights, "রাইসা")
+        assertThat(raisa.suggestion).isEqualTo(Suggestion.DROP)
+        assertThat(raisa.growthPercent).isEqualTo(-40.0)
     }
 
     @Test
@@ -45,7 +57,7 @@ class ReorderInsightCalculatorTest {
             thisYear = listOf(SaleLine("নতুন পাবলিশার", 20)),
             lastYear = emptyList(),
         )
-        assertThat(insights.first { it.publisher == "নতুন পাবলিশার" }.suggestion).isEqualTo(Suggestion.NEW)
+        assertThat(insight(insights, "নতুন পাবলিশার").suggestion).isEqualTo(Suggestion.NEW)
     }
 
     @Test
@@ -54,8 +66,8 @@ class ReorderInsightCalculatorTest {
             thisYear = emptyList(),
             lastYear = listOf(SaleLine("পুরনো", 100)),
         )
-        assertThat(insights.first { it.publisher == "পুরনো" }.suggestion).isEqualTo(Suggestion.DROP)
-        assertThat(insights.first { it.publisher == "পুরনো" }.growthPercent).isEqualTo(-100.0)
+        assertThat(insight(insights, "পুরনো").suggestion).isEqualTo(Suggestion.DROP)
+        assertThat(insight(insights, "পুরনো").growthPercent).isEqualTo(-100.0)
     }
 
     @Test
