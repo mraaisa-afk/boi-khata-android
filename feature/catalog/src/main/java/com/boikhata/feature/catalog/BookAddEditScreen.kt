@@ -88,17 +88,17 @@ fun BookAddEditScreen(
                 isbn = book.isbn ?: ""
                 titleBn = book.titleBn
                 titleEn = book.titleEn ?: ""
-                author = book.author
-                publisher = book.publisher
-                classLevel = book.classLevel
-                subject = book.subject
-                editionYear = book.editionYear.toString()
-                purchasePrice = book.purchasePrice.toString()
-                sellingPrice = book.sellingPrice.toString()
-                initialStock = book.initialStock.toString()
-                lowStockThreshold = book.lowStockThreshold.toString()
-                category = book.category
-                condition = book.condition
+                author = book.author ?: ""
+                publisher = book.publisher ?: ""
+                classLevel = book.classLevel ?: ""
+                subject = book.subject ?: ""
+                editionYear = book.editionYear?.toString() ?: "2026"
+                purchasePrice = book.purchasePrice?.toString() ?: "0"
+                sellingPrice = book.sellingPrice?.toString() ?: "0"
+                initialStock = book.initialStock?.toString() ?: "0"
+                lowStockThreshold = book.lowStockThreshold?.toString() ?: "5"
+                category = book.category ?: BookCategory.TEXTBOOK
+                condition = book.condition ?: BookCondition.NEW
                 isActive = book.isActive
             }
         }
@@ -234,43 +234,55 @@ fun BookAddEditScreen(
                     val parsedStock = initialStock.toIntOrNull() ?: 0
                     val parsedLowStock = lowStockThreshold.toIntOrNull() ?: 5
 
-                    if (isEdit && bookId != null) {
-                        viewModel.updateBook(
-                            id = bookId,
-                            isbn = isbn.ifBlank { null },
-                            titleBn = titleBn,
-                            titleEn = titleEn.ifBlank { null },
-                            author = author,
-                            publisher = publisher,
-                            classLevel = classLevel,
-                            subject = subject,
-                            editionYear = parsedEdition,
-                            category = category,
-                            condition = condition,
-                            purchasePrice = parsedPurchase,
-                            sellingPrice = parsedSelling,
-                            lowStockThreshold = parsedLowStock,
-                            isActive = isActive,
-                            onDone = onBack,
-                        )
-                    } else {
-                        viewModel.addBook(
-                            isbn = isbn.ifBlank { null },
-                            titleBn = titleBn,
-                            titleEn = titleEn.ifBlank { null },
-                            author = author,
-                            publisher = publisher,
-                            classLevel = classLevel,
-                            subject = subject,
-                            editionYear = parsedEdition,
-                            category = category,
-                            condition = condition,
-                            purchasePrice = parsedPurchase,
-                            sellingPrice = parsedSelling,
-                            initialStock = parsedStock,
-                            lowStockThreshold = parsedLowStock,
-                            onDone = onBack,
-                        )
+                    val safeTitleBn = titleBn
+                    val safeTitleEn = titleEn.ifBlank { "" }
+                    val safeAuthor = author.ifBlank { "" }
+                    val safePublisher = publisher.ifBlank { "" }
+
+                    val isValid = when (isEdit) {
+                        true -> bookId != null && safeTitleBn.isNotBlank() && safeAuthor != null
+                        false -> safeTitleBn.isNotBlank() && safeAuthor != null
+                    }
+
+                    if (isValid) {
+                        if (isEdit && bookId != null) {
+                            viewModel.updateBook(
+                                id = bookId,
+                                isbn = isbn.ifBlank { "" },
+                                titleBn = safeTitleBn,
+                                titleEn = safeTitleEn,
+                                author = safeAuthor,
+                                publisher = safePublisher,
+                                classLevel = classLevel,
+                                subject = subject,
+                                editionYear = parsedEdition,
+                                category = category,
+                                condition = condition,
+                                purchasePrice = parsedPurchase,
+                                sellingPrice = parsedSelling,
+                                lowStockThreshold = parsedLowStock,
+                                isActive = isActive,
+                                onDone = onBack,
+                            )
+                        } else {
+                            viewModel.addBook(
+                                isbn = isbn.ifBlank { "" },
+                                titleBn = safeTitleBn,
+                                titleEn = safeTitleEn.ifBlank { "" },
+                                author = safeAuthor,
+                                publisher = safePublisher,
+                                classLevel = classLevel,
+                                subject = subject,
+                                editionYear = parsedEdition,
+                                category = category,
+                                condition = condition,
+                                purchasePrice = parsedPurchase,
+                                sellingPrice = parsedSelling,
+                                initialStock = parsedStock,
+                                lowStockThreshold = parsedLowStock,
+                                onDone = onBack,
+                            )
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
