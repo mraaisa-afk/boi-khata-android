@@ -56,4 +56,17 @@
     <string name="confirm_number">Confirm number</string>
     <string name="migration_vendor_approval">Rebind complete. The vendor must approve the new number.</string>
     <string name="migration_complete">New number is active</string>
+    <string name="demo_reset">Reset demo data</string>
+    <string name="demo_reset_title">Reset demo data?</string>
+    <string name="demo_reset_warning">All local ledger data on this device will be cleared and demo seed data restored. Do not use this on a real shop.</string>
+    <string name="demo_reset_confirm">Reset</string>
+    <string name="demo_reset_cancel">Cancel</string>
+    <string name="referral_title">Refer a shop</string>
+    <string name="referral_vendor_note">Give this code to a new shop. The vendor validates eligibility.</string>
+    <string name="founders_club">Founders Club: ৳%1$d/month for the first 50 tenants</string>
+    <string name="device_group_title">Device group</string>
+    <string name="device_group_usage">Active devices: %1$d/%2$d</string>
+    <string name="device_label">Device label</string>
+    <string name="add_device">Add device</string>
+    <string name="remove_device">Remove</string>
 </resources>

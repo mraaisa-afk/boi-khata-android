@@ -56,4 +56,17 @@
     <string name="confirm_number">নম্বর নিশ্চিত করুন</string>
     <string name="migration_vendor_approval">রিবাইন্ড সম্পন্ন। বিক্রেতা অনুমোদন দিলে নতুন নম্বর চালু হবে।</string>
     <string name="migration_complete">নতুন নম্বর চালু হয়েছে</string>
+    <string name="demo_reset">ডেমো ডেটা রিসেট</string>
+    <string name="demo_reset_title">ডেমো ডেটা রিসেট করবেন?</string>
+    <string name="demo_reset_warning">এই ডিভাইসের সব স্থানীয় হিসাব মুছে ডেমো বীজ ডেটা ফিরবে। আসল দোকানের ডেটায় ব্যবহার করবেন না।</string>
+    <string name="demo_reset_confirm">রিসেট করুন</string>
+    <string name="demo_reset_cancel">বাতিল</string>
+    <string name="referral_title">রেফার করুন</string>
+    <string name="referral_vendor_note">কোডটি নতুন দোকানকে দিন। যোগ্যতা ভেন্ডর যাচাই করবেন।</string>
+    <string name="founders_club">ফাউন্ডার্স ক্লাব: মাসে ৳%1$d, প্রথম ৫০ টেন্যান্টের জন্য</string>
+    <string name="device_group_title">ডিভাইস গ্রুপ</string>
+    <string name="device_group_usage">সক্রিয় ডিভাইস: %1$d/%2$d</string>
+    <string name="device_label">ডিভাইসের নাম</string>
+    <string name="add_device">ডিভাইস যোগ করুন</string>
+    <string name="remove_device">সরিয়ে দিন</string>
 </resources>
