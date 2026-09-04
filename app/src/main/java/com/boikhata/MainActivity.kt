@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
             BoiKhataTheme(liteMode = liteMode) {
                 val mainViewModel: MainViewModel = hiltViewModel()
                 val trialViewModel: TrialViewModel = hiltViewModel()
+                val demoResetViewModel: DemoResetViewModel = hiltViewModel()
                 val authState by mainViewModel.authState.collectAsState()
 
                 when (val state = authState) {
@@ -90,6 +91,7 @@ class MainActivity : ComponentActivity() {
                                     preferences.edit().putBoolean("lite_mode", it).apply()
                                 },
                                 onSignOut = { mainViewModel.signOut() },
+                                onDemoReset = { demoResetViewModel.reset { } },
                             )
                         }
                     }

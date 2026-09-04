@@ -57,6 +57,7 @@ fun BoiKhataMainScreen(
     liteMode: Boolean,
     onLiteModeChange: (Boolean) -> Unit,
     onSignOut: () -> Unit,
+    onDemoReset: () -> Unit,
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -200,6 +201,8 @@ fun BoiKhataMainScreen(
                     onShareCopy = { shareMonthlyCopy(context) },
                     onMigration = { navController.navigate("number_migration") },
                     onUpgrade = { navController.navigate("subscription") },
+                    onDemoReset = onDemoReset,
+                    isOwner = role == com.boikhata.core.domain.enums.Role.OWNER,
                 )
             }
             composable("number_migration") {

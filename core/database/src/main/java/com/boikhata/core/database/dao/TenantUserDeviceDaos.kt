@@ -39,4 +39,10 @@ interface DeviceDao {
 
     @Query("SELECT * FROM devices WHERE tenantId = :tenantId ORDER BY boundAt DESC")
     suspend fun getByTenant(tenantId: String): List<DeviceEntity>
+
+    @Query("SELECT COUNT(*) FROM devices WHERE tenantId = :tenantId AND isActive = 1")
+    suspend fun countActive(tenantId: String): Int
+
+    @Query("UPDATE devices SET isActive = 0 WHERE id = :deviceId AND isPrimary = 0")
+    suspend fun deactivateSecondary(deviceId: String): Int
 }

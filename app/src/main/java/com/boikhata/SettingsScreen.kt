@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +30,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BookDao
 import com.boikhata.core.domain.pilot.TrialPolicy
+import com.boikhata.core.domain.p8.FoundersClubPolicy
+import com.boikhata.core.domain.p8.ReferralCodeGenerator
 import com.boikhata.core.domain.repository.TrialRedemptionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -84,8 +88,11 @@ fun SettingsScreen(
     onShareCopy: () -> Unit,
     onMigration: () -> Unit,
     onUpgrade: () -> Unit,
+    onDemoReset: () -> Unit,
+    isOwner: Boolean,
     viewModel: TrialViewModel = hiltViewModel(),
 ) {
+    var showDemoResetConfirmation by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(tenantId, phone) { viewModel.ensureTrial(tenantId, phone) }
     val status = viewModel.status
     Column(
@@ -93,6 +100,12 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.settings_title))
+        Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.referral_title))
+            Text(ReferralCodeGenerator.codeForTenant(tenantId))
+            Text(stringResource(R.string.referral_vendor_note))
+            Text(stringResource(R.string.founders_club, FoundersClubPolicy.MONTHLY_FEE_TAKA))
+        } }
         Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.trial_title))
             if (status == null) Text(stringResource(R.string.trial_loading))
@@ -104,13 +117,32 @@ fun SettingsScreen(
                 }
             }
         } }
+        Card { DeviceGroupCard(tenantId = tenantId, isOwner = isOwner) }
         Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.lite_ui))
             Switch(checked = liteMode, onCheckedChange = onLiteModeChange)
             Button(onClick = onSpeakSetup) { Text(stringResource(R.string.repeat_voice_setup)) }
             Button(onClick = onShareCopy) { Text(stringResource(R.string.share_monthly_copy)) }
             Button(onClick = onMigration) { Text(stringResource(R.string.number_changed)) }
+            Button(onClick = { showDemoResetConfirmation = true }, enabled = isOwner) { Text(stringResource(R.string.demo_reset)) }
         } }
+    }
+    if (showDemoResetConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDemoResetConfirmation = false },
+            title = { Text(stringResource(R.string.demo_reset_title)) },
+            text = { Text(stringResource(R.string.demo_reset_warning)) },
+            confirmButton = {
+                Button(onClick = { showDemoResetConfirmation = false; onDemoReset() }) {
+                    Text(stringResource(R.string.demo_reset_confirm))
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDemoResetConfirmation = false }) {
+                    Text(stringResource(R.string.demo_reset_cancel))
+                }
+            },
+        )
     }
 }
 

@@ -14,8 +14,8 @@ android {
         applicationId = "com.boikhata"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "0.0.1"
+        versionCode = libs.versions.appVersionCode.get().toInt()
+        versionName = libs.versions.appVersionName.get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
