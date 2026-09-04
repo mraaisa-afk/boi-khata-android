@@ -1,0 +1,21 @@
+<resources>
+    <string name="tab_expense">খরচ</string>
+    <string name="tab_cashbook">ক্যাশবক</string>
+    <string name="tab_drawing">মালিকের তোলা</string>
+    <string name="add_expense">খরচ যোগ করুন</string>
+    <string name="add_entry">এন্ট্রি যোগ করুন</string>
+    <string name="add_drawing">তোলা যোগ করুন</string>
+    <string name="category">শ্রেণি</string>
+    <string name="amount">পরিমাণ</string>
+    <string name="description">বিবরণ</string>
+    <string name="save">সেভ</string>
+    <string name="cancel">বাতিল</string>
+    <string name="ok">ঠিক আছে</string>
+    <string name="no_expenses">কোনো খরচ নেই।</string>
+    <string name="no_drawings">কোনো তোলা নেই।</string>
+    <string name="expense_history">খরচের ইতিহাস</string>
+    <string name="ghori_balance">ঘরি ব্যালেন্স</string>
+    <string name="income_label">আয়</string>
+    <string name="expense_label">খরচ</string>
+    <string name="balance">ব্যালেন্স</string>
+</resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tab_pnl">লাভ-ক্ষতি</string>
+    <string name="tab_balance_sheet">ব্যালেন্স-শিট</string>
+    <string name="tab_period_lock">পিরিয়ড-লক</string>
+    <string name="tab_budget">বাজেট</string>
+    <string name="tab_cash_close">আজকের হিসাব</string>
+
+    <string name="select_month">মাস নির্বাচন</string>
+    <string name="gregorian">গ্রেগরিয়ান</string>
+    <string name="bengali_year">বাংলা বর্ষ</string>
+    <string name="revenue">মোট বিক্রি</string>
+    <string name="discount">ছাড়</string>
+    <string name="net_revenue">নিট বিক্রি</string>
+    <string name="cogs_purchase">ক্রয়-COGS</string>
+    <string name="cogs_consignment">কনসাইনমেন্ট-কমিশন</string>
+    <string name="total_cogs">মোট COGS</string>
+    <string name="gross_profit">সর্বমোট লাভ</string>
+    <string name="expenses">খরচ</string>
+    <string name="owner_drawings">মালিকের তোলা</string>
+    <string name="vat_collected">ভ্যাট আদায়</string>
+    <string name="net_profit">নিট লাভ</string>
+    <string name="margin">মার্জিন</string>
+
+    <string name="assets">সম্পদ</string>
+    <string name="cash">নগদ</string>
+    <string name="inventory">ইনভেন্টরি</string>
+    <string name="receivables">খাতা পাওনা</string>
+    <string name="ghori_advances">ঘরি অগ্রিম</string>
+    <string name="total_assets">মোট সম্পদ</string>
+    <string name="liabilities">দায়</string>
+    <string name="supplier_payables">সাপ্লায়ার দেনা</string>
+    <string name="total_liabilities">মোট দায়</string>
+    <string name="equity">ইক্যুইটি</string>
+    <string name="retained_earnings">অবধৃত মুনাফা</string>
+    <string name="less_drawings">মালিকের তোলা (কম)</string>
+    <string name="total_equity">মোট ইক্যুইটি</string>
+
+    <string name="lock_period">মাস তালাবদ্ধ করুন</string>
+    <string name="locked">তালাবদ্ধ</string>
+    <string name="not_locked">খোলা</string>
+    <string name="lock_button">তালা দিন</string>
+    <string name="locked_periods">তালাবদ্ধ মাসসমূহ</string>
+    <string name="no_locked_periods">কোনো মাস তালাবদ্ধ নেই</string>
+
+    <string name="budget_alerts">বাজেট সতর্কতা</string>
+    <string name="no_budget_alerts">কোনো বাজেট সতর্কতা নেই</string>
+    <string name="warning">সতর্কতা</string>
+    <string name="over">সীমা অতিক্রান্ত</string>
+
+    <string name="sales_by_method">বিক্রি (মাধ্যম অনুযায়ী)</string>
+    <string name="cash_sales">নগদ বিক্রি</string>
+    <string name="bkash_sales">বিকাশ বিক্রি</string>
+    <string name="nagad_sales">নগদ (Nagad) বিক্রি</string>
+    <string name="credit_sales">বাকি বিক্রি</string>
+    <string name="total_sales">মোট বিক্রি</string>
+    <string name="expenses_by_category">খরচ (শ্রেণি অনুযায়ী)</string>
+    <string name="total_expenses">মোট খরচ</string>
+    <string name="mfs_fee">MFS-ফি (আনুমানিক)</string>
+    <string name="mfs_fee_rate">MFS-ফি হার (%)</string>
+    <string name="cash_reconciliation">নগদ মিলান</string>
+    <string name="system_cash">হিসাব-অনুযায়ী</string>
+    <string name="counted_cash">গোনা নগদ</string>
+    <string name="variance">ভ্যারিয়েন্স</string>
+    <string name="share_close">WhatsApp-এ শেয়ার</string>
+    <string name="share_hisab_pack">হিসাব-প্যাক শেয়ার</string>
+    <string name="no_expenses_today">আজ কোনো খরচ নেই</string>
+
+    <string name="loading">লোড হচ্ছে…</string>
+    <string name="error">ত্রুটি</string>
+    <string name="reports">রিপোর্ট</string>
+    <string name="tab_trends">১২ মাসের ধারা</string>
+    <string name="tab_top_ten">সেরা ১০</string>
+    <string name="trend_sales">বিক্রি</string>
+    <string name="trend_profit">লাভ</string>
+    <string name="trend_expenses">খরচ</string>
+    <string name="mom_change">মাসের পরিবর্তন: %1$.1f%%</string>
+    <string name="top_books">সেরা বিক্রি বই</string>
+    <string name="top_customers">বেশি কেনা ক্রেতা</string>
+    <string name="top_expenses">বড় খরচের শ্রেণি</string>
+    <string name="share_report">রিপোর্ট শেয়ার</string>
+</resources>

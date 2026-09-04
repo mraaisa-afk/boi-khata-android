@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">Boi Khata</string>
+    <string name="phase_zero_ready">Phase 0 skeleton ready</string>
+    <string name="enter_pin">Enter PIN</string>
+    <string name="login">Login</string>
+    <string name="wrong_pin">Wrong PIN</string>
+    <string name="locked">Locked — please log in again</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_catalog">Catalog</string>
+    <string name="nav_khata">Khata</string>
+    <string name="nav_sale">Sale</string>
+
+    <!-- P4a: Phone OTP Login -->
+    <string name="login_title">Boi Khata — Login</string>
+    <string name="enter_phone">Enter your phone number</string>
+    <string name="phone_hint">+8801XXXXXXXXX</string>
+    <string name="send_otp">Send OTP</string>
+    <string name="enter_otp">Enter OTP code</string>
+    <string name="otp_hint">6-digit code</string>
+    <string name="verify_otp">Verify</string>
+    <string name="otp_sent">OTP sent</string>
+    <string name="otp_failed">Failed to send OTP</string>
+    <string name="verify_failed">Wrong code or verification failed</string>
+    <string name="resend_otp">Resend</string>
+
+    <!-- P4a: Pending Activation -->
+    <string name="pending_title">Account Not Activated</string>
+    <string name="pending_msg">Your account has not been activated yet. Please contact the vendor to activate:</string>
+    <string name="vendor_phone">+8801711468027</string>
+    <string name="retry">Check Again</string>
+    <string name="sign_out">Sign Out</string>
+
+    <!-- P4a: License Banner -->
+    <string name="license_active">License Active</string>
+    <string name="license_grace">Grace Period — %1$d days left</string>
+    <string name="license_soft_locked">License Expired — new entries blocked</string>
+    <string name="license_suspended">License Suspended — new entries blocked</string>
+    <string name="license_refresh">Refresh</string>
+    <string name="license_syncing">Verifying license…</string>
+    <string name="license_offline">Offline — showing last known state</string>
+    <string name="settings_title">Settings</string>
+    <string name="trial_title">Trial</string>
+    <string name="trial_loading">Loading trial information…</string>
+    <string name="trial_usage">Bills %1$d/%2$d · Books %3$d/%4$d</string>
+    <string name="trial_active">Trial is active. Reading and writing are available.</string>
+    <string name="trial_expired">Trial ended — reading and export remain open; new writes are blocked.</string>
+    <string name="trial_upgrade">Upgrade to subscription</string>
+    <string name="lite_ui">Lite mode</string>
+    <string name="repeat_voice_setup">Hear voice setup again</string>
+    <string name="share_monthly_copy">Share monthly data copy</string>
+    <string name="number_changed">My number changed</string>
+    <string name="voice_setup_script">Boi Khata setup is starting</string>
+    <string name="number_migration_title">Recover with a new number</string>
+    <string name="new_phone_number">New phone number</string>
+    <string name="migration_otp_sent">OTP sent to the new number</string>
+    <string name="confirm_number">Confirm number</string>
+    <string name="migration_vendor_approval">Rebind complete. The vendor must approve the new number.</string>
+    <string name="migration_complete">New number is active</string>
+    <string name="demo_reset">Reset demo data</string>
+    <string name="demo_reset_title">Reset demo data?</string>
+    <string name="demo_reset_warning">All local ledger data on this device will be cleared and demo seed data restored. Do not use this on a real shop.</string>
+    <string name="demo_reset_confirm">Reset</string>
+    <string name="demo_reset_cancel">Cancel</string>
+    <string name="referral_title">Refer a shop</string>
+    <string name="referral_vendor_note">Give this code to a new shop. The vendor validates eligibility.</string>
+    <string name="founders_club">Founders Club: ৳%1$d/month for the first 50 tenants</string>
+    <string name="device_group_title">Device group</string>
+    <string name="device_group_usage">Active devices: %1$d/%2$d</string>
+    <string name="device_label">Device label</string>
+    <string name="add_device">Add device</string>
+    <string name="remove_device">Remove</string>
+</resources>

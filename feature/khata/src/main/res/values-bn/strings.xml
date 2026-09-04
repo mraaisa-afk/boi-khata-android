@@ -1,0 +1,29 @@
+<resources>
+    <string name="search_customers">কাস্টমার খুঁজুন (নাম, এলাকা, ফোন)…</string>
+    <string name="add_customer">কাস্টমার যোগ করুন</string>
+    <string name="no_customers">কোনো কাস্টমার নেই। + চিহ্নে ক্লিক করে যোগ করুন।</string>
+    <string name="customer_name">কাস্টমারের নাম</string>
+    <string name="area_address">এলাকা / ঠিকানা</string>
+    <string name="phone_optional">ফোন (ঐচ্ছিক)</string>
+    <string name="credit_limit">ক্রেডিট লিমিট (৳)</string>
+    <string name="save">সেভ করুন</string>
+    <string name="cancel">বাতিল</string>
+    <string name="confirm">নিশ্চিত করুন</string>
+    <string name="total_due">মোট বাকি</string>
+    <string name="age_days">%1$d দিন আগে</string>
+    <string name="share_statement">বাকি হিসাব শেয়ার</string>
+    <string name="credit_limit_warning">⚠ ক্রেডিট লিমিট ছাড়িয়েছে (সীমা: %1$s)</string>
+    <string name="add_credit">বাকি যোগ</string>
+    <string name="add_payment">জমা যোগ</string>
+    <string name="add_installment">কিস্তি যোগ</string>
+    <string name="forgive_debt">দেনা মুন</string>
+    <string name="forgive_debt_confirm">মোট %1$s বাকি মাফ করবেন? এটি হিসাবে দেনা-মুন হিসেবে লেখা হবে।</string>
+    <string name="amount">পরিমাণ</string>
+    <string name="description">বিবরণ</string>
+    <string name="entry_history">লেনদেনের ইতিহাস</string>
+    <string name="no_entries">কোনো লেনদেন নেই</string>
+    <string name="installments">কিস্তি</string>
+    <string name="paid">পরিশোধিত</string>
+    <string name="mark_paid">পরিশোধ চিহ্নিত করুন</string>
+    <string name="due_after_days">কত দিন পর মেয়াদ</string>
+</resources>

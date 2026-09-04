@@ -1,0 +1,21 @@
+<resources>
+    <string name="tab_expense">Expense</string>
+    <string name="tab_cashbook">Cashbook</string>
+    <string name="tab_drawing">Owner Drawing</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="add_entry">Add Entry</string>
+    <string name="add_drawing">Add Drawing</string>
+    <string name="category">Category</string>
+    <string name="amount">Amount</string>
+    <string name="description">Description</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="no_expenses">No expenses yet.</string>
+    <string name="no_drawings">No drawings yet.</string>
+    <string name="expense_history">Expense History</string>
+    <string name="ghori_balance">Staff Advance Balance</string>
+    <string name="income_label">Income</string>
+    <string name="expense_label">Expense</string>
+    <string name="balance">Balance</string>
+</resources>

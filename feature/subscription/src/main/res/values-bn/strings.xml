@@ -1,0 +1,12 @@
+<resources>
+    <string name="subscription_title">সাবস্ক্রিপশন</string>
+    <string name="subscription_bkash_info">নিচের নম্বরে bKash পাঠান:</string>
+    <string name="subscription_amount_info">মাসিক ফি: ৳%1$d</string>
+    <string name="subscription_amount_label">পরিমাণ (৳)</string>
+    <string name="subscription_trxid_label">TrxID (ঐচ্ছিক)</string>
+    <string name="subscription_note_label">নোট (ঐচ্ছিক)</string>
+    <string name="subscription_submit">পেমেন্ট রেকর্ড করুন</string>
+    <string name="subscription_success">পেমেন্ট রেকর্ড হয়েছে — ভেন্ডর যাচাই করবেন</string>
+    <string name="subscription_owner_only">শুধুমাত্র OWNER পেমেন্ট রেকর্ড করতে পারবেন</string>
+    <string name="subscription_cooling_off">সাবস্ক্রিপশন বাতিলের অনুরোধে ৭ দিনের কুলিং-অফ সময় প্রযোজ্য। এই সময়ে আপনার ডেটা পড়া ও রপ্তানি খোলা থাকবে।</string>
+</resources>
