@@ -656,3 +656,13 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Decision:** Add the already-catalogued Compose Material 3 dependency to `core/designsystem` and keep all theme policy in `BoiKhataTheme`; no new library or version is introduced.
 **Alternatives considered:** Keep the pass-through theme (rejected: it cannot enforce the constitutional design rules); duplicate Material 3 theme code in app/features (rejected: violates single ownership and increases drift).
 **Supersedes:** —
+
+---
+
+## D63 — P7 trial and phone-number migration remain local-first policy services
+**Date:** 2026-09-04
+**Phase:** 7
+**Context:** P7 requires a 14-day full-feature trial with hard usage caps, one trial per device and phone, expiry to read-only, plus a phone-number-change recovery path. The existing architecture keeps Room as business truth and Firebase limited to Phone Auth, claims, license, and backup; no new server or Firebase collection is permitted.
+**Decision:** Implement trial eligibility, cap, and expiry decisions as pure domain services. A trial permits reads and writes only while within 14 days and below 100 bills/200 books; backup remains disabled during trial. Device and phone fingerprints are passed in as locally persisted redemption facts, with the policy denying a second redemption for either identity. Trial expiry returns a read-only decision rather than hiding or deleting data. Implement number migration as a pure state transition requiring new-number OTP verification, then tenant rebind and vendor-issued claims transfer; the app never writes custom claims. UI, Firebase round-trip, and destructive device replacement remain explicit device/Firebase verification items.
+**Alternatives considered:** Storing trial state in a new Room table (rejected for this increment because it would require a schema migration and tenant-rebind scope without a demonstrated UI consumer); server-side trial counters (rejected: no custom server and Spark-only constraint); silently treating an expired trial as ACTIVE (rejected: violates never-lock and license truth); app-written claims (rejected: Firebase-Project-Context says claims are vendor-side only).
+**Supersedes:** —
