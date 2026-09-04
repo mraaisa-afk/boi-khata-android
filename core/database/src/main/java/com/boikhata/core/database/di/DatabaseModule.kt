@@ -16,15 +16,18 @@ import com.boikhata.core.database.dao.ExpenseDao
 import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.KhataInstallmentDao
+import com.boikhata.core.database.dao.MelaDao
 import com.boikhata.core.database.dao.OwnerDrawingDao
 import com.boikhata.core.database.dao.PeriodLockDao
 import com.boikhata.core.database.dao.RecurringExpenseDao
 import com.boikhata.core.database.dao.StockLedgerDao
+import com.boikhata.core.database.dao.SupplierDao
 import com.boikhata.core.database.dao.TenantDao
 import com.boikhata.core.database.dao.TenantRebindDao
 import com.boikhata.core.database.dao.UserDao
 import com.boikhata.core.database.migration.Migration1To2
 import com.boikhata.core.database.migration.Migration2To3
+import com.boikhata.core.database.migration.Migration3To4
 import com.boikhata.core.database.seed.DatabaseSeeder
 import dagger.Module
 import dagger.Provides
@@ -46,7 +49,7 @@ object DatabaseModule {
             BoiKhataDatabase::class.java,
             BoiKhataDatabase.DATABASE_NAME
         )
-            .addMigrations(Migration1To2, Migration2To3)
+            .addMigrations(Migration1To2, Migration2To3, Migration3To4)
             .fallbackToDestructiveMigrationOnDowngrade()
             .build()
     }
@@ -71,6 +74,8 @@ object DatabaseModule {
     @Provides fun provideBudgetDao(db: BoiKhataDatabase): BudgetDao = db.budgetDao()
     @Provides fun provideTenantRebindDao(db: BoiKhataDatabase): TenantRebindDao = db.tenantRebindDao()
     @Provides fun provideBackupDao(db: BoiKhataDatabase): BackupDao = db.backupDao()
+    @Provides fun provideSupplierDao(db: BoiKhataDatabase): SupplierDao = db.supplierDao()
+    @Provides fun provideMelaDao(db: BoiKhataDatabase): MelaDao = db.melaDao()
 
     @Provides
     @Singleton

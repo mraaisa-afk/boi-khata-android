@@ -366,3 +366,91 @@ interface MasterCatalogRepository {
 interface TenantInfoRepository {
     suspend fun fetchShopName(tenantId: String): String?
 }
+
+// ── P5: Supplier / Publisher payable ledger (দেনা-খাতা) ──────────────────────
+
+interface SupplierRepository {
+    suspend fun getSuppliers(tenantId: String): List<com.boikhata.core.domain.model.Supplier>
+    suspend fun getSupplier(tenantId: String, supplierId: String): com.boikhata.core.domain.model.Supplier?
+    suspend fun addSupplier(
+        tenantId: String,
+        nameBn: String,
+        phone: String?,
+        settlementCycle: String,
+        notes: String?,
+    ): String
+
+    suspend fun getEntries(tenantId: String, supplierId: String): List<com.boikhata.core.domain.model.SupplierEntry>
+    suspend fun getEntriesByDateRange(tenantId: String, supplierId: String, start: Long, end: Long): List<com.boikhata.core.domain.model.SupplierEntry>
+    suspend fun addEntry(
+        tenantId: String,
+        supplierId: String,
+        amount: Double,
+        type: com.boikhata.core.domain.enums.SupplierEntryType,
+        description: String,
+        referenceId: String?,
+        date: Long,
+        userId: String,
+        cashbookAccount: com.boikhata.core.domain.enums.CashbookAccount? = null,
+    ): String
+
+    // D53: Supplier PAYMENT with optional trxID note → cashbook EXPENSE in the account.
+    suspend fun addPayment(
+        tenantId: String,
+        supplierId: String,
+        amount: Double,
+        description: String,
+        trxId: String?,
+        userId: String,
+        cashbookAccount: com.boikhata.core.domain.enums.CashbookAccount,
+    ): String
+
+    // Convenience: opening / consignment / purchase credits.
+    suspend fun addOpeningBalance(tenantId: String, supplierId: String, amount: Double, userId: String): String
+    suspend fun addConsignment(tenantId: String, supplierId: String, amount: Double, description: String, userId: String): String
+    suspend fun addPurchase(tenantId: String, supplierId: String, amount: Double, description: String, userId: String): String
+
+    suspend fun getSupplierBalance(tenantId: String, supplierId: String, now: Long): com.boikhata.core.domain.model.SupplierBalance
+    suspend fun getSupplierAgingSummary(tenantId: String, now: Long): com.boikhata.core.domain.model.SupplierAgingSummary
+    suspend fun getSettlementReminders(tenantId: String, now: Long): List<com.boikhata.core.domain.model.SupplierBalance>
+
+    // D54: settlement statement (shareable text data model)
+    suspend fun getSettlementStatement(
+        tenantId: String,
+        supplierId: String,
+        shopName: String,
+        startDate: Long?,
+        endDate: Long,
+    ): com.boikhata.core.domain.model.SupplierStatement
+}
+
+// ── P5: Mela mode (book fair / seasonal) ─────────────────────────────────────
+
+interface MelaRepository {
+    suspend fun getCurrentSession(tenantId: String): com.boikhata.core.domain.model.MelaSession?
+    suspend fun startSession(
+        tenantId: String,
+        nameBn: String,
+        location: String,
+        startDate: Long,
+        endDate: Long,
+        userId: String,
+    ): String
+    suspend fun pauseSession(tenantId: String, userId: String, reason: String?): Boolean
+    suspend fun resumeSession(tenantId: String, userId: String): Boolean
+    suspend fun endSession(tenantId: String, userId: String): Boolean
+    suspend fun isSessionPaused(tenantId: String): Boolean
+
+    // D56: stock-cycle move (MELA_IN / MELA_OUT) — appends to stock_ledger.
+    suspend fun moveStock(
+        tenantId: String,
+        bookId: String,
+        quantity: Int,
+        direction: com.boikhata.core.domain.enums.StockChangeReason, // MELA_IN or MELA_OUT
+        userId: String,
+    ): String
+
+    suspend fun getLowStockAlerts(tenantId: String): List<com.boikhata.core.domain.model.LowStockAlert>
+    suspend fun getOversellAlerts(tenantId: String): List<com.boikhata.core.domain.model.OversellAlert>
+    suspend fun getMelaStockReport(tenantId: String): List<com.boikhata.core.domain.model.MelaStockLine>
+}

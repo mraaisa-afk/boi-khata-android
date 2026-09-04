@@ -1,0 +1,30 @@
+<resources>
+    <string name="mela_title">মেলা মোড</string>
+    <string name="no_active_session">কোনো সক্রিয় মেলা সেশন নেই।</string>
+    <string name="start_session">মেলা শুরু করুন</string>
+    <string name="pause_session">পজ করুন</string>
+    <string name="resume_session">পুনরায় শুরু করুন</string>
+    <string name="end_session">মেলা শেষ করুন</string>
+    <string name="session_name">মেলার নাম</string>
+    <string name="location">স্থান</string>
+    <string name="start_date">শুরুর তারিখ</string>
+    <string name="end_date">শেষ তারিখ</string>
+    <string name="low_stock_alerts">কম স্টক সতর্কতা (সফট-রিজার্ভেশন)</string>
+    <string name="oversell_alerts">ওভারসেল-রিকনসিলিয়েশন</string>
+    <string name="mela_stock_report">মেলা স্টক রিপোর্ট</string>
+    <string name="move_stock">স্টক স্থানান্তর (IN/OUT)</string>
+    <string name="move_in">মেলায় নিন (IN)</string>
+    <string name="move_out">দোকানে ফেরত (OUT)</string>
+    <string name="quantity">পরিমাণ</string>
+    <string name="paused">পজ করা</string>
+    <string name="active_session">সক্রিয় সেশন</string>
+    <string name="no_low_stock">কোনো কম-স্টক সতর্কতা নেই।</string>
+    <string name="no_oversell">কোনো ওভারসেল হয়নি।</string>
+    <string name="no_stock_moves">কোনো স্টক স্থানান্তর নেই।</string>
+    <string name="at_mela">মেলায়</string>
+    <string name="select_book">বই নির্বাচন</string>
+    <string name="save">সেভ</string>
+    <string name="cancel">বাতিল</string>
+    <string name="ok">ঠিক আছে</string>
+    <string name="pause_reason">পজের কারণ (ঐচ্ছিক)</string>
+</resources>

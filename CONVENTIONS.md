@@ -18,6 +18,10 @@
 - BookCategory: TEXTBOOK, GENERAL, STATIONERY, OTHER
 - StockChangeReason: SALE, PURCHASE, RETURN, ADJUSTMENT, MELA_IN, MELA_OUT
 - BookCondition: NEW, USED, DAMAGED
+- SupplierEntryType: OPENING, CONSIGNMENT, PURCHASE, PAYMENT, ADJUSTMENT
+  (D51: OPENING=initial payable; CONSIGNMENT=goods on consignment→increases payable;
+   PURCHASE=credit purchase→increases payable; PAYMENT=cash/MFS→decreases payable;
+   ADJUSTMENT=±correction. Mirrors KhataEntryType with supplier-specific credits.)
 
 ## ৩. Room-স্কিমা v1 (টেবিল → কলাম; টাকার-টেবিল = ট্যাগড 🔒 append-only)
 
@@ -49,7 +53,9 @@
 - owner_drawings(id PK, tenantId, amount, description, drawingDate, userId, idempotencyKey)
 - suppliers(id PK, tenantId, nameBn, phone?, settlementCycle, notes?)
 - supplier_entries 🔒(id PK, tenantId, supplierId, amount, type, description, referenceId?,
-  date, idempotencyKey)
+  date, idempotencyKey) — type = SupplierEntryType name (D51)
+- mela_sessions(id PK, tenantId, nameBn, location, startDate, endDate, isActive, isPaused,
+  pauseReason?, createdAt, updatedAt) — D57; isPaused blocks new MELA_IN/MELA_OUT writes
 - master_catalog(id PK, isbn?, titleBn, titleEn?, author, publisher, classLevel, subject,
   editionYear, mrp, isActive, lastUpdated)
 - audit_logs 🔒(id PK, tenantId, userId, action, detail, timestamp) — LOCAL-ONLY, কখনো আপলোড নয়

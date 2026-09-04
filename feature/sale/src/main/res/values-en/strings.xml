@@ -33,4 +33,6 @@
     <string name="cash_close_button">Today\'s Close</string>
     <string name="reports_button">Reports</string>
     <string name="subscription_button">Subscription</string>
+    <string name="supplier_button">Supplier</string>
+    <string name="mela_button">Mela</string>
 </resources>

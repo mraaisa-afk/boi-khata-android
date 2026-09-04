@@ -31,12 +31,14 @@ import com.boikhata.feature.home.HomeScreen
 import com.boikhata.feature.khata.KhataAddCustomerScreen
 import com.boikhata.feature.khata.KhataCustomerDetailScreen
 import com.boikhata.feature.khata.KhataCustomerListScreen
+import com.boikhata.feature.melamode.MelaScreen
 import com.boikhata.feature.reports.CashCloseScreen
 import com.boikhata.feature.reports.ReportsScreen
 import com.boikhata.feature.sale.BillDetailScreen
 import com.boikhata.feature.sale.BillHistoryScreen
 import com.boikhata.feature.sale.PosScreen
 import com.boikhata.feature.subscription.SubscriptionScreen
+import com.boikhata.feature.supplier.SupplierScreen
 
 /**
  * D18: Bottom navigation (Home/Catalog/Khata/Sale) via Navigation-Compose.
@@ -143,6 +145,8 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String, role: com.boikhata.co
                     onReportsClick = { navController.navigate("reports") },
                     onCashCloseClick = { navController.navigate("cash_close") },
                     onSubscriptionClick = { navController.navigate("subscription") },
+                    onSupplierClick = { navController.navigate("supplier") },
+                    onMelaClick = { navController.navigate("mela") },
                 )
             }
             // P3a: Expense + Cashbook + Owner Drawing
@@ -160,6 +164,14 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String, role: com.boikhata.co
             // P4b: Subscription screen (manual bKash, OWNER-gated)
             composable("subscription") {
                 SubscriptionScreen(tenantId = tenantId, role = role)
+            }
+            // P5: Supplier/publisher payable ledger (দেনা-খাতা)
+            composable("supplier") {
+                SupplierScreen(tenantId = tenantId, shopName = shopName)
+            }
+            // P5: Mela mode (book fair / seasonal)
+            composable("mela") {
+                MelaScreen(tenantId = tenantId)
             }
             // P2b: Bill history
             composable("bill_history") {

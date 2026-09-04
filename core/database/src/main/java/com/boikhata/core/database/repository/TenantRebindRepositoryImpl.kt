@@ -48,6 +48,7 @@ class TenantRebindRepositoryImpl @Inject constructor(
             totalUpdated += rebindDao.rebindPeriodLocks(oldTenantId, newTenantId)
             totalUpdated += rebindDao.rebindRecurringExpenses(oldTenantId, newTenantId)
             totalUpdated += rebindDao.rebindBudgets(oldTenantId, newTenantId)
+            totalUpdated += rebindDao.rebindMelaSessions(oldTenantId, newTenantId)
 
             // Update cloud_sync_state to reflect the rebind
             val state = cloudSyncStateDao.get()

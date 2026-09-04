@@ -74,9 +74,25 @@
   - নোট: P4b — 296 tests total, 0 failures (56 new P4b tests: 17 BackupMapperTest + 17 RestoreMapperTest + 9 CatalogDeltaDetectorTest + 13 SubscriptionRecordTest). Full ./gradlew build (assemble+lint+test) green. P4 inherited items completed: (a) shop name from tenants Firestore doc via TenantInfoRepositoryImpl (replaces phone placeholder in MainViewModel), (b) direct license-refresh from banner button via MainViewModel.refreshLicense() (replaces placeholder in MainActivity). ⚠ CANNOT VERIFY without real device: the live chain (OTP→activate→banner→backup→renew) requires a real device + Firebase connection — the sandbox has neither. All pure logic (backup mapping, restore mapping, Negative-Adj round-trip, subscription record construction, catalog delta detection, license timestamp parsing, claims session, tenant rebind plan) is unit-tested. P4 COMPLETE — Firebase-ব্যাকবোন (identity+license+backup+restore+subscription+catalog+worker) সম্পূর্ণ।
 
 ## P5 — সাপ্লায়ার + মেলা
-- [ ] দেনা-খাতা (payable, কিস্তি-রিমাইন্ডার, trxID-নোট) + পাবলিশার-স্টেটমেন্ট PDF + রি-অর্ডার-ইনসাইট
-- [ ] মেলা-মোড (স্টক-চক্র, ≤৩-সতর্কতা, ওভারসেল-রিকনসিলিয়েশন) + সিজনাল-পজ
+- [x] দেনা-খাতা (payable, কিস্তি-রিমাইন্ডার, trxID-নোট) + পাবলিশার-স্টেটমেন্ট PDF + রি-অর্ডার-ইনসাইট
+  - নোট: P5a — SupplierEntryType enum (D51, CONVENTIONS §2), SupplierAgingCalculator FIFO payable aging (D52),
+    supplier payable ledger (opening/consignment/purchase/payment + trxID note + cashbook-EXPENSE reflection D53),
+    shareable পাবলিশার-স্টেটমেন্ট as Unicode plain text (D54, shared/receipt SupplierStatementBuilder — D2/D14
+    receipt-decision precedent; PDF rendering DEFERRED), seasonal reorder insight (D55 ReorderInsightCalculator).
+    Repository + DAO + Room (suppliers/supplier_entries used as-is) + feature/supplier UI + strings.xml.
+    ⚠ CANNOT VERIFY: sandbox has NO JDK / Android-SDK / network → `./gradlew build` NOT run; code is unverified here.
+    Unit tests written (SupplierAgingCalculatorTest incl. consignment-settlement E2E, SupplierStatementBuilderTest,
+    ReorderInsightCalculatorTest) but NOT executed in-sandbox.
+- [x] মেলা-মোড (স্টক-চক্র, ≤৩-সতর্কতা, ওভারসেল-রিকনসিলিয়েশন) + সিজনাল-পজ
+  - নোট: P5a — mela_sessions table (D57, Migration v3→v4, no drops), MelaStockCalculator (D56: low-stock ≤3
+    soft-reserve warning, oversell reconciliation, atMela stock cycle), MelaRepository (start/pause/resume/end +
+    MELA_IN/MELA_OUT stock moves; paused session → MelaPausedException, reads/stats stay open), feature/melamode UI
+    + strings.xml. TenantRebindDao + TenantRebindPlanner updated for mela_sessions. Supplier/mela backup scope = DEFERRED (D58).
+    ⚠ CANNOT VERIFY: build NOT run (no toolchain); MelaStockCalculatorTest written but NOT executed.
 - [ ] **Exit-gate:** কনসাইনমেন্ট-সেটেলমেন্ট E2E-টেস্ট
+  - নোট: pure-logic E2E (SupplierAgingCalculatorTest "consignment settlement E2E") + repository-layer E2E
+    (SupplierRepositoryImplTest with in-memory fakes) written. ⚠ NOT RUN — sandbox lacks JDK/Android-SDK/network so
+    `./gradlew build` could not be invoked; a true Room/Robolectric E2E is a post-P5 follow-up.
 
 ## P6 — রিপোর্ট + ট্রাস্ট + ভয়েস
 - [ ] রিপোর্ট-গভীরতা (১২-মাস-ট্রেন্ড, টপ-১০, তুলনা) + মাসিক-ডেটা-কপি (CSV→শেয়ার) + ভয়েস-সেটআপ (ডিভাইস-TTS) + Lite-UI-মোড

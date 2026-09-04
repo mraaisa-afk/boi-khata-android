@@ -1,0 +1,30 @@
+<resources>
+    <string name="supplier_title">সাপ্লায়ার ও দেনা-খাতা</string>
+    <string name="add_supplier">সাপ্লায়ার যোগ করুন</string>
+    <string name="supplier_name">সাপ্লায়ার/পাবলিশার নাম</string>
+    <string name="phone">ফোন</string>
+    <string name="settlement_cycle">সেটেলমেন্ট চক্র (দিন)</string>
+    <string name="notes">নোট</string>
+    <string name="no_suppliers">কোনো সাপ্লায়ার নেই।</string>
+    <string name="total_payable">মোট দেনা</string>
+    <string name="payable">দেনা</string>
+    <string name="aging">এজিং</string>
+    <string name="transactions">লেনদেন</string>
+    <string name="add_opening">উদ্বোধনী দেনা</string>
+    <string name="add_consignment">কনসাইনমেন্ট গ্রহণ</string>
+    <string name="add_purchase">ক্রয় (বাকি)</string>
+    <string name="add_payment">পেমেন্ট</string>
+    <string name="entry_amount">পরিমাণ</string>
+    <string name="entry_description">বিবরণ</string>
+    <string name="trx_id">trxID (ঐচ্ছিক)</string>
+    <string name="share_statement">স্টেটমেন্ট শেয়ার</string>
+    <string name="settlement_reminders">সেটেলমেন্ট রিমাইন্ডার</string>
+    <string name="no_entries">কোনো লেনদেন নেই।</string>
+    <string name="save">সেভ</string>
+    <string name="cancel">বাতিল</string>
+    <string name="ok">ঠিক আছে</string>
+    <string name="select_entry_type">লেনদেন ধরন</string>
+    <string name="select_account">ক্যাশ মাধ্যম</string>
+    <string name="loading">লোড হচ্ছে…</string>
+    <string name="settlement_cycle_hint">যেমন ৩০ দিন</string>
+</resources>
