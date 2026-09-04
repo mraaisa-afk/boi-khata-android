@@ -614,3 +614,45 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Decision:** P5 does NOT extend the backup scope to suppliers/supplier_entries/mela_sessions. These stay local-only this phase and are logged in the DEFERRED list as "extend backup scope to supplier + mela tables (BackupMapper + RestoreMapper + BackupRepository + restore) in a post-P5 session". The app still stores them in Room (the source of truth); only the cloud backup/restore pipeline is deferred.
 **Alternatives considered:** Extend backup now (rejected: P5 scope says no new Firebase work + touching the P4 backup mapper risks regressions in the 56 backup tests; honest scoping defers it with a clear DEFERRED entry).
 **Supersedes:** —
+
+
+---
+
+## D59 — P6 report depth stays local and calculator-driven
+**Date:** 2026-09-04
+**Phase:** 6
+**Context:** P6 requires twelve-month sales/profit/expense trends, month-over-month comparison, top-10 rankings, and shareable report text. Existing PnLCalculator, BengaliFiscalCalendar, Room DAOs, and shared/receipt text builders are already local and unit-testable.
+**Decision:** Add pure domain calculators/models for twelve-month report aggregation and top-10 rankings. The repository reads Room data and supplies plain inputs; no feature module imports another feature, no Firebase reads are added, and report/export paths remain ungated. Report sharing uses Unicode text/plain through the Android share sheet, following D14/D21/D54; no PNG/Bitmap or server rendering is introduced.
+**Alternatives considered:** SQL-only aggregation (rejected: it duplicates accounting rules and weakens unit-testability); Firebase aggregation (rejected: violates offline-first and adds Spark usage); a new chart dependency (rejected: not required for the Bengali-first tabular trend and increases APK/build surface).
+**Supersedes:** —
+
+---
+
+## D60 — Monthly data copy is a local WorkManager artifact with foreground sharing
+**Date:** 2026-09-04
+**Phase:** 6
+**Context:** P6 requires an automatic monthly CSV copy on the first day containing sales, khata, and stock summaries, followed by Android sharing. WorkManager can generate local files but cannot safely launch an interactive share sheet from background execution.
+**Decision:** Add a local-only monthly-copy worker that runs once per month, checks a pure date-trigger rule, generates a UTF-8 CSV in app-scoped storage, and records the generated artifact for the foreground UI. The UI exposes the artifact through a FileProvider-backed ACTION_SEND share sheet. If the worker runs while the app is not foregrounded, generation is automatic and sharing is offered at the next app-visible opportunity; no email, server, Firebase collection, or cloud upload is added. The artifact is never license-gated.
+**Alternatives considered:** Starting ACTION_SEND directly from the worker (rejected: background activity launch restrictions and poor user trust); uploading to Firebase (rejected: Three Laws and the P6 constraint); silently deleting prior copies (rejected: a local owner-controlled copy should remain available until replaced).
+**Supersedes:** —
+
+---
+
+## D61 — Device-local voice setup and per-user Lite display preference
+**Date:** 2026-09-04
+**Phase:** 6
+**Context:** P6 requires five Bengali voice-guided setup steps on first launch, repeatable from settings, plus a per-user Lite UI mode with 20% larger typography and 56–64dp touch targets. The feature must work offline and cannot add a server TTS dependency.
+**Decision:** Use Android's device-local TextToSpeech engine with Locale Bengali and a fixed, localized five-step script. Persist completion and Lite mode using app-local preferences keyed by the active local user; these are display/onboarding preferences, not business truth. The theme will expose a Lite branch that scales typography by 1.2 and enforces minimum interactive target sizing where P6 surfaces are touched. A repeatable voice action is exposed from the app's settings/setup surface; TTS lifecycle is stopped on disposal. When Bengali is unavailable on a device, the UI reports an actionable local-engine message and remains fully usable by text.
+**Alternatives considered:** Network/server TTS (rejected: violates offline-first and Spark-only); a separate visual theme (rejected: P6 defines Lite as a display preference, not a new theme); storing Lite mode in Room business tables (rejected: it is per-user UI state, not enterprise data).
+**Supersedes:** —
+
+
+---
+
+## D62 — Design-system owns Material 3 for P6 theme enforcement
+**Date:** 2026-09-04
+**Phase:** 6
+**Context:** The existing design-system module exposed only Compose UI/runtime, while P6 requires the shared BoiKhataTheme to enforce Lal Khata colors and Lite typography.
+**Decision:** Add the already-catalogued Compose Material 3 dependency to `core/designsystem` and keep all theme policy in `BoiKhataTheme`; no new library or version is introduced.
+**Alternatives considered:** Keep the pass-through theme (rejected: it cannot enforce the constitutional design rules); duplicate Material 3 theme code in app/features (rejected: violates single ownership and increases drift).
+**Supersedes:** —

@@ -88,6 +88,12 @@ fun SubscriptionScreen(
             }
         }
 
+        Text(
+            text = stringResource(R.string.subscription_cooling_off),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+
         // Amount field
         OutlinedTextField(
             value = amountText,

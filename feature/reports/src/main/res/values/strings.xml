@@ -69,4 +69,14 @@
     <string name="loading">লোড হচ্ছে…</string>
     <string name="error">ত্রুটি</string>
     <string name="reports">রিপোর্ট</string>
+    <string name="tab_trends">১২ মাসের ধারা</string>
+    <string name="tab_top_ten">সেরা ১০</string>
+    <string name="trend_sales">বিক্রি</string>
+    <string name="trend_profit">লাভ</string>
+    <string name="trend_expenses">খরচ</string>
+    <string name="mom_change">মাসের পরিবর্তন: %1$.1f%%</string>
+    <string name="top_books">সেরা বিক্রি বই</string>
+    <string name="top_customers">বেশি কেনা ক্রেতা</string>
+    <string name="top_expenses">বড় খরচের শ্রেণি</string>
+    <string name="share_report">রিপোর্ট শেয়ার</string>
 </resources>

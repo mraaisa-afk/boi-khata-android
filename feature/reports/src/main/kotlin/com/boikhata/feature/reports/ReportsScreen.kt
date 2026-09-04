@@ -25,6 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +39,8 @@ import com.boikhata.core.designsystem.format.NumberFormatter
 import com.boikhata.core.domain.accounting.BudgetAlertCalculator
 import com.boikhata.core.domain.model.BalanceSheetLite
 import com.boikhata.core.domain.model.PnLReport
+import com.boikhata.core.domain.accounting.ReportDepthCalculator
+import com.boikhata.shared.receipt.ReportShareBuilder
 
 /**
  * D37: ReportsScreen — the P3b accounting engine made visible.
@@ -57,6 +61,8 @@ fun ReportsScreen(
         R.string.tab_balance_sheet,
         R.string.tab_period_lock,
         R.string.tab_budget,
+        R.string.tab_trends,
+        R.string.tab_top_ten,
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -77,6 +83,8 @@ fun ReportsScreen(
             1 -> BalanceSheetSection(viewModel = viewModel)
             2 -> PeriodLockSection(viewModel = viewModel)
             3 -> BudgetSection(viewModel = viewModel)
+            4 -> TrendSection(viewModel = viewModel)
+            5 -> RankingSection(viewModel = viewModel)
         }
     }
 }
@@ -309,6 +317,66 @@ private fun BudgetContent(alerts: List<BudgetAlertCalculator.BudgetAlert>) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun TrendSection(viewModel: ReportsViewModel) {
+    val state by viewModel.trendState.collectAsState()
+    when (val value = state) {
+        TrendState.Loading -> CenterLoading()
+        is TrendState.Error -> CenterError(value.message)
+        is TrendState.Success -> {
+            val context = LocalContext.current
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                item {
+                    TextButton(onClick = {
+                        context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, ReportShareBuilder.buildTrend(value.points))
+                        }, null))
+                    }) { Text(stringResource(R.string.share_report)) }
+                }
+                items(value.points) { point ->
+                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(point.labelBn, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.trend_sales) + ": " + NumberFormatter.formatMoney(point.sales, DigitStyle.BANGLA))
+                        Text(stringResource(R.string.trend_profit) + ": " + NumberFormatter.formatMoney(point.profit, DigitStyle.BANGLA))
+                        Text(stringResource(R.string.trend_expenses) + ": " + NumberFormatter.formatMoney(point.expenses, DigitStyle.BANGLA))
+                        if (point.year != value.points.first().year || point.month != value.points.first().month) {
+                            Text(stringResource(R.string.mom_change, point.salesChangePercent))
+                        }
+                    }
+                }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RankingSection(viewModel: ReportsViewModel) {
+    val state by viewModel.rankingState.collectAsState()
+    when (val value = state) {
+        RankingState.Loading -> CenterLoading()
+        is RankingState.Error -> CenterError(value.message)
+        is RankingState.Success -> LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            item { RankingGroup(stringResource(R.string.top_books), value.books) }
+            item { RankingGroup(stringResource(R.string.top_customers), value.customers) }
+            item { RankingGroup(stringResource(R.string.top_expenses), value.expenses) }
+        }
+    }
+}
+
+@Composable
+private fun RankingGroup(title: String, rows: List<ReportDepthCalculator.RankedItem>) {
+    Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(vertical = 8.dp))
+    rows.forEachIndexed { index, row ->
+        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("${index + 1}. ${row.label}")
+            Text("${row.quantity} · ${NumberFormatter.formatMoney(row.amount, DigitStyle.BANGLA)}")
         }
     }
 }
