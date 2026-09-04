@@ -24,8 +24,9 @@ android {
             if (project.hasProperty("debugKeystore")) {
                 storeFile = file(project.property("debugKeystore") as String)
                 val debugKeystorePassword = project.findProperty("debugKeystorePassword")?.toString() ?: "android"
+                val debugKeystoreAlias = project.findProperty("debugKeystoreAlias")?.toString() ?: "boikhata-debug"
                 storePassword = debugKeystorePassword
-                keyAlias = "androiddebugkey"
+                keyAlias = debugKeystoreAlias
                 keyPassword = debugKeystorePassword
             }
         }
