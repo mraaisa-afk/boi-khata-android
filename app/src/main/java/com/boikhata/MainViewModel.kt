@@ -84,6 +84,7 @@ class MainViewModel @Inject constructor(
                 _authState.value = AuthState.Authenticated(
                     tenantId = state.tenantId,
                     role = state.role,
+                    phone = state.phone,
                     shopName = shopName,
                     licenseSyncResult = syncResult,
                 )
@@ -128,6 +129,7 @@ sealed class AuthState {
     data class Authenticated(
         val tenantId: String,
         val role: Role,
+        val phone: String,
         val shopName: String,
         val licenseSyncResult: LicenseSyncResult,
     ) : AuthState()

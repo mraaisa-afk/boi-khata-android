@@ -23,9 +23,11 @@ android {
         create("sharedDebug") {
             if (project.hasProperty("debugKeystore")) {
                 storeFile = file(project.property("debugKeystore") as String)
-                storePassword = "boikhata123"
-                keyAlias = "boikhata-debug"
-                keyPassword = "boikhata123"
+                val debugKeystorePassword = project.findProperty("debugKeystorePassword")?.toString() ?: "android"
+                val debugKeystoreAlias = project.findProperty("debugKeystoreAlias")?.toString() ?: "boikhata-debug"
+                storePassword = debugKeystorePassword
+                keyAlias = debugKeystoreAlias
+                keyPassword = debugKeystorePassword
             }
         }
     }
@@ -39,6 +41,9 @@ android {
         }
         release {
             isMinifyEnabled = true
+            if (project.hasProperty("debugKeystore")) {
+                signingConfig = signingConfigs.getByName("sharedDebug")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

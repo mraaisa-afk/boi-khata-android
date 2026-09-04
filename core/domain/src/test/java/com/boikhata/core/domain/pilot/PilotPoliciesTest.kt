@@ -6,6 +6,20 @@ import java.util.concurrent.TimeUnit
 
 class PilotPoliciesTest {
     @Test
+    fun `should reject bill when bill cap is reached`() {
+        assertThat(runCatching {
+            TrialPolicy.assertCanAddBill(TrialPolicy.Usage(TrialPolicy.MAX_BILLS, 0))
+        }.exceptionOrNull()).isInstanceOf(TrialPolicy.CapExceededException::class.java)
+    }
+
+    @Test
+    fun `should reject book when book cap is reached`() {
+        assertThat(runCatching {
+            TrialPolicy.assertCanAddBook(TrialPolicy.Usage(0, TrialPolicy.MAX_BOOKS))
+        }.exceptionOrNull()).isInstanceOf(TrialPolicy.CapExceededException::class.java)
+    }
+
+    @Test
     fun `should allow full trial writes when within fourteen days and under caps`() {
         val decision = TrialPolicy.evaluate(1_000L, 1_000L + TimeUnit.DAYS.toMillis(13), TrialPolicy.Usage(99, 199))
         assertThat(decision.canWrite).isTrue()

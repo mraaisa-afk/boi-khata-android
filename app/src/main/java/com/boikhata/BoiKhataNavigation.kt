@@ -7,7 +7,9 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PointOfSale
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -15,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -46,8 +49,17 @@ import com.boikhata.feature.supplier.SupplierScreen
  * P2b: 4th tab (বিক্রয়) added.
  */
 @Composable
-fun BoiKhataMainScreen(tenantId: String, shopName: String, role: com.boikhata.core.domain.enums.Role) {
+fun BoiKhataMainScreen(
+    tenantId: String,
+    shopName: String,
+    role: com.boikhata.core.domain.enums.Role,
+    phone: String,
+    liteMode: Boolean,
+    onLiteModeChange: (Boolean) -> Unit,
+    onSignOut: () -> Unit,
+) {
     val navController = rememberNavController()
+    val context = LocalContext.current
 
     val tabs = listOf(
         NavTab("home", R.string.nav_home, Icons.Default.Home),
@@ -60,6 +72,11 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String, role: com.boikhata.co
     val currentRoute = backStackEntry?.destination?.route
 
     Scaffold(
+        topBar = {
+            IconButton(onClick = { navController.navigate("settings") }) {
+                Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings_title))
+            }
+        },
         bottomBar = {
             NavigationBar {
                 tabs.forEach { tab ->
@@ -172,6 +189,21 @@ fun BoiKhataMainScreen(tenantId: String, shopName: String, role: com.boikhata.co
             // P5: Mela mode (book fair / seasonal)
             composable("mela") {
                 MelaScreen(tenantId = tenantId)
+            }
+            composable("settings") {
+                SettingsScreen(
+                    tenantId = tenantId,
+                    phone = phone,
+                    liteMode = liteMode,
+                    onLiteModeChange = onLiteModeChange,
+                    onSpeakSetup = { VoiceSetupSpeaker(context).speakSetup() },
+                    onShareCopy = { shareMonthlyCopy(context) },
+                    onMigration = { navController.navigate("number_migration") },
+                    onUpgrade = { navController.navigate("subscription") },
+                )
+            }
+            composable("number_migration") {
+                NumberMigrationScreen(onSignOut = onSignOut)
             }
             // P2b: Bill history
             composable("bill_history") {

@@ -6,6 +6,7 @@ import com.boikhata.core.domain.enums.BookCategory
 import com.boikhata.core.domain.enums.BookCondition
 import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.model.Book
+import com.boikhata.core.domain.pilot.TrialPolicy
 import com.boikhata.core.domain.repository.BookRepository
 import com.boikhata.core.domain.text.BengaliNormalizer
 import java.util.UUID
@@ -51,6 +52,7 @@ class BookRepositoryImpl @Inject constructor(
         lowStockThreshold: Int,
     ): String {
         writeGuard.assertWriteAllowed()
+        TrialPolicy.assertCanAddBook(TrialPolicy.Usage(0, bookDao.countForTenant(tenantId)))
         val id = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
         bookDao.insert(

@@ -2,6 +2,7 @@ package com.boikhata
 
 import android.content.Context
 import android.speech.tts.TextToSpeech
+import com.boikhata.core.domain.accessibility.VoiceSetupSteps
 import java.util.Locale
 
 class VoiceSetupSpeaker(context: Context) : TextToSpeech.OnInitListener {
@@ -17,6 +18,19 @@ class VoiceSetupSpeaker(context: Context) : TextToSpeech.OnInitListener {
     fun speak(step: String): Boolean {
         if (!ready) return false
         textToSpeech.speak(step, TextToSpeech.QUEUE_FLUSH, null, "boi-khata-setup")
+        return true
+    }
+
+    fun speakSetup(): Boolean {
+        if (!ready) return false
+        VoiceSetupSteps.Bengali.forEachIndexed { index, step ->
+            textToSpeech.speak(
+                step,
+                if (index == 0) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD,
+                null,
+                "boi-khata-setup-$index",
+            )
+        }
         return true
     }
 

@@ -50,6 +50,7 @@ object TenantRebindPlanner {
         "recurring_expenses",
         "budgets",
         "mela_sessions",
+        "trial_redemptions",
     )
 
     /**

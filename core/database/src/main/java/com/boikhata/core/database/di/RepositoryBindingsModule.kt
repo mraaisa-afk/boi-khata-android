@@ -15,6 +15,7 @@ import com.boikhata.core.database.repository.RecurringExpenseRepositoryImpl
 import com.boikhata.core.database.repository.SaleRepositoryImpl
 import com.boikhata.core.database.repository.SupplierRepositoryImpl
 import com.boikhata.core.database.repository.TenantRebindRepositoryImpl
+import com.boikhata.core.database.repository.TrialRedemptionRepositoryImpl
 import com.boikhata.core.database.repository.UserRepositoryImpl
 import com.boikhata.core.domain.accounting.PeriodLockChecker
 import com.boikhata.core.domain.repository.AccountingRepository
@@ -31,6 +32,7 @@ import com.boikhata.core.domain.repository.OwnerDrawingRepository
 import com.boikhata.core.domain.repository.RecurringExpenseRepository
 import com.boikhata.core.domain.repository.SupplierRepository
 import com.boikhata.core.domain.repository.TenantRebindRepository
+import com.boikhata.core.domain.repository.TrialRedemptionRepository
 import com.boikhata.core.domain.repository.UserRepository
 import dagger.Binds
 import dagger.Module
@@ -91,4 +93,7 @@ abstract class RepositoryBindingsModule {
 
     @Binds @Singleton
     abstract fun bindMelaRepository(impl: MelaRepositoryImpl): MelaRepository
+
+    @Binds @Singleton
+    abstract fun bindTrialRedemptionRepository(impl: TrialRedemptionRepositoryImpl): TrialRedemptionRepository
 }
