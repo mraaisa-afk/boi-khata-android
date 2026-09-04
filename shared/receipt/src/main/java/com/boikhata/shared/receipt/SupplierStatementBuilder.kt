@@ -44,9 +44,10 @@ object SupplierStatementBuilder {
         sb.append("সাপ্লায়ার: ${statement.supplier.nameBn}\n")
         statement.supplier.phone?.takeIf { it.isNotBlank() }?.let { sb.append("ফোন: $it\n") }
         sb.append("সেটেলমেন্ট চক্র: ${statement.supplier.settlementCycle}\n")
+        val start = statement.startDate
         val rangeLabel = when {
-            statement.startDate != null ->
-                "${formatDate(statement.startDate)} – ${formatDate(statement.endDate)}"
+            start != null ->
+                "${formatDate(start)} – ${formatDate(statement.endDate)}"
             else -> "সূচনা – ${formatDate(statement.endDate)}"
         }
         sb.append("মেয়াদ: $rangeLabel\n")
