@@ -104,6 +104,7 @@
 - [ ] ট্রায়াল-মোড + anti-farm + নম্বর-মাইগ্রেশন + ডিভাইস-গ্রুপ-ম্যানেজার + ডেমো-মোড (লোকাল-রিসেটেবল)
 - [ ] অফলাইন-কাওস-স্যুট (এয়ারপ্লেন-দিন, মিড-সিঙ্ক-কিল, ৩০-দিন-সোক+সাইজ-গেট)
 - [ ] **Exit-gate:** ২০-দোকান-পাইলট APK রেডি
+  - নোট: P7 policy foundation only — `TrialPolicy` and `NumberMigrationPolicy` are implemented and unit-tested. UI integration, persistent redemption records, claims-transfer flow, device-group manager, demo reset, offline-chaos soak, and pilot APK gate remain unchecked.
 
 ## P8 — GA
 - [ ] রিলিজ: R8+সাইনড-APK+ভার্সন-সানসেট-ম্যানিফেস্ট + এজেন্ট-APK-চ্যানেল
