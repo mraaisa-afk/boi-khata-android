@@ -15,10 +15,12 @@ import com.boikhata.core.database.dao.ExpenseDao
 import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.KhataInstallmentDao
+import com.boikhata.core.database.dao.MelaDao
 import com.boikhata.core.database.dao.OwnerDrawingDao
 import com.boikhata.core.database.dao.PeriodLockDao
 import com.boikhata.core.database.dao.RecurringExpenseDao
 import com.boikhata.core.database.dao.StockLedgerDao
+import com.boikhata.core.database.dao.SupplierDao
 import com.boikhata.core.database.dao.TenantDao
 import com.boikhata.core.database.dao.TenantRebindDao
 import com.boikhata.core.database.dao.UserDao
@@ -36,6 +38,7 @@ import com.boikhata.core.database.entity.KhataCustomerEntity
 import com.boikhata.core.database.entity.KhataEntryEntity
 import com.boikhata.core.database.entity.KhataInstallmentEntity
 import com.boikhata.core.database.entity.MasterCatalogEntity
+import com.boikhata.core.database.entity.MelaSessionEntity
 import com.boikhata.core.database.entity.OwnerDrawingEntity
 import com.boikhata.core.database.entity.PeriodLockEntity
 import com.boikhata.core.database.entity.RecurringExpenseEntity
@@ -47,8 +50,10 @@ import com.boikhata.core.database.entity.UserEntity
 
 /**
  * CONVENTIONS §1: ডিভাইস-সত্য = Room; বিল্ডারে `.addMigrations(...)` বাধ্যতামূলক.
- * All 19 tables from CONVENTIONS §3 + 3 P3b tables (period_locks, recurring_expenses, budgets).
- * v1 = initial schema; v2 = D16 normalized columns; v3 = D32/D35 accounting tables.
+ * All 19 tables from CONVENTIONS §3 + 3 P3b tables (period_locks, recurring_expenses, budgets)
+ * + 1 P5 table (mela_sessions).
+ * v1 = initial schema; v2 = D16 normalized columns; v3 = D32/D35 accounting tables;
+ * v4 = D57 mela_sessions table.
  */
 @Database(
     entities = [
@@ -74,8 +79,9 @@ import com.boikhata.core.database.entity.UserEntity
         PeriodLockEntity::class,
         RecurringExpenseEntity::class,
         BudgetEntity::class,
+        MelaSessionEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 abstract class BoiKhataDatabase : RoomDatabase() {
@@ -99,6 +105,8 @@ abstract class BoiKhataDatabase : RoomDatabase() {
     abstract fun budgetDao(): BudgetDao
     abstract fun tenantRebindDao(): TenantRebindDao
     abstract fun backupDao(): BackupDao
+    abstract fun supplierDao(): SupplierDao
+    abstract fun melaDao(): MelaDao
 
     companion object {
         const val DATABASE_NAME = "boi-khata.db"

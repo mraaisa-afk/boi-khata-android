@@ -33,4 +33,6 @@
     <string name="cash_close_button">আজকের হিসাব</string>
     <string name="reports_button">রিপোর্ট</string>
     <string name="subscription_button">সাবস্ক্রিপশন</string>
+    <string name="supplier_button">সাপ্লায়ার</string>
+    <string name="mela_button">মেলা</string>
 </resources>

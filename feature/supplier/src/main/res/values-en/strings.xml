@@ -1,0 +1,30 @@
+<resources>
+    <string name="supplier_title">Supplier & Payable Ledger</string>
+    <string name="add_supplier">Add Supplier</string>
+    <string name="supplier_name">Supplier/Publisher name</string>
+    <string name="phone">Phone</string>
+    <string name="settlement_cycle">Settlement cycle (days)</string>
+    <string name="notes">Notes</string>
+    <string name="no_suppliers">No suppliers yet.</string>
+    <string name="total_payable">Total payable</string>
+    <string name="payable">Payable</string>
+    <string name="aging">Aging</string>
+    <string name="transactions">Transactions</string>
+    <string name="add_opening">Opening balance</string>
+    <string name="add_consignment">Consignment receipt</string>
+    <string name="add_purchase">Purchase (credit)</string>
+    <string name="add_payment">Payment</string>
+    <string name="entry_amount">Amount</string>
+    <string name="entry_description">Description</string>
+    <string name="trx_id">trxID (optional)</string>
+    <string name="share_statement">Share statement</string>
+    <string name="settlement_reminders">Settlement reminders</string>
+    <string name="no_entries">No transactions yet.</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="select_entry_type">Entry type</string>
+    <string name="select_account">Cash account</string>
+    <string name="loading">Loading…</string>
+    <string name="settlement_cycle_hint">e.g. 30 days</string>
+</resources>

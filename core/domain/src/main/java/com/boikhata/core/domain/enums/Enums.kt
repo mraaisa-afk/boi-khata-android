@@ -22,3 +22,6 @@ enum class BookCategory { TEXTBOOK, GENERAL, STATIONERY, OTHER }
 enum class StockChangeReason { SALE, PURCHASE, RETURN, ADJUSTMENT, MELA_IN, MELA_OUT }
 
 enum class BookCondition { NEW, USED, DAMAGED }
+
+/** D51: SupplierEntryType — supplier/denā payable ledger types (CONVENTIONS §2). */
+enum class SupplierEntryType { OPENING, CONSIGNMENT, PURCHASE, PAYMENT, ADJUSTMENT }

@@ -63,6 +63,8 @@ fun PosScreen(
     onReportsClick: () -> Unit = {},
     onCashCloseClick: () -> Unit = {},
     onSubscriptionClick: () -> Unit = {},
+    onSupplierClick: () -> Unit = {},
+    onMelaClick: () -> Unit = {},
     viewModel: SaleViewModel = hiltViewModel(),
 ) {
     val cartState by viewModel.cartState.collectAsState()
@@ -89,6 +91,12 @@ fun PosScreen(
                     }
                     TextButton(onClick = onSubscriptionClick) {
                         Text(stringResource(R.string.subscription_button))
+                    }
+                    TextButton(onClick = onSupplierClick) {
+                        Text(stringResource(R.string.supplier_button))
+                    }
+                    TextButton(onClick = onMelaClick) {
+                        Text(stringResource(R.string.mela_button))
                     }
                 },
             )

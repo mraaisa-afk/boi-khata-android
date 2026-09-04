@@ -78,4 +78,7 @@ interface TenantRebindDao {
 
     @Query("UPDATE budgets SET tenantId = :newTenantId WHERE tenantId = :oldTenantId")
     suspend fun rebindBudgets(oldTenantId: String, newTenantId: String): Int
+
+    @Query("UPDATE mela_sessions SET tenantId = :newTenantId WHERE tenantId = :oldTenantId")
+    suspend fun rebindMelaSessions(oldTenantId: String, newTenantId: String): Int
 }

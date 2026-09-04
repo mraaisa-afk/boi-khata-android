@@ -73,6 +73,8 @@ dependencies {
     implementation(project(":feature:expense"))
     implementation(project(":feature:reports"))
     implementation(project(":feature:subscription"))
+    implementation(project(":feature:supplier"))
+    implementation(project(":feature:melamode"))
     implementation(project(":shared:receipt"))
 
     implementation(platform(libs.androidx.compose.bom))

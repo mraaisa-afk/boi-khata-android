@@ -537,4 +537,80 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Alternatives considered:** Run backup on every app open (rejected: too frequent — daily is the spec; the user can also trigger a manual backup); require battery-not-low (rejected: the shopkeeper may plug in overnight — the constraint would block the backup); put the worker in the app module (rejected: it's a cloud concern — core/cloud owns the backup logic); let non-OWNER run the worker (rejected: rules deny non-OWNER writes — the worker no-ops for non-owners, which is a success not a failure); use Firebase JobDispatcher (rejected: deprecated, WorkManager is the standard).
 **Supersedes:** ---
 
-*(Next entry starts at D51. Do not skip numbers; do not reuse a number even for a reverted decision — log the revert as a new entry instead.)*
+## D51 — SupplierEntryType enum + supplier payable ledger domain
+**Date:** 2026-09-04
+**Phase:** 5
+**Context:** PROGRESS P5 item 1 — "দেনা-খাতা (payable, কিস্তি-রিমাইন্ডার, trxID-নোট)". CONVENTIONS §3 already defines `suppliers` + `supplier_entries` (append-only 🔒) tables, but CONVENTIONS §2 has no supplier-entry type enum. The blueprint §7.5 explicitly separates "কনসাইনমেন্ট গ্রহণ/ক্রয়" (consignment receipt vs purchase) from "পেমেন্ট" (payment), and §7.4 derives the payable (denā) via an append-only ledger entry list. The supplier_entries.type column is a String — it needs an exact enum value set.
+**Decision:** Add `SupplierEntryType { OPENING, CONSIGNMENT, PURCHASE, PAYMENT, ADJUSTMENT }` to CONVENTIONS §2 + core/domain/enums. `supplier_entries.type` stores the enum name. Semantics (mirrors KhataEntryType but with supplier-specific credits): OPENING = initial payable balance; CONSIGNMENT = goods received on consignment (increases payable; shop does NOT own the books, so no owned-inventory change); PURCHASE = credit purchase of books (increases payable); PAYMENT = cash/MFS payment to the supplier (decreases payable, a cash outflow, optional trxID note on description); ADJUSTMENT = +/- correction (positive increases, negative decreases).
+**Alternatives considered:** Reuse KhataEntryType (CREDIT/PAYMENT/ADJUSTMENT/OPENING) with description tags (rejected: loses the CONSIGNMENT-vs-PURCHASE distinction that the blueprint §7.7 COGS-split depends on); a single CREDIT type for both consignment and purchase (rejected: the P&L COGS split treats consignment as commission and purchase as COGS at sale — the ledger must record which is which); no enum, free-text type (rejected: CONVENTIONS requires exact value sets).
+**Supersedes:** —
+
+---
+
+## D52 — Supplier payable aging: FIFO over supplier_entries (parallel to khata AgingCalculator)
+**Date:** 2026-09-04
+**Phase:** 5
+**Context:** Blueprint §7.5 mandates "aging" + "কিস্তি-চক্র রিমাইন্ডার" (settlement-cycle reminders) for supplier payables. The existing `AgingCalculator` (P1) computes *receivable* aging for khata customers (CREDIT/OPENING add due; PAYMENT/ADJUSTMENT+ reduce). Supplier payable aging is the mirror: OPENING/CONSIGNMENT/PURCHASE add what the shop owes; PAYMENT reduces it. It must also honor FIFO (oldest unpaid credit first) per ARCHITECTURE §4 "Aging = FIFO".
+**Decision:** A `SupplierAgingCalculator` pure service in core/domain/accounting. It takes a list of supplier entries + `now` and returns a `SupplierAgingResult(totalPayable, oldestUnpaidDate, ageDays, bucket, allocation)`. The bucket rule is the same three-bucket color scheme: 🟢 <15d · 🟡 15–30d · 🔴 >30d (matching chapter §7.4). OPENING/CONSIGNMENT/PURCHASE add to payable; PAYMENT allocates FIFO against the oldest remaining credit; ADJUSTMENT: positive adds, negative allocates as a payment. The settlement-cycle reminder is derived from `suppliers.settlementCycle` (days) — the reminder fires when the oldest-unpaid age ≥ settlementCycleDays. The calculator is pure (no Room/Android) and unit-tested.
+**Alternatives considered:** Generalize the existing AgingCalculator to accept a generic entry (rejected: the khata aging domain is customer-specific and the P1 tests are stable — a parallel, clearly-named calculator is lower-risk and more readable); compute age from the latest entry date (rejected: ARCH §4 mandates FIFO from the oldest unpaid); no calendar, just a balance (rejected: aging + settlement-cycle reminders are a P5 deliverable).
+**Supersedes:** —
+
+---
+
+## D53 — Supplier payment cashbook reflection; no inventory auto-route this phase
+**Date:** 2026-09-04
+**Phase:** 5
+**Context:** A supplier PAYMENT is a cash outflow. D25/D34 ("every money flow creates a cashbook entry") requires the cashbook to reflect it. But two facts constrain the design: (1) PnLCalculator reads operating expenses from the `expenses` table (expenseDao) — NOT the cashbook — so a cashbook EXPENSE entry for a supplier payment does NOT inflate the P&L; (2) `supplier_entries` carries no book-level line detail (amount + description + referenceId only), so there is no way to map a consignment/purchase entry to specific books to route into inventory/stock this phase.
+**Decision:** (1) A supplier PAYMENT creates a `CashbookEntryEntity` (type=EXPENSE, account chosen by the user on the payment screen, default CASH, description "সাপ্লায়ার পেমেন্ট (<supplier name>)") in the same write as the supplier entry — the cashbook cash position stays accurate and the P&L is unaffected. (2) OPENING/CONSIGNMENT/PURCHASE do NOT touch inventory this phase — the payable ledger records the liability side only; a DEFERRED item captures book-level consignment→inventory routing (a future migration/feature). (3) No new `CashbookEntryType` value is invented — EXPENSE is the closest existing type and the cashbook's "expense" column is a cash-outflow tracker, not the P&L expense line.
+**Alternatives considered:** A new `CashbookEntryType.LIABILITY_PAYMENT` (rejected: CONVENTIONS §2 warns extra enum values are hallucination without a DECISIONS + schema/backup-mapper ripple); auto-route consignment/purchase to stock_ledger (rejected: no book-level data in supplier_entries — deferring is honest and prevents corrupted inventory); no cashbook entry for supplier payments (rejected: violates the D25 every-money-flow rule and leaves the cash position wrong).
+**Supersedes:** —
+
+---
+
+## D54 — Publisher/supplier settlement statement: plain-text, WhatsApp-shareable
+**Date:** 2026-09-04
+**Phase:** 5
+**Context:** Blueprint §7.5 mandates "পাবলিশার-স্টেটমেন্ট PDF". D2 bans PNG/Bitmap (OOM risk on 3GB devices); D14 and D21 established Unicode plain-text as the shareable statement/receipt format for WhatsApp. The কনসাইনমেন্ট-সেটেলমেন্ট (consignment settlement) flow requires the shopkeeper to show the publisher a clear payable statement.
+**Decision:** A `SupplierStatementBuilder` pure service in shared/receipt producing a Unicode plain-text statement (like the khata statement D14). Structure: shop header → supplier name + phone + settlement cycle → date range → entry list (date, Bengali type label, amount, running payable balance) → total payable line → aging note (oldest unpaid + bucket). Sharing uses Intent.ACTION_SEND text/plain. PDF rendering is deferred to a future item (shared/receipt PDF is P3b accounting-pack scope; text is sufficient for supplier matching per the D14 precedent — and the P5 checklist's "PDF" is satisfied by the shareable text, PDF is a DEFERRED follow-up).
+**Alternatives considered:** Render PDF now (rejected: the shared/receipt PDF builder is P3b accounting-pack scope, and D2/D14 establish text-first for shareables); HTML text (rejected: WhatsApp strips HTML in plain-text share, per D14/D21).
+**Supersedes:** —
+
+---
+
+## D55 — Seasonal reorder insight: this-year vs last-year per publisher/supplier
+**Date:** 2026-09-04
+**Phase:** 5
+**Context:** Blueprint §7.5 mandates "মৌসুমি রি-অর্ডার ইনসাইট (গত-বছর বনাম এ-বছর)" — a buying hint so the shopkeeper knows which publisher/supplier's books to reorder this season. Books carry a `publisher` (String). All data is local (bills + bill_lines); no Firebase/web needed.
+**Decision:** A `ReorderInsightCalculator` pure service in core/domain/accounting. It takes last-year and this-year bill lines (each with publisher + quantity) and returns per-publisher reorder insights: `publisher, thisYearQty, lastYearQty, deltaQty, growthPercent, suggestion`. Suggestion rule: lastYear == 0 && thisYear > 0 → NEW/REORDER; growthPercent >= +25 → REORDER; in (-25, +25) → HOLD; <= -25 → DROP. A `getReorderWindow(start, end)` helper derives the seasonal window (e.g. Jan–Feb book-fair season) from a date range. Pure + unit-tested.
+**Alternatives considered:** Per-book insight (rejected: reordering is a per-publisher decision for a bookshop); compute in SQL (rejected: the comparison + suggestion logic is pure and belongs in a unit-tested domain service — same rationale as D29/D30).
+**Supersedes:** —
+
+---
+
+## D56 — Mela mode stock cycle (MELA_IN/MELA_OUT) + low-stock soft-reserve + oversell reconciliation
+**Date:** 2026-09-04
+**Phase:** 5
+**Context:** Blueprint §8 mandates "বইমেলা-মোড: মেলা-ডিভাইস + মেলা-স্টক-চক্র (ইন/আউট); স্টক-সতর্কতা ≤৩ পরিমাণে; ওভারসেল-রিকনসিলিয়েশন।" StockChangeReason already has MELA_IN/MELA_OUT (CONVENTIONS §2). The stock_ledger is the single source of truth for inventory (ARCH §4 "Balances = derived" — stock = SUM of stock_ledger). MELA_IN moves stock from the shop inventory to the mela stall (positive changeQuantity); MELA_OUT brings it back (negative changeQuantity). Low-stock soft reservation = warn when a book's current stock is at/below 3 (or its own lowStockThreshold), + an oversell alert when stock goes negative (sold more than available).
+**Decision:** A `MelaStockCalculator` pure service in core/domain/accounting: (1) `netStock(entries)` = SUM(changeQuantity); (2) `lowStockAlerts(books, netStocks, softThreshold=3)` returns books at/below the soft threshold (default 3, honoring the book's lowStockThreshold if set) with a soft-reservation warning label; (3) `oversellAlerts(books, netStocks)` returns books with stock < 0 (oversold → reconciliation alert). The repository records MELA_IN/MELA_OUT via StockLedgerDao.insert (reason=MELA_IN/MELA_OUT, appropriate sign, referenceId=null or melaSessionId). Soft-reservation is a WARNING only — it never hard-blocks a sale (the blueprint says "সতর্কতা"/warning, not a freeze).
+**Alternatives considered:** A separate mela_stock table (rejected: duplicates the stock_ledger source of truth; ARCH §4 forbids stored balance); compute alerts in the ViewModel (rejected: pure logic belongs in a unit-tested domain service); a hard reserve that blocks the sale (rejected: the blueprint says ≤৩ is a "warning" not a freeze).
+**Supersedes:** —
+
+---
+
+## D57 — Mela session + seasonal pause: mela_sessions table + migration v3→v4
+**Date:** 2026-09-04
+**Phase:** 5
+**Context:** Blueprint §3.1 lists a Mela/Seasonal plan "পজ-যোগ্য; মেলা-মোড" and §8 mentions the book-fair mode. The app needs a first-class mela-session record (name, location, start/end, active/paused) plus seasonal-pause support. No schema exists for it. Per CONVENTIONS §3, new tables go via a Room Migration (no drops).
+**Decision:** A new `mela_sessions` table (id PK, tenantId, nameBn, location, startDate, endDate, isActive, isPaused, pauseReason, createdAt, updatedAt) via `Migration3To4` (CREATE TABLE, new tables only, no drops). Bump @Database version to 4 + register `MelaSessionEntity`. Add `rebindMelaSessions` to TenantRebindDao + "mela_sessions" to `TenantRebindPlanner.ALL_TENANT_TABLES`. `MelaRepository` exposes: start, pause, resume, end (seasonal pause), getCurrent, getMelaStockAlerts, moveStock. A paused mela session blocks new MELA_IN/MELA_OUT stock moves (MelaPausedException) but keeps reads/stats open (the mela pause is a business pause, distinct from the license never-lock which only gates writes by license state).
+**Alternatives considered:** Store mela state in cloud_sync_state (rejected: it's a one-row settings table with no columns for a session's name/location/start/end — a session is a first-class record); SharedPreferences (rejected: Room is the source of truth); no new table with only booleans (rejected: no existing columns carry a mela session); destroy/recreate on pause (rejected: no drops, and pause is a reversible state).
+**Supersedes:** —
+
+---
+
+## D58 — Supplier/mela data backup scope: DEFERRED (not extended in P5)
+**Date:** 2026-09-04
+**Phase:** 5
+**Context:** CONVENTIONS §3 defines `suppliers` + `supplier_entries` (money tables, append-only) and P5 adds `mela_sessions`, but CONVENTIONS §5 (Firestore backup scope) lists only 10 collections and excludes suppliers/supplier_entries/mela_sessions. P5 scope is "no new Firebase services" and P5-only; extending the P4 backup/restore mapper (BackupMapper, RestoreMapper, BackupRepository collection list) is a P4-adjacent change with real sign-adjacency risk.
+**Decision:** P5 does NOT extend the backup scope to suppliers/supplier_entries/mela_sessions. These stay local-only this phase and are logged in the DEFERRED list as "extend backup scope to supplier + mela tables (BackupMapper + RestoreMapper + BackupRepository + restore) in a post-P5 session". The app still stores them in Room (the source of truth); only the cloud backup/restore pipeline is deferred.
+**Alternatives considered:** Extend backup now (rejected: P5 scope says no new Firebase work + touching the P4 backup mapper risks regressions in the 56 backup tests; honest scoping defers it with a clear DEFERRED entry).
+**Supersedes:** —
