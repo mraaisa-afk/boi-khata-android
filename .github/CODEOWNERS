@@ -1,0 +1,78 @@
+# CODEOWNERS - Boi-Khata Android
+#
+# GitHub auto-requests review from the owner listed for any path a PR touches.
+# Later rules override earlier ones, so the most specific rule must come LAST.
+#
+# NOTE: only GitHub users/teams with write access can be code owners.
+# The Boi-Khata Coder agent is an integration, not a user, so it can never be
+# listed here. Agent restrictions are enforced by AGENT_GUARDRAILS.md G1-G6
+# plus branch protection on `main`, not by this file.
+#
+# Required setting (manual, one-time):
+#   Settings > Branches > main > Require review from Code Owners
+#
+# Path globs below were verified against settings.gradle.kts on 2026-09-05.
+# Real modules: app, core/{database,domain,cloud,designsystem,common},
+# feature/{home,sale,catalog,khata,expense,supplier,reports,subscription,
+# melamode,support}, shared/receipt.  There is NO data/ directory.
+
+# ---------------------------------------------------------------------------
+# Default owner for everything
+# ---------------------------------------------------------------------------
+*                           @mraaisa-afk
+
+# ---------------------------------------------------------------------------
+# OWNER-ONLY ZONE - agent may propose, Sakira must review
+# ---------------------------------------------------------------------------
+
+# Gate + decision files (D66: PROGRESS.md is the sole gate owner)
+/PROGRESS.md                @mraaisa-afk
+/DECISIONS.md               @mraaisa-afk
+/CONVENTIONS.md             @mraaisa-afk
+/ARCHITECTURE.md            @mraaisa-afk
+
+# Agent behaviour contracts
+/AGENT_GUARDRAILS.md        @mraaisa-afk
+/AGENT_PLAYBOOK.md          @mraaisa-afk
+/DEFINITION_OF_DONE.md      @mraaisa-afk
+/PHASE_PLAN.md              @mraaisa-afk
+
+# Build system - dependency + module changes need a D-decision (G11-G13)
+/settings.gradle.kts        @mraaisa-afk
+/build.gradle.kts           @mraaisa-afk
+/gradle/libs.versions.toml  @mraaisa-afk
+/gradle.properties          @mraaisa-afk
+/gradle/wrapper/**          @mraaisa-afk
+/DEPENDENCY_MANIFEST.md     @mraaisa-afk
+
+# CI + repo meta - agent must never modify workflows
+/.github/workflows/**       @mraaisa-afk
+/.github/CODEOWNERS         @mraaisa-afk
+
+# Signing, secrets, Firebase config
+/app/google-services.json   @mraaisa-afk
+/app/proguard-rules.pro     @mraaisa-afk
+/keystore/**                @mraaisa-afk
+/.env.example               @mraaisa-afk
+
+# Core layer - schema, migrations, guards, shared types
+/core/**                    @mraaisa-afk
+/shared/**                  @mraaisa-afk
+/ROOM_MIGRATION_LEDGER.md   @mraaisa-afk
+
+# ---------------------------------------------------------------------------
+# AGENT WORK ZONE - still reviewed by Sakira, but expected agent territory
+# ---------------------------------------------------------------------------
+/feature/**                 @mraaisa-afk
+/app/src/**                 @mraaisa-afk
+/CODING_STANDARDS.md        @mraaisa-afk
+/TESTING_STRATEGY.md        @mraaisa-afk
+/GIT_WORKFLOW.md            @mraaisa-afk
+
+# Append-only log - agent writes here every session
+/ERROR_LOG.md               @mraaisa-afk
+
+# ---------------------------------------------------------------------------
+# Reminder: Sakira Suva is the sole merge authority on `main`.
+# The agent never merges its own PR, even when CI is green.
+# ---------------------------------------------------------------------------
