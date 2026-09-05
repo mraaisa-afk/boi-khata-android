@@ -23,12 +23,13 @@
 - [ ] Pure-service classes (Calculator, Builder, Parser): at least 85% branch coverage
 - [ ] Repository classes: happy path plus at least one error path
 - [ ] No `@Ignore` without a comment and a linked follow-up
+- [ ] Tests use JUnit 4 (`org.junit.Test`) — JUnit 5 is rejected per D68
 
 ---
 
 ## Gate 3 — Room & Data
 
-- [ ] If the Room schema changed, the matching `MigrationNToN+1` class exists in the same commit
+- [ ] If the Room schema changed, the matching `Migration<N>To<N+1>` class exists in the same commit (current convention: `Migration1To2` through `Migration4To5`)
 - [ ] `ROOM_MIGRATION_LEDGER.md` updated if `TenantRebindPlanner.ALL_TENANT_TABLES` changed
 - [ ] No `fallbackToDestructiveMigration()` anywhere in the codebase
 - [ ] Migration test exists, or the existing suite still passes
@@ -99,6 +100,7 @@
 ```text
 [ ] gradlew build green?
 [ ] Tests: count up, zero new failures?
+[ ] Tests on JUnit 4 (org.junit.Test)?
 [ ] No hardcoded strings?
 [ ] No new dependency without a D-number?
 [ ] Branch name correct?
