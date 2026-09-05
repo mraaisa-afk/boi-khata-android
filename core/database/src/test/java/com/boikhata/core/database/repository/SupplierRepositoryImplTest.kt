@@ -6,6 +6,7 @@ import com.boikhata.core.database.entity.CashbookEntryEntity
 import com.boikhata.core.database.entity.SupplierEntity
 import com.boikhata.core.database.entity.SupplierEntryEntity
 import com.boikhata.core.domain.accounting.PeriodLockChecker
+import com.boikhata.core.domain.accounting.PeriodLockedException
 import com.boikhata.core.domain.accounting.PeriodLockGuard
 import com.boikhata.core.domain.enums.CashbookAccount
 import com.boikhata.core.domain.enums.SupplierEntryType
@@ -107,7 +108,7 @@ class SupplierRepositoryImplTest {
     private class LockedPeriods : PeriodLockChecker {
         override suspend fun getLockedPeriods(tenantId: String): Set<PeriodLockGuard.LockedPeriod> = emptySet()
         override suspend fun assertNotLocked(tenantId: String, date: Long) {
-            throw PeriodLockGuard.PeriodLockedException("locked")
+            throw PeriodLockedException(2026, 1)
         }
     }
 
@@ -161,7 +162,7 @@ class SupplierRepositoryImplTest {
         val repo = SupplierRepositoryImpl(supplierDao, FakeCashbookDao(), writeGuard, LockedPeriods())
         val supplierId = repo.addSupplier("t_1", "সাপ্লায়ার", null, "30", null)
 
-        assertThrows(PeriodLockGuard.PeriodLockedException::class.java) {
+        assertThrows(PeriodLockedException::class.java) {
             kotlinx.coroutines.runBlocking {
                 repo.addEntry("t_1", supplierId, 100.0, SupplierEntryType.CONSIGNMENT, "goods", null, 1000L, "u_1")
             }
@@ -173,13 +174,16 @@ class SupplierRepositoryImplTest {
     @Test
     fun `addEntry throws LicenseBlockedException when guard is SOFT_LOCKED and inserts nothing`() = runTest {
         val supplierDao = FakeSupplierDao()
+        // Pre-seed the supplier so addSupplier is not needed (it would throw under SOFT_LOCKED)
+        supplierDao.suppliers.add(
+            SupplierEntity("s1", "t_1", "সাপ্লায়ার", null, "30", null)
+        )
         val blockedGuard = LicenseWriteGuard().apply { updateState(LicenseState.SOFT_LOCKED) }
         val repo = SupplierRepositoryImpl(supplierDao, FakeCashbookDao(), blockedGuard, NoLock)
-        val supplierId = repo.addSupplier("t_1", "সাপ্লায়ার", null, "30", null)
 
         assertThrows(LicenseBlockedException::class.java) {
             kotlinx.coroutines.runBlocking {
-                repo.addEntry("t_1", supplierId, 100.0, SupplierEntryType.CONSIGNMENT, "goods", null, 1000L, "u_1")
+                repo.addEntry("t_1", "s1", 100.0, SupplierEntryType.CONSIGNMENT, "goods", null, 1000L, "u_1")
             }
         }
         assertThat(supplierDao.entries).isEmpty()
