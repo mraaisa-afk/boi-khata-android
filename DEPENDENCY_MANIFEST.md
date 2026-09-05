@@ -123,9 +123,11 @@ Bundle `compose-core` groups ui, ui-graphics, ui-tooling-preview, foundation, ma
 
 ## Testing
 
+**Test framework: JUnit 4 (`4.13.2`). See D68 below. JUnit 5 is not approved.**
+
 | Library | Version | Scope | Notes |
 | --- | --- | --- | --- |
-| `junit:junit` | `4.13.2` | `testImplementation` | JUnit **4** |
+| `junit:junit` | `4.13.2` | `testImplementation` | JUnit **4** — the only test framework |
 | `androidx.test.ext:junit` | `1.2.1` | `androidTest` | VERIFY-pending |
 | `androidx.test:runner` | `1.6.2` | `androidTest` | VERIFY-pending |
 | `org.robolectric:robolectric` | `4.14.1` | `testImplementation` | VERIFY-pending |
@@ -135,15 +137,40 @@ Bundle `compose-core` groups ui, ui-graphics, ui-tooling-preview, foundation, ma
 | `androidx.compose.ui:ui-test-junit4` | BOM-managed | `androidTest` | P6+ scope |
 | `androidx.compose.ui:ui-test-manifest` | BOM-managed | `androidTest` | |
 
-### Open conflict: JUnit 5 (D7)
+### D68 — Test framework locked to JUnit 4 (amends D7)
 
-Decision **D7** records JUnit 5 as the chosen test framework, but `libs.versions.toml`
-contains **only JUnit 4 (`4.13.2`)** and no `junit-jupiter` entry. The build therefore
-does not implement D7.
+**Decision:** the project uses **JUnit 4 (`4.13.2`)** for all unit, Robolectric and
+instrumented tests. **JUnit 5 (Jupiter) is rejected.** D68 amends D7, which had recorded
+JUnit 5 but was never backed by anything in `libs.versions.toml`.
 
-**Status: unresolved.** Do not "fix" this by adding JUnit 5. Either D7 is amended or
-the catalogue is changed — both require an owner ruling and a D-entry. Until then,
-write tests against **JUnit 4**.
+**Correct import — there is only one:**
+
+```kotlin
+import org.junit.Test
+```
+
+**Why JUnit 4:**
+
+1. **Room migration tests require it.** `MigrationTestHelper` is a JUnit 4 `TestRule`.
+   There is no Google-supported JUnit 5 equivalent, so guardrails G15 and G16 could not
+   be satisfied under JUnit 5.
+2. **Compose UI tests require it.** The artifact is literally `ui-test-junit4`, and
+   `createAndroidComposeRule` is a JUnit 4 rule. P6 and P7 UI work depends on it.
+3. **Robolectric and Hilt require it.** `RobolectricTestRunner` is used via `@RunWith`,
+   and `HiltAndroidRule` is a `@Rule`.
+4. **Instrumented JUnit 5 is effectively unsupported.** `AndroidJUnitRunner` is
+   JUnit 4-based; JUnit 5 on device needs an unofficial third-party Gradle plugin whose
+   device-test support is still experimental.
+5. **296 tests already pass on JUnit 4.** Migrating delivers no user-facing value and
+   adds unpriced risk while the P5 build is still unverified.
+6. **Nothing of value is lost.** MockK, Turbine, Truth and `kotlinx-coroutines-test`
+   behave identically on both. `@DisplayName` is covered by backtick test names,
+   `assertThrows` by `assertFailsWith`, and parameterized tests by the JUnit 4
+   `Parameterized` runner.
+7. **One framework prevents silent failures.** Mixing JUnit 4 and JUnit 5 imports
+   produces the worst possible outcome: a green build with silently skipped tests.
+
+**Reinstating JUnit 5 later requires a fresh D-entry and an owner ruling.**
 
 ---
 
@@ -159,6 +186,7 @@ write tests against **JUnit 4**.
 
 | Library | Status | Reason |
 | --- | --- | --- |
+| JUnit 5 / `junit-jupiter` | Rejected | D68 — Room, Compose, Robolectric and Hilt test infra are all JUnit 4 rules and runners |
 | OkHttp family | Rejected | No REST layer — Firestore only |
 | Retrofit | Rejected | No REST layer — Firestore only |
 | Ktor | Rejected | No REST layer — Firestore only |

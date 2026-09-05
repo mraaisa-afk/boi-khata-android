@@ -18,6 +18,7 @@
 ## Gate 2 — Tests
 
 - [ ] Every new logic unit has a matching unit test in the same commit
+- [ ] Tests are written against **JUnit 4** (`import org.junit.Test`) — see D68
 - [ ] Total test count is greater than or equal to the previous count
 - [ ] All existing tests still pass (zero new failures)
 - [ ] Pure-service classes (Calculator, Builder, Parser): at least 85% branch coverage
@@ -28,7 +29,7 @@
 
 ## Gate 3 — Room & Data
 
-- [ ] If the Room schema changed, the matching `MigrationNToN+1` class exists in the same commit
+- [ ] If the Room schema changed, the matching `Migration<N>To<N+1>` class exists in the same commit (current head is `Migration4To5`, so the next one is `Migration5To6`)
 - [ ] `ROOM_MIGRATION_LEDGER.md` updated if `TenantRebindPlanner.ALL_TENANT_TABLES` changed
 - [ ] No `fallbackToDestructiveMigration()` anywhere in the codebase
 - [ ] Migration test exists, or the existing suite still passes
@@ -99,6 +100,7 @@
 ```text
 [ ] gradlew build green?
 [ ] Tests: count up, zero new failures?
+[ ] JUnit 4 imports only (org.junit.Test)?
 [ ] No hardcoded strings?
 [ ] No new dependency without a D-number?
 [ ] Branch name correct?
