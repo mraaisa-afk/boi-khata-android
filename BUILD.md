@@ -30,7 +30,7 @@ PROGRESS.md (ফেজ-চেকলিস্ট) · DECISIONS.md (সিদ্�
 - `app/google-services.json` → applicationId **com.boikhata** (CONVENTIONS §১)।
   Firebase প্রজেক্টে (boi-khata-app) ঠিক এই applicationId-ই রেজিস্টার্ড —
   **বিদ্যমান ফাইলই বৈধ; রিপো-বদলে কিছু করা লাগবে না।**
-- ফাইলটি রিপোতে কমিট হয় না (.gitignore); প্রতি AI-সেশনে অ্যাটাচ করে `app/`-এ বসানো হয়।
+- ফাইলটি রিপোতে কমিটেড ও repo-safe (D68); কোনো সেশনে অ্যাটাচ করার প্রয়োজন নেই।
 - `google-services` প্লাগইন app-মডিউলে; Firebase ভার্সন BOM-দ্বারা পরিচালিত (catalog দেখো)।
 
 ## ৩. বিল্ড-ভ্যারিয়েন্ট ও সাইনিং

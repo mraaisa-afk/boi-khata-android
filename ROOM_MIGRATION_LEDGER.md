@@ -14,13 +14,13 @@
 
 ## Current Schema Version
 
-**Current Room DB version: v5**
+**Current Room DB version: v6**
 
 - Database class: `core/database/src/main/java/com/boikhata/core/database/BoiKhataDatabase.kt`
 - `exportSchema = true`
 - Entities registered: **24**
-- Last migration: `Migration4To5`
-- Next migration would be: `Migration5To6`
+- Last migration: `Migration5To6`
+- Next migration would be: `Migration6To7`
 
 ### Naming convention
 
@@ -32,6 +32,7 @@ Migration classes in this repo are named `Migration<N>To<N+1>`:
 | `Migration2To3` | `migration/Migration2To3.kt` |
 | `Migration3To4` | `migration/Migration3To4.kt` |
 | `Migration4To5` | `migration/Migration4To5.kt` |
+| `Migration5To6` | `migration/Migration5To6.kt` |
 
 > Do **not** write `MigrationV1_V2`. That form does not exist in this codebase.
 
@@ -48,6 +49,7 @@ Sourced from the KDoc block on `BoiKhataDatabase`.
 | v3 | `Migration2To3` | Accounting tables | D32, D35 |
 | v4 | `Migration3To4` | `mela_sessions` table | D57 |
 | v5 | `Migration4To5` | `trial_redemptions` table | D64 |
+| v6 | `Migration5To6` | Unique index on `supplier_entries.idempotencyKey` | D70 |
 
 > **Known gap:** the per-migration SQL was not read line by line during this audit.
 > Before relying on the exact column-level changes for v2 and v3, open the migration

@@ -820,3 +820,62 @@ Firebase-Project-Context §১ স্পষ্ট: "NOT a secret file; repo-safe
   উল্টোটা নয়।
 
 **Supersedes:** BUILD.md §২-এর google-services.json-সংক্রান্ত বাক্য (ফাইল-সংশোধন বাকি)।
+
+---
+
+## D69 — JUnit 4.13.2 is the sole test framework; JUnit 5 (Jupiter) is forbidden
+
+**Date:** 2026-09-10
+**Phase:** Cross-cutting (test infrastructure)
+**Context:**
+The project has used JUnit 4.13.2 since P0 (`gradle/libs.versions.toml` line 53: `junit4 = "4.13.2"`). Every existing test — 296+ across core/domain, core/database, shared/receipt — runs on JUnit 4. No JUnit 5 (Jupiter) dependency exists anywhere in the catalog or any module's `build.gradle.kts`. This was an implicit convention; it is now formalised so that a future agent does not introduce JUnit 5 and create a mixed-framework test suite that breaks CI.
+
+**Decision:**
+1. **JUnit 4.13.2 is the ONLY test framework** for unit tests, DAO/Room tests, and any future instrumented tests.
+2. **JUnit 5 (Jupiter) is forbidden** — no `org.junit.jupiter.*` dependency may be added to any module's `build.gradle.kts` or to `libs.versions.toml`.
+3. The `junit` alias in `libs.versions.toml` (currently `junit4 = "4.13.2"`) is the single source of the JUnit version; no inline version strings.
+4. Test naming stays `<ClassUnderTest>Test`; methods `should <expected> when <condition>` (BUILD.md §5).
+
+**Alternatives considered:**
+- *Adopt JUnit 5 (Jupiter):* rejected — no benefit for this project's test pyramid (pure-domain unit tests + Room-in-memory); migration would touch every test file and risk CI breakage for zero functional gain.
+- *Leave implicit:* rejected — implicit conventions get violated; a DECISIONS.md entry makes the rule grep-enforceable in review.
+
+**Supersedes:** —
+
+---
+
+## D70 — Migration5To6: deterministic idempotencyKey unique index on supplier_entries
+
+**Date:** 2026-09-10
+**Phase:** P5 hotfix (B3 bug)
+**Context:**
+`supplier_entries` is an append-only (🔒) ledger table. Its `idempotencyKey` column exists but is NOT enforced unique at the Room layer. The current repository (`SupplierRepositoryImpl.kt`) generates `idempotencyKey = UUID.randomUUID().toString()` at three call sites (lines 101, 138, 154). This means:
+  - The same business operation retried (e.g. after a crash or sync retry) produces a DIFFERENT UUID each time.
+  - Nothing stops a duplicate entry from being inserted.
+  - This is bug B3, noted as `@Ignore` in `SupplierRepositoryImplTest.kt` line 261.
+
+A unique index on `idempotencyKey` is the enforcement layer. But the index is only effective once the repository generates **deterministic** keys — the same business operation retried must produce the SAME key string, so the unique constraint turns the duplicate into a constraint error (caught by the repository as an idempotent no-op).
+
+**Decision:**
+1. **Add a unique Room index** on `supplier_entries.idempotencyKey` via `@Index(value = ["idempotencyKey"], unique = true)` on the `@Entity` annotation.
+2. **Write `Migration5To6`** — `CREATE UNIQUE INDEX IF NOT EXISTS index_supplier_entries_idempotencyKey ON supplier_entries(idempotencyKey)`. No table drops, no column changes (no-drop rule, CONVENTIONS §3).
+3. **Bump `@Database` version 5 → 6** and register `Migration5To6` in `DatabaseModule.addMigrations()`.
+4. **Idempotency key contract (deterministic):**
+   ```
+   idempotencyKey = "{supplierId}_{sourceEntityId}_{entryType}"
+   ```
+   Where `sourceEntityId` is the UUID of the document that triggered the entry — created once, stored permanently:
+   - **PURCHASE** tied to a supplier bill: `"{supplierId}_{billId}_PURCHASE"`
+   - **PAYMENT** to a supplier: `"{supplierId}_{paymentId}_PAYMENT"` (paymentId = UUID generated once per payment intent)
+   - **CONSIGNMENT** settlement: `"{supplierId}_{settlementId}_SETTLE"` (or `_CONSIGNMENT`)
+   - **OPENING** balance: `"{supplierId}_{openingId}_OPENING"`
+   - **ADJUSTMENT**: `"{supplierId}_{adjustmentReferenceId}_ADJUSTMENT"`
+   The key MUST NOT include timestamps or random components. Same business operation = same key, always.
+5. **Repository fix is a required follow-up** (not in this PR's scope). The current `UUID.randomUUID()` generation at three call sites in `SupplierRepositoryImpl.kt` must be replaced with the deterministic contract above. This PR ships the enforcement layer (index + migration); the application layer (key generation) follows in a separate change. Until then, the index is a no-op for random UUIDs (they are unique by nature) but becomes the safety net once deterministic keys are in place.
+
+**Alternatives considered:**
+- *Application-level dedup (query before insert):* rejected — race conditions between concurrent writes; Room's unique index is atomic.
+- *Firestore-only enforcement:* rejected — offline-first; Room is the source of truth; the constraint must exist locally.
+- *Include epochMillis in key:* rejected (Senior ruling) — non-deterministic; same operation retried later produces a different key, defeating the purpose.
+
+**Supersedes:** —

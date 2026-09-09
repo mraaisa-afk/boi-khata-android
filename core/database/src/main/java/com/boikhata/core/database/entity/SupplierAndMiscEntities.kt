@@ -1,6 +1,7 @@
 package com.boikhata.core.database.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /** CONVENTIONS §3: suppliers(id PK, tenantId, nameBn, phone?, settlementCycle, notes?) */
@@ -15,8 +16,12 @@ data class SupplierEntity(
 )
 
 /** CONVENTIONS §3 🔒: supplier_entries(id PK, tenantId, supplierId, amount, type, description,
- *  referenceId?, date, idempotencyKey) — append-only */
-@Entity(tableName = "supplier_entries")
+ *  referenceId?, date, idempotencyKey) — append-only.
+ *  D70: unique index on idempotencyKey enforces deterministic-key dedup. */
+@Entity(
+    tableName = "supplier_entries",
+    indices = [Index(value = ["idempotencyKey"], unique = true)],
+)
 data class SupplierEntryEntity(
     @PrimaryKey val id: String,
     val tenantId: String,

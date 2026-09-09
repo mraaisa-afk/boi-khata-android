@@ -23,7 +23,7 @@
    PURCHASE=credit purchase→increases payable; PAYMENT=cash/MFS→decreases payable;
    ADJUSTMENT=±correction. Mirrors KhataEntryType with supplier-specific credits.)
 
-## ৩. Room-স্কিমা v1 (টেবিল → কলাম; টাকার-টেবিল = ট্যাগড 🔒 append-only)
+## ৩. Room-স্কিমা v6 (টেবিল → কলাম; টাকার-টেবিল = ট্যাগড 🔒 append-only)
 
 - tenants(id PK, name, phone, createdAt)
 - users(id PK, tenantId, name, role, pinHash, salt, isActive, createdAt, updatedAt)
@@ -51,9 +51,14 @@
 - cashbook_entries 🔒(id PK, tenantId, account, type, amount, description, referenceId?,
   date, userId, idempotencyKey)
 - owner_drawings(id PK, tenantId, amount, description, drawingDate, userId, idempotencyKey)
+- period_locks(id PK, tenantId, periodYear, periodMonth, lockedAt, lockedByUserId) — D32; locked period = immutable money tables
+- recurring_expenses(id PK, tenantId, categoryId, amount, description, frequency,
+  lastAppliedDate, nextDueDate, isActive, userId, createdAt) — D35; recurring-expense template
+- budgets(id PK, tenantId, categoryId, monthlyLimit, isActive) — D35; monthly budget per category
 - suppliers(id PK, tenantId, nameBn, phone?, settlementCycle, notes?)
 - supplier_entries 🔒(id PK, tenantId, supplierId, amount, type, description, referenceId?,
-  date, idempotencyKey) — type = SupplierEntryType name (D51)
+  date, idempotencyKey) — type = SupplierEntryType name (D51); D70: unique index on idempotencyKey
+  (deterministic key = "{supplierId}_{sourceEntityId}_{entryType}")
 - mela_sessions(id PK, tenantId, nameBn, location, startDate, endDate, isActive, isPaused,
   pauseReason?, createdAt, updatedAt) — D57; isPaused blocks new MELA_IN/MELA_OUT writes
 - master_catalog(id PK, isbn?, titleBn, titleEn?, author, publisher, classLevel, subject,
