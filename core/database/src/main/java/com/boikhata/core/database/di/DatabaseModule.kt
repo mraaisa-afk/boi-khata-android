@@ -30,6 +30,7 @@ import com.boikhata.core.database.migration.Migration1To2
 import com.boikhata.core.database.migration.Migration2To3
 import com.boikhata.core.database.migration.Migration3To4
 import com.boikhata.core.database.migration.Migration4To5
+import com.boikhata.core.database.migration.Migration5To6
 import com.boikhata.core.database.seed.DatabaseSeeder
 import dagger.Module
 import dagger.Provides
@@ -51,7 +52,7 @@ object DatabaseModule {
             BoiKhataDatabase::class.java,
             BoiKhataDatabase.DATABASE_NAME
         )
-            .addMigrations(Migration1To2, Migration2To3, Migration3To4, Migration4To5)
+            .addMigrations(Migration1To2, Migration2To3, Migration3To4, Migration4To5, Migration5To6)
             .fallbackToDestructiveMigrationOnDowngrade()
             .build()
     }

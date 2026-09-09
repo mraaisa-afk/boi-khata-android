@@ -55,7 +55,8 @@ import com.boikhata.core.database.entity.UserEntity
  * All 19 tables from CONVENTIONS §3 + 3 P3b tables (period_locks, recurring_expenses, budgets)
  * + 1 P5 table (mela_sessions).
  * v1 = initial schema; v2 = D16 normalized columns; v3 = D32/D35 accounting tables;
- * v4 = D57 mela_sessions table; v5 = D64 trial_redemptions table.
+ * v4 = D57 mela_sessions table; v5 = D64 trial_redemptions table;
+ * v6 = D70 supplier_entries idempotencyKey unique index.
  */
 @Database(
     entities = [
@@ -84,7 +85,7 @@ import com.boikhata.core.database.entity.UserEntity
         MelaSessionEntity::class,
         TrialRedemptionEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 abstract class BoiKhataDatabase : RoomDatabase() {
