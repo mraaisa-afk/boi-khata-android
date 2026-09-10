@@ -24,6 +24,7 @@ import javax.inject.Inject
 /**
  * D37: ReportsViewModel — makes the P3b accounting engine visible.
  * P&L (dual-calendar month selector) + balance-sheet + period-lock + budget alerts.
+ * P6: extended with 12-month trend, top-10 rankings, and side-by-side month comparison.
  * Read-only: the engine owns the math; this VM reads it.
  */
 @HiltViewModel
@@ -52,15 +53,29 @@ class ReportsViewModel @Inject constructor(
     private val _rankingState = MutableStateFlow<RankingState>(RankingState.Loading)
     val rankingState: StateFlow<RankingState> = _rankingState.asStateFlow()
 
+    private val _comparisonState = MutableStateFlow<ComparisonState>(ComparisonState.Idle)
+    val comparisonState: StateFlow<ComparisonState> = _comparisonState.asStateFlow()
+
     private var currentTenantId = "t_1"
     private var selectedYear: Int = 0
     private var selectedMonth: Int = 0
 
+    // Comparison: month A (older) and month B (newer — defaults to previous month)
+    var compareYearA: Int = 0; private set
+    var compareMonthA: Int = 0; private set
+    var compareYearB: Int = 0; private set
+    var compareMonthB: Int = 0; private set
+
     init {
-        // Default to current month
         val cal = Calendar.getInstance(TimeZone.getDefault())
         selectedYear = cal.get(Calendar.YEAR)
         selectedMonth = cal.get(Calendar.MONTH) + 1
+        // Comparison defaults: previous month vs current month
+        val calPrev = Calendar.getInstance(TimeZone.getDefault()).apply { add(Calendar.MONTH, -1) }
+        compareYearA = calPrev.get(Calendar.YEAR)
+        compareMonthA = calPrev.get(Calendar.MONTH) + 1
+        compareYearB = selectedYear
+        compareMonthB = selectedMonth
     }
 
     fun loadReports(tenantId: String) {
@@ -71,6 +86,7 @@ class ReportsViewModel @Inject constructor(
         loadBudgetAlerts()
         loadTrend()
         loadRankings()
+        loadComparison()
     }
 
     fun selectMonth(year: Int, month: Int) {
@@ -78,6 +94,18 @@ class ReportsViewModel @Inject constructor(
         selectedMonth = month
         loadPnL()
         loadBudgetAlerts()
+    }
+
+    fun selectCompareMonthA(year: Int, month: Int) {
+        compareYearA = year
+        compareMonthA = month
+        loadComparison()
+    }
+
+    fun selectCompareMonthB(year: Int, month: Int) {
+        compareYearB = year
+        compareMonthB = month
+        loadComparison()
     }
 
     private fun loadPnL() {
@@ -178,6 +206,20 @@ class ReportsViewModel @Inject constructor(
         }
     }
 
+    /** P6: Load side-by-side comparison of two months. */
+    fun loadComparison() {
+        viewModelScope.launch {
+            _comparisonState.value = ComparisonState.Loading
+            try {
+                val pnlA = accountingRepository.getMonthlyPnL(currentTenantId, compareYearA, compareMonthA)
+                val pnlB = accountingRepository.getMonthlyPnL(currentTenantId, compareYearB, compareMonthB)
+                _comparisonState.value = ComparisonState.Success(ReportDepthCalculator.compare(pnlA, pnlB))
+            } catch (e: Exception) {
+                _comparisonState.value = ComparisonState.Error(e.message ?: "ত্রুটি")
+            }
+        }
+    }
+
     private fun loadBudgetAlerts() {
         viewModelScope.launch {
             _budgetAlertState.value = BudgetAlertState.Loading
@@ -190,7 +232,6 @@ class ReportsViewModel @Inject constructor(
         }
     }
 
-    /** The dual-calendar label for the selected month (Gregorian + Bengali). */
     fun monthLabel(): String {
         val gregName = BengaliFiscalCalendar.gregorianMonthNameBn(selectedMonth)
         val bengaliMonth = BengaliFiscalCalendar.gregorianToBengaliMonth(selectedMonth)
@@ -241,4 +282,12 @@ sealed interface RankingState {
         val expenses: List<ReportDepthCalculator.RankedItem>,
     ) : RankingState
     data class Error(val message: String) : RankingState
+}
+
+/** P6: State for side-by-side month comparison. */
+sealed interface ComparisonState {
+    data object Idle : ComparisonState
+    data object Loading : ComparisonState
+    data class Success(val comparison: ReportDepthCalculator.MonthComparison) : ComparisonState
+    data class Error(val message: String) : ComparisonState
 }
