@@ -1,15 +1,16 @@
 <resources>
     <string name="total_due">Total Due</string>
     <string name="today_sales">Today\'s Sales</string>
-    <string name="due_customers">%1$d customers have dues</string>
-    <string name="today_bills">%1$d bills today</string>
-    <string name="top_due">Top Dues (top 5)</string>
-    <string name="no_due">No dues</string>
-    <string name="age_days">%1$d days ago</string>
+    <string name="due_customers">%1$s customers have dues</string>
+    <string name="today_bills">%1$s bills today</string>
+    <string name="top_due">Top Debtors</string>
+    <string name="no_due">No dues right now</string>
+    <string name="no_due_hint">Add a due — go to Khata tab</string>
+    <string name="age_days">%1$s days overdue</string>
     <!-- D75: Trident dashboard strings -->
     <string name="cash_balance">Cash Balance</string>
     <string name="customer_dues">Customer Dues</string>
     <string name="supplier_dues">Supplier Dues</string>
-    <string name="supplier_count">%1$d suppliers</string>
+    <string name="supplier_count">%1$s suppliers</string>
     <string name="cash_account">Cash Account</string>
 </resources>
