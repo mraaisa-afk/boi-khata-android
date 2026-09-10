@@ -45,6 +45,7 @@ import com.boikhata.shared.receipt.ReportShareBuilder
 /**
  * D37: ReportsScreen — the P3b accounting engine made visible.
  * P&L (dual-calendar month selector) + balance-sheet + period-lock + budget alerts.
+ * P6: extended with Trends, Top-10 Rankings, and side-by-side month Comparison.
  */
 @Composable
 fun ReportsScreen(
@@ -63,12 +64,11 @@ fun ReportsScreen(
         R.string.tab_budget,
         R.string.tab_trends,
         R.string.tab_top_ten,
+        R.string.tab_comparison,
     )
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // Month selector
         MonthSelector(viewModel = viewModel)
-        // Top tab row
         ScrollableTabRow(selectedTabIndex = selectedTab) {
             tabs.forEachIndexed { index, labelRes ->
                 Tab(
@@ -85,6 +85,7 @@ fun ReportsScreen(
             3 -> BudgetSection(viewModel = viewModel)
             4 -> TrendSection(viewModel = viewModel)
             5 -> RankingSection(viewModel = viewModel)
+            6 -> ComparisonSection(viewModel = viewModel)
         }
     }
 }
@@ -109,6 +110,8 @@ private fun MonthSelector(viewModel: ReportsViewModel) {
         )
     }
 }
+
+// ── P&L ───────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun PnLSection(viewModel: ReportsViewModel) {
@@ -148,6 +151,8 @@ private fun PnLLineRow(label: String, amount: Double, isBold: Boolean) {
         )
     }
 }
+
+// ── Balance Sheet ─────────────────────────────────────────────────────────────
 
 @Composable
 private fun BalanceSheetSection(viewModel: ReportsViewModel) {
@@ -201,6 +206,8 @@ private fun BalanceRow(label: String, amount: Double) {
         )
     }
 }
+
+// ── Period Lock ───────────────────────────────────────────────────────────────
 
 @Composable
 private fun PeriodLockSection(viewModel: ReportsViewModel) {
@@ -264,6 +271,8 @@ private fun PeriodLockContent(state: PeriodLockState.Success, viewModel: Reports
     }
 }
 
+// ── Budget ────────────────────────────────────────────────────────────────────
+
 @Composable
 private fun BudgetSection(viewModel: ReportsViewModel) {
     val state by viewModel.budgetAlertState.collectAsState()
@@ -321,6 +330,8 @@ private fun BudgetContent(alerts: List<BudgetAlertCalculator.BudgetAlert>) {
     }
 }
 
+// ── 12-Month Trend ────────────────────────────────────────────────────────────
+
 @Composable
 private fun TrendSection(viewModel: ReportsViewModel) {
     val state by viewModel.trendState.collectAsState()
@@ -339,22 +350,24 @@ private fun TrendSection(viewModel: ReportsViewModel) {
                     }) { Text(stringResource(R.string.share_report)) }
                 }
                 items(value.points) { point ->
-                Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(point.labelBn, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text(stringResource(R.string.trend_sales) + ": " + NumberFormatter.formatMoney(point.sales, DigitStyle.BANGLA))
-                        Text(stringResource(R.string.trend_profit) + ": " + NumberFormatter.formatMoney(point.profit, DigitStyle.BANGLA))
-                        Text(stringResource(R.string.trend_expenses) + ": " + NumberFormatter.formatMoney(point.expenses, DigitStyle.BANGLA))
-                        if (point.year != value.points.first().year || point.month != value.points.first().month) {
-                            Text(stringResource(R.string.mom_change, point.salesChangePercent))
+                    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(point.labelBn, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.trend_sales) + ": " + NumberFormatter.formatMoney(point.sales, DigitStyle.BANGLA))
+                            Text(stringResource(R.string.trend_profit) + ": " + NumberFormatter.formatMoney(point.profit, DigitStyle.BANGLA))
+                            Text(stringResource(R.string.trend_expenses) + ": " + NumberFormatter.formatMoney(point.expenses, DigitStyle.BANGLA))
+                            if (point.year != value.points.first().year || point.month != value.points.first().month) {
+                                Text(stringResource(R.string.mom_change, point.salesChangePercent))
+                            }
                         }
                     }
-                }
                 }
             }
         }
     }
 }
+
+// ── Top-10 Rankings ───────────────────────────────────────────────────────────
 
 @Composable
 private fun RankingSection(viewModel: ReportsViewModel) {
@@ -379,7 +392,136 @@ private fun RankingGroup(title: String, rows: List<ReportDepthCalculator.RankedI
             Text("${row.quantity} · ${NumberFormatter.formatMoney(row.amount, DigitStyle.BANGLA)}")
         }
     }
+    Spacer(modifier = Modifier.height(16.dp))
 }
+
+// ── P6: Side-by-side Month Comparison ────────────────────────────────────────
+
+@Composable
+private fun ComparisonSection(viewModel: ReportsViewModel) {
+    val state by viewModel.comparisonState.collectAsState()
+    val context = LocalContext.current
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Month A / Month B selector buttons
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(R.string.comparison_month_a), style = MaterialTheme.typography.labelMedium)
+                TextButton(onClick = {
+                    // Step back one month from A
+                    val (y, m) = prevMonth(viewModel.compareYearA, viewModel.compareMonthA)
+                    viewModel.selectCompareMonthA(y, m)
+                }) { Text("◄ ${stringResource(R.string.comparison_prev_month)}") }
+                Text(
+                    text = monthLabel(viewModel.compareYearA, viewModel.compareMonthA),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                TextButton(onClick = {
+                    val (y, m) = nextMonth(viewModel.compareYearA, viewModel.compareMonthA)
+                    viewModel.selectCompareMonthA(y, m)
+                }) { Text("${stringResource(R.string.comparison_next_month)} ►") }
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(stringResource(R.string.comparison_month_b), style = MaterialTheme.typography.labelMedium)
+                TextButton(onClick = {
+                    val (y, m) = prevMonth(viewModel.compareYearB, viewModel.compareMonthB)
+                    viewModel.selectCompareMonthB(y, m)
+                }) { Text("◄ ${stringResource(R.string.comparison_prev_month)}") }
+                Text(
+                    text = monthLabel(viewModel.compareYearB, viewModel.compareMonthB),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                TextButton(onClick = {
+                    val (y, m) = nextMonth(viewModel.compareYearB, viewModel.compareMonthB)
+                    viewModel.selectCompareMonthB(y, m)
+                }) { Text("${stringResource(R.string.comparison_next_month)} ►") }
+            }
+        }
+
+        when (val s = state) {
+            ComparisonState.Idle, ComparisonState.Loading -> CenterLoading()
+            is ComparisonState.Error -> CenterError(s.message)
+            is ComparisonState.Success -> {
+                val cmp = s.comparison
+                // Share button
+                TextButton(
+                    onClick = {
+                        context.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, ReportShareBuilder.buildComparison(cmp))
+                        }, null))
+                    },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                ) { Text(stringResource(R.string.share_comparison)) }
+
+                // Header row
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(stringResource(R.string.comparison_metric), style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1.4f))
+                    Text(cmp.labelA, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f), maxLines = 1)
+                    Text(cmp.labelB, style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(1f), maxLines = 1)
+                    Text(stringResource(R.string.comparison_change), style = MaterialTheme.typography.labelSmall, modifier = Modifier.weight(0.8f))
+                }
+
+                LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+                    items(cmp.rows) { row ->
+                        ComparisonRow(row)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ComparisonRow(row: ReportDepthCalculator.ComparisonRow) {
+    val deltaColor = when {
+        row.deltaPercent > 0 -> MaterialTheme.colorScheme.tertiary
+        row.deltaPercent < 0 -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val deltaSign = when {
+        row.deltaPercent > 0 -> "+"
+        row.deltaPercent < 0 -> ""
+        else -> ""
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(row.labelBn, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1.4f))
+        Text(NumberFormatter.formatMoney(row.valueA, DigitStyle.BANGLA), style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+        Text(NumberFormatter.formatMoney(row.valueB, DigitStyle.BANGLA), style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+        Text(
+            text = if (row.deltaPercent == 0.0) "=" else "$deltaSign${"%.1f".format(row.deltaPercent)}%",
+            style = MaterialTheme.typography.bodySmall,
+            color = deltaColor,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(0.8f),
+        )
+    }
+}
+
+private fun prevMonth(year: Int, month: Int): Pair<Int, Int> =
+    if (month == 1) Pair(year - 1, 12) else Pair(year, month - 1)
+
+private fun nextMonth(year: Int, month: Int): Pair<Int, Int> =
+    if (month == 12) Pair(year + 1, 1) else Pair(year, month + 1)
+
+private fun monthLabel(year: Int, month: Int): String {
+    val names = listOf("জান", "ফেব", "মার", "এপ্র", "মে", "জুন", "জুল", "আগ", "সেপ", "অক্ট", "নভ", "ডিস")
+    return "${names.getOrElse(month - 1) { month.toString() }} $year"
+}
+
+// ── Shared helpers ────────────────────────────────────────────────────────────
 
 @Composable
 private fun CenterLoading() {
