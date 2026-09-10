@@ -32,12 +32,20 @@ data class BillSummary(
     val status: String,
 )
 
+/**
+ * D75: Trident dashboard data model.
+ * Three Trident arms: cashBalance (নগদ), totalDue (গ্রাহক বাকি), supplierDuesTotal (সাপ্লায়ার পাওনা).
+ * Blueprint §2: Trident numbers only — no chart, no additional metric, no percentage.
+ */
 data class HomeData(
     val totalDue: Double,
     val dueCustomerCount: Int,
     val todaySalesTotal: Double,
     val todayBillCount: Int,
     val topDueCustomers: List<KhataCustomerDue>,
+    val cashBalance: Double,        // D75: নগদ ব্যালেন্স (CASH account balance from cashbook)
+    val supplierDuesTotal: Double,  // D75: সাপ্লায়ার পাওনা (total supplier payable)
+    val supplierCount: Int,         // D75: number of suppliers with outstanding balance
 )
 
 data class KhataCustomerDue(
