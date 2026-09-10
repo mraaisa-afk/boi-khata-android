@@ -79,4 +79,14 @@
     <string name="top_customers">Largest customers</string>
     <string name="top_expenses">Largest expense categories</string>
     <string name="share_report">Share report</string>
+
+    <!-- P6: Comparison tab -->
+    <string name="tab_comparison">Comparison</string>
+    <string name="comparison_month_a">Month A</string>
+    <string name="comparison_month_b">Month B</string>
+    <string name="comparison_prev_month">Prev</string>
+    <string name="comparison_next_month">Next</string>
+    <string name="comparison_metric">Metric</string>
+    <string name="comparison_change">Δ%</string>
+    <string name="share_comparison">Share comparison</string>
 </resources>
