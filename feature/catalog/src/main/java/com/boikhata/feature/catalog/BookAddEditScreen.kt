@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -85,20 +84,21 @@ fun BookAddEditScreen(
             val books = (uiState as CatalogUiState.Success).books
             val book = books.find { it.id == bookId }
             if (book != null) {
+                // Book domain model fields are non-nullable; no ?: defaults needed.
                 isbn = book.isbn ?: ""
                 titleBn = book.titleBn
                 titleEn = book.titleEn ?: ""
-                author = book.author ?: ""
-                publisher = book.publisher ?: ""
-                classLevel = book.classLevel ?: ""
-                subject = book.subject ?: ""
-                editionYear = book.editionYear?.toString() ?: "2026"
-                purchasePrice = book.purchasePrice?.toString() ?: "0"
-                sellingPrice = book.sellingPrice?.toString() ?: "0"
-                initialStock = book.initialStock?.toString() ?: "0"
-                lowStockThreshold = book.lowStockThreshold?.toString() ?: "5"
-                category = book.category ?: BookCategory.TEXTBOOK
-                condition = book.condition ?: BookCondition.NEW
+                author = book.author
+                publisher = book.publisher
+                classLevel = book.classLevel
+                subject = book.subject
+                editionYear = book.editionYear.toString()
+                purchasePrice = book.purchasePrice.toString()
+                sellingPrice = book.sellingPrice.toString()
+                initialStock = book.initialStock.toString()
+                lowStockThreshold = book.lowStockThreshold.toString()
+                category = book.category
+                condition = book.condition
                 isActive = book.isActive
             }
         }
@@ -116,9 +116,15 @@ fun BookAddEditScreen(
             )
         }
     ) { padding ->
+        // D76 FIX 1: fillMaxWidth() only — NOT fillMaxSize() — on a verticalScroll Column.
+        // fillMaxSize() + verticalScroll creates conflicting height constraints inside a
+        // nested-Scaffold context: Compose tries to fill a fixed parent height (fillMaxSize)
+        // AND provide infinite scroll height simultaneously -> IllegalStateException at layout.
+        // fillMaxWidth() lets the Column grow to its content height, which is correct for
+        // a vertically scrollable form.
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(padding)
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState()),
@@ -184,10 +190,8 @@ fun BookAddEditScreen(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
-                // D74 FIX: pass Modifier.weight(1f) so CategoryDropdown does not
-                // consume the entire Row width via its inner fillMaxWidth(), which
-                // previously left a negative remaining width for the weighted sibling
-                // and caused IllegalStateException (crash) in Compose layout.
+                // D74 FIX (preserved): weight(1f) on CategoryDropdown's Box prevents
+                // negative remaining-width crash for the sibling TextField.
                 CategoryDropdown(
                     selected = category,
                     onSelect = { category = it },
@@ -248,8 +252,8 @@ fun BookAddEditScreen(
                     val safePublisher = publisher.ifBlank { "" }
 
                     val isValid = when (isEdit) {
-                        true -> bookId != null && safeTitleBn.isNotBlank() && safeAuthor != null
-                        false -> safeTitleBn.isNotBlank() && safeAuthor != null
+                        true -> bookId != null && safeTitleBn.isNotBlank() && author.isNotBlank()
+                        false -> safeTitleBn.isNotBlank() && author.isNotBlank()
                     }
 
                     if (isValid) {
@@ -309,16 +313,23 @@ private fun CategoryDropdown(
     modifier: Modifier = Modifier,  // D74: caller supplies the weight/size constraint
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Box(modifier = modifier) {  // D74: apply modifier here on Box, not on TextField
+    Box(modifier = modifier) {  // D74: modifier applied to Box, not to TextField
         OutlinedTextField(
             value = categoryLabel(selected),
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.category)) },
-            modifier = Modifier
-                .fillMaxWidth()  // fills the Box, which is now constrained by caller
-                .clickable { expanded = true },
+            // D76 FIX 2: no .clickable here — TextField's own interaction chain handles
+            // ripple/focus; an external .clickable on the TextField itself conflicts with
+            // Material3 internals and can throw at composition time.
+            modifier = Modifier.fillMaxWidth(),
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
+        )
+        // Transparent overlay captures taps without touching TextField's interaction chain.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { expanded = true },
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             BookCategory.entries.forEach { cat ->
@@ -334,16 +345,20 @@ private fun CategoryDropdown(
 @Composable
 private fun ConditionDropdown(selected: BookCondition, onSelect: (BookCondition) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    Box {
+    // D76 FIX 2 (same pattern): outer Box gets fillMaxWidth; transparent overlay for clicks.
+    Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = conditionLabel(selected),
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.condition)) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = true },
+            modifier = Modifier.fillMaxWidth(),
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
+        )
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clickable { expanded = true },
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             BookCondition.entries.forEach { cond ->

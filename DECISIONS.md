@@ -733,3 +733,13 @@ HomeScreen showed two summary cards (Total Due, Today's Sales) using hardcoded h
 5. `strings.xml`: 5 new Bengali string resources added (`cash_balance`, `customer_dues`, `supplier_dues`, `supplier_count`, `cash_account`). No hardcoded UI strings anywhere in the feature.
 **Alternatives considered:** Keep two-card layout, add Supplier as third row (rejected: Cash — the most important daily number — was still missing); use Color.Red for RED aging bucket (rejected: D71 §1 permits only four declared colors; RED bucket uses ColorPrimary maroon); proxy Cash from todaySalesTotal (rejected: conceptually distinct from actual cash balance).
 **Supersedes:** —
+
+---
+
+## D76 — Fix: BookAddEditScreen crash — fillMaxWidth + Box-overlay clickable pattern
+**Date:** 2026-09-10
+**Phase:** P10
+**Context:** BookAddEditScreen crashes (app exits) when navigated to via Catalog FAB. D74 fixed the Row/weight constraint issue but the crash persisted across multiple sessions. Two additional root causes identified: (1) Column used `Modifier.fillMaxSize()` before `verticalScroll()`. In the nested-Scaffold context Compose must simultaneously satisfy a fixed parent-height constraint (fillMaxSize) AND provide infinite height for scroll measurement → conflict produces `IllegalStateException` at layout time. (2) Both `CategoryDropdown` and `ConditionDropdown` attached `Modifier.clickable { }` directly to `OutlinedTextField`. Material3 TextField owns its own internal interaction/ripple chain; an external `.clickable` on the same node creates conflicting interaction sources and can throw during Compose composition.
+**Decision:** (1) Replace `fillMaxSize()` with `fillMaxWidth()` on the scrollable Column — width fills parent, height is determined by content height (correct for vertically scrollable forms). (2) Remove `.clickable` from `OutlinedTextField.modifier` in both dropdowns. Instead, add a transparent `Box(Modifier.matchParentSize().clickable { expanded = true })` as the last child of the outer Box — clicks are captured by the overlay without interfering with the TextField's own interaction chain. D74's Row/weight fix is preserved unchanged. Edit-mode field assignments updated to match non-nullable `Book` domain model fields (no `?: default` on non-nullable fields).
+**Alternatives considered:** Remove nested Scaffold (rejected: other feature screens use the same pattern without issue; over-engineered); keep fillMaxSize() and remove verticalScroll (rejected: form content requires scrolling on small screens); use `enabled = false` on TextField (rejected: grays out the field visually — D2 mandates clear touch targets).
+**Supersedes:** D74 partially — D74's Row/weight fix is preserved; D76 fixes the two additional crash causes D74 missed.
