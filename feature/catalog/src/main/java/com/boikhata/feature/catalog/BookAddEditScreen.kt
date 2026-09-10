@@ -184,7 +184,15 @@ fun BookAddEditScreen(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
-                CategoryDropdown(category) { category = it }
+                // D74 FIX: pass Modifier.weight(1f) so CategoryDropdown does not
+                // consume the entire Row width via its inner fillMaxWidth(), which
+                // previously left a negative remaining width for the weighted sibling
+                // and caused IllegalStateException (crash) in Compose layout.
+                CategoryDropdown(
+                    selected = category,
+                    onSelect = { category = it },
+                    modifier = Modifier.weight(1f),
+                )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
@@ -295,16 +303,20 @@ fun BookAddEditScreen(
 }
 
 @Composable
-private fun CategoryDropdown(selected: BookCategory, onSelect: (BookCategory) -> Unit) {
+private fun CategoryDropdown(
+    selected: BookCategory,
+    onSelect: (BookCategory) -> Unit,
+    modifier: Modifier = Modifier,  // D74: caller supplies the weight/size constraint
+) {
     var expanded by remember { mutableStateOf(false) }
-    Box {
+    Box(modifier = modifier) {  // D74: apply modifier here on Box, not on TextField
         OutlinedTextField(
             value = categoryLabel(selected),
             onValueChange = {},
             readOnly = true,
             label = { Text(stringResource(R.string.category)) },
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth()  // fills the Box, which is now constrained by caller
                 .clickable { expanded = true },
             trailingIcon = { Icon(Icons.Default.ArrowDropDown, contentDescription = null) },
         )
