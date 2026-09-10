@@ -879,3 +879,79 @@ A unique index on `idempotencyKey` is the enforcement layer. But the index is on
 - *Include epochMillis in key:* rejected (Senior ruling) — non-deterministic; same operation retried later produces a different key, defeating the purpose.
 
 **Supersedes:** —
+
+---
+
+## D71 — P10 design system spec: color, typography, shape, motion, lite-mode, forbidden patterns
+
+**Date:** 2026-09-10
+**Phase:** P10 (Design Rebuild)
+**Context:**
+D67 established P10 as the design-enforcement phase and mandated the Lal Khata theme (#800000 maroon + #FDFAF6 ivory), Bengali-first UI, and Bangla digits. D67 also identified that `BoiKhataTheme` was a pass-through — it enforced nothing. D62 explained why: `core:designsystem` only exposed Compose UI/runtime without overriding M3 defaults.
+
+The vendor has now provided the full design system specification. This entry captures it as a single grep-able source of truth for all future P10 agents. No P10 UI code should be written before consulting this entry.
+
+D71 extends D67. D67 is NOT superseded.
+
+**Decision:**
+
+### §1 Color Palette (four semantic roles; no additions without a new D-entry)
+
+| Role | Hex | Purpose | WCAG AA on #FDFAF6 |
+|------|-----|---------|---------------------|
+| Surface | `#FDFAF6` (ivory) | App background, card surfaces | — (D67 confirmed) |
+| Primary | `#800000` (maroon) | Brand/identity ONLY — app bar, key actions, headings accent | 10.52:1 (D67 confirmed) |
+| Semantic Positive | `#1B6E3F` (muted forest green) | Credit amounts, deposit confirmations, positive balances ONLY | **6.03:1** ✅ |
+| Semantic Caution | `#9E5C00` (deep amber) | Overdue indicators, debt warnings, period-locked banners ONLY | **5.06:1** ✅ |
+
+- **Money Green (`#1B6E3F`):** HSL(146°, 0.61, 0.27) — desaturated but clearly green (S=0.61 reads as "calm positive", not grey or neon). Contrast computed via WCAG relative-luminance formula: `(L_lighter + 0.05) / (L_darker + 0.05) = 6.03:1`, exceeding the 4.5:1 threshold for normal text.
+- **Amber (`#9E5C00`):** HSL(35°, 1.00, 0.31) — fully saturated warm amber. Hue at 35° gives 35° separation from maroon's 0° — no visual overlap. Contrast: 5.06:1, exceeding 4.5:1.
+- **RULE:** `#800000` maroon is NOT a semantic error/danger color. It is a brand color. Amber covers caution. No separate error-red is added in D71. If an error color is needed in future, a new D-entry is required.
+- **RULE:** No additional semantic colors may be introduced without a new DECISIONS.md entry.
+
+### §2 Typography
+
+- **Font family:** Noto Sans Bengali for all text (existing convention, unchanged).
+- **Amount display:** `tabular-nums` always — every digit must occupy equal width so ledger columns align vertically. Apply via `fontFeatureSettings` or equivalent in the theme.
+- **Hierarchy contrast:** ONE step above M3 default between heading and body text. Specifically:
+  - Increase contrast between **M3 `headlineSmall`** (24sp) and **M3 `bodyLarge`** (16sp) by bumping `headlineSmall` to **28sp** while keeping `bodyLarge` at 16sp. This widens the heading-to-body ratio from 1.5× to 1.75×, improving ledger readability where shop owners scan column headers vs. row data at arm's length on a 5" device.
+  - Do NOT alter other M3 type roles (titleMedium, labelLarge, etc.) unless a future D-entry says so.
+- **All user-facing strings:** Bengali-first. NumberFormatter for all numeric display values (existing convention, unchanged).
+
+### §3 Shape / Cards
+
+- **Corner radius:** 16dp minimum, 20dp maximum. Never outside this range.
+- **Elevation:** light (1–2dp elevation) OR a soft 1px border. One per component — **never combine elevation + border on the same surface**.
+- **FORBIDDEN:** double shadows, glassmorphism, frosted glass, blurred backgrounds.
+
+### §4 Motion
+
+- **Allowed animation moments (exhaustive — nothing else without a new D-entry):**
+  a. Ledger cell save / write complete
+  b. Deposit or payment save complete
+  c. Tab switch
+- **Duration:** 200ms, ease-in-out. No other durations without a new D-entry.
+- **FORBIDDEN:** bounce on button press, spring animation on list items, loading skeleton shimmer, entrance animation on every screen navigation.
+
+### §5 Lite Mode Principle
+
+- "Premium" = richer, more accurate data. NOT more widgets or animations.
+- App must remain responsive on a ₹5,000 entry-level Android device.
+- This is a hard architecture constraint, not a stretch goal.
+
+### §6 Forbidden Design Patterns (grep-enforceable list for PR review)
+
+- Neobank purple/blue gradient backgrounds
+- Dark "crypto" theme or any dark-primary palette
+- English-only microcopy (every string requires a Bangla version)
+- Icon-only bottom nav (text labels are mandatory)
+- Dense chart dashboards as primary screens
+- Visual mimicry of Revolut / Monzo / N26
+
+**Alternatives considered:**
+- *Add an error-red semantic color now:* rejected — no current screen requires it; adding it speculatively invites misuse. A new D-entry when the need is concrete.
+- *Use M3 default type scale:* rejected — insufficient hierarchy contrast for ledger readability on entry-level devices (D67 diagnosis).
+- *Allow spring/bounce animations for "delight":* rejected — entry-level device performance + shop-owner audience values speed over delight.
+- *Use Material green 500 (#4CAF50):* rejected — contrast 3.3:1 on #FDFAF6, fails WCAG AA; too bright/neon for "calm positive."
+
+**Supersedes:** — (extends D67; D67 is NOT superseded)
