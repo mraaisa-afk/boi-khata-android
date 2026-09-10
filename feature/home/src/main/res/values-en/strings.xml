@@ -6,4 +6,10 @@
     <string name="top_due">Top Dues (top 5)</string>
     <string name="no_due">No dues</string>
     <string name="age_days">%1$d days ago</string>
+    <!-- D75: Trident dashboard strings -->
+    <string name="cash_balance">Cash Balance</string>
+    <string name="customer_dues">Customer Dues</string>
+    <string name="supplier_dues">Supplier Dues</string>
+    <string name="supplier_count">%1$d suppliers</string>
+    <string name="cash_account">Cash Account</string>
 </resources>
