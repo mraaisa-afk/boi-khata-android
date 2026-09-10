@@ -13,29 +13,29 @@ import androidx.compose.ui.unit.sp
 
 val LocalLiteUi = staticCompositionLocalOf { false }
 
-// D71 — Full Lal Khata color scheme (22 M3 tokens)
+// D71/D73 — Full Lal Khata color scheme (26 M3 tokens; D73 adds 4 surfaceContainer tokens)
 // D72 — M3 role mapping documented in DECISIONS.md
 private val LalKhataColors = lightColorScheme(
-    // ── Primary: Maroon #800000 ──────────────────────────────────────
+    // ── Primary: Maroon #800000 ────────────────────────────────────────────────
     primary            = Color(0xFF800000),
     onPrimary          = Color.White,
     primaryContainer   = Color(0xFFFFD7D7),
     onPrimaryContainer = Color(0xFF5C0000),
 
-    // ── Secondary: Money Green #1B6E3F  (6.03:1 WCAG AA) ────────────
+    // ── Secondary: Money Green #1B6E3F  (6.03:1 WCAG AA) ────────────────────
     // secondaryContainer fixes the M3-default lavender nav-bar active chip
     secondary            = Color(0xFF1B6E3F),
     onSecondary          = Color.White,
     secondaryContainer   = Color(0xFFB8F0D4),
     onSecondaryContainer = Color(0xFF003920),
 
-    // ── Tertiary: Amber #9E5C00  (5.06:1 WCAG AA) ───────────────────
+    // ── Tertiary: Amber #9E5C00  (5.06:1 WCAG AA) ───────────────────────
     tertiary            = Color(0xFF9E5C00),
     onTertiary          = Color.White,
     tertiaryContainer   = Color(0xFFFFDDB3),
     onTertiaryContainer = Color(0xFF321200),
 
-    // ── Surface / Background: Warm Ivory #FDFAF6 ─────────────────────
+    // ── Surface / Background: Warm Ivory #FDFAF6 ─────────────────────────────
     // surfaceVariant fixes the M3-default grey elevated card surface
     background       = Color(0xFFFDFAF6),
     onBackground     = Color(0xFF1A1110),
@@ -46,7 +46,16 @@ private val LalKhataColors = lightColorScheme(
     outline          = Color(0xFF8D7B6E),
     outlineVariant   = Color(0xFFD9CFC8),
 
-    // ── Error ────────────────────────────────────────────────────────
+    // ── Surface Container tokens (M3 1.2+) — D73 fix ──────────────────────
+    // Card() uses surfaceContainer (not surfaceVariant) as its default background.
+    // Without these tokens, M3 derives them from primary (maroon #800000) via its
+    // tonal algorithm → lavender/purple tint on all Card surfaces.
+    surfaceContainer        = Color(0xFFF2EDE7),   // warm ivory — same as surfaceVariant
+    surfaceContainerLow     = Color(0xFFF7F3EE),   // slightly lighter (bottom sheets)
+    surfaceContainerHigh    = Color(0xFFEDE7E1),   // slightly darker (nav bar bg)
+    surfaceContainerHighest = Color(0xFFE8E1DB),   // darkest (chips, selected state)
+
+    // ── Error ───────────────────────────────────────────────────────────────────
     error            = Color(0xFFB3261E),
     onError          = Color.White,
     errorContainer   = Color(0xFFF9DEDC),
