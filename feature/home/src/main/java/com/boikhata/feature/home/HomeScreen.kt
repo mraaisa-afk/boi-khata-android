@@ -41,7 +41,7 @@ private val ColorPrimary          = Color(0xFF800000)  // brand/identity — key
 
 /**
  * D67 §2 + D75: Trident dashboard.
- * Three Trident cards (নগদ / গ্রাহক বাকি / সাপ্লায়ার পাওনা) + শীর্ষ বাকিদার list.
+ * Three Trident cards (নগদ / গ্রাহক বাকি / সাপ্লায়ার পাওনা) + আজকের বিক্রি + শীর্ষ বাকিদার list.
  *
  * D71 §6: No charts. D2: Trident numbers only — no extra metric, no percentage.
  * Blueprint §2: খাতা-প্রথম হোম = দেনা-তালিকা + Trident metrics.
@@ -95,7 +95,7 @@ private fun HomeContent(data: HomeData) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(vertical = 16.dp),
     ) {
-        // ── Trident 1: নগদ ব্যালেন্স ────────────────────────────────────
+        // ── Trident 1: নগদ ব্যালেন্স ──────────────────────────────────
         item {
             TridentCard(
                 title = stringResource(R.string.cash_balance),
@@ -104,12 +104,12 @@ private fun HomeContent(data: HomeData) {
                 amountColor = ColorSemanticPositive,
             )
         }
-        // ── Trident 2: গ্রাহক বাকি ─────────────────────────────────────
+        // ── Trident 2: গ্রাহক বাকি ───────────────────────────────────
         item {
             TridentCard(
                 title = stringResource(R.string.customer_dues),
                 value = NumberFormatter.formatMoney(data.totalDue, DigitStyle.BANGLA),
-                subtitle = stringResource(R.string.due_customers, data.dueCustomerCount),
+                subtitle = stringResource(R.string.due_customers, banglaDigit(data.dueCustomerCount.toLong())),
                 amountColor = ColorSemanticCaution,
             )
         }
@@ -118,11 +118,18 @@ private fun HomeContent(data: HomeData) {
             TridentCard(
                 title = stringResource(R.string.supplier_dues),
                 value = NumberFormatter.formatMoney(data.supplierDuesTotal, DigitStyle.BANGLA),
-                subtitle = stringResource(R.string.supplier_count, data.supplierCount),
+                subtitle = stringResource(R.string.supplier_count, banglaDigit(data.supplierCount.toLong())),
                 amountColor = ColorSemanticCaution,
             )
         }
-        // ── Section header: শীর্ষ বাকিদার ─────────────────────────────────
+        // ── আজকের বিক্রি ────────────────────────────────────────────────────
+        item {
+            TodaySalesCard(
+                todaySalesTotal = data.todaySalesTotal,
+                todayBillCount = data.todayBillCount,
+            )
+        }
+        // ── Section header: শীর্ষ বাকিদার ────────────────────────────────────
         item {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -133,17 +140,75 @@ private fun HomeContent(data: HomeData) {
             HorizontalDivider(modifier = Modifier.padding(top = 4.dp))
         }
         if (data.topDueCustomers.isEmpty()) {
-            item {
-                Text(
-                    text = stringResource(R.string.no_due),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
+            item { EmptyDueState() }
         } else {
             items(data.topDueCustomers) { due ->
                 DueCustomerCard(due)
             }
         }
+    }
+}
+
+/**
+ * আজকের বিক্রি summary — today’s sales total + bill count.
+ * Blueprint §2: দেনা-তালিকা + today’s number on Home.
+ * D71 §3: corner radius 16dp; elevation 2dp.
+ */
+@Composable
+private fun TodaySalesCard(
+    todaySalesTotal: Double,
+    todayBillCount: Int,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = stringResource(R.string.today_sales),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = NumberFormatter.formatMoney(todaySalesTotal, DigitStyle.BANGLA),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = ColorSemanticPositive,
+            )
+            Text(
+                text = stringResource(R.string.today_bills, banglaDigit(todayBillCount.toLong())),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/**
+ * Actionable empty state when no customers have dues.
+ * Design KB: “Bengali, actionable, with a next step — never a one-line English sentence.”
+ */
+@Composable
+private fun EmptyDueState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(R.string.no_due),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.no_due_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -188,6 +253,7 @@ private fun TridentCard(
 /**
  * A single customer-due row. Aging-bucket color uses D71 §1 semantic palette only.
  * D71 §3: corner radius 16dp; elevation 1dp.
+ * age rendered via banglaDigit() — no Latin digits in Bengali UI (Design KB digit law).
  */
 @Composable
 private fun DueCustomerCard(due: KhataCustomerDue) {
@@ -217,7 +283,7 @@ private fun DueCustomerCard(due: KhataCustomerDue) {
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = stringResource(R.string.age_days, due.ageDays.toInt()),
+                    text = stringResource(R.string.age_days, banglaDigit(due.ageDays)),
                     style = MaterialTheme.typography.bodySmall,
                     color = amountColor,
                 )
@@ -230,4 +296,14 @@ private fun DueCustomerCard(due: KhataCustomerDue) {
             )
         }
     }
+}
+
+/**
+ * Converts a non-negative integer to Bengali digit string.
+ * Example: 15L → "১৫". Used for counts/ages where formatMoney is inappropriate.
+ * Digit law: no Latin digits in Bengali UI paths (Design KB).
+ */
+private fun banglaDigit(n: Long): String {
+    val b = "০১২৩৪৫৬৭৮৯"
+    return n.toString().map { c -> if (c.isDigit()) b[c - '0'] else c }.joinToString("")
 }

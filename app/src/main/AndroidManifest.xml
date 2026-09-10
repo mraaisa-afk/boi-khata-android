@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
+    <!--
+        Android 11+ (API 30+) package visibility: declare intent queries so the
+        system chooser can surface apps (WhatsApp, SMS, etc.) for ACTION_SEND.
+        Without this, startActivity(Intent.createChooser(...)) may show no targets.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/plain" />
+        </intent>
+    </queries>
+
     <application
         android:name=".BoiKhataApp"
         android:allowBackup="true"
