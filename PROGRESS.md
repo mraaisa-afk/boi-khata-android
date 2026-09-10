@@ -118,6 +118,16 @@
 - [ ] **Exit-gate:** প্রথম পেইং-টেন্যান্ট লাইভ
   - নোট: Requires vendor activation, real payment, and device verification — pilot phase
 
+## P10 — ডিজাইন-সিস্টেম (D67 + D71 + D72)
+- [x] D71: Design System Specification — color palette, typography, shape, motion, forbidden patterns (merged PR #29, 2026-09-07)
+- [x] D72: M3 Color-Scheme Token Mapping — 22-token lightColorScheme role mapping (this PR)
+- [x] BoiKhataTheme.kt: Full D71 color token set (22 tokens) — fixes lavender nav indicator, lavender card surfaces, FAB color
+- [x] BoiKhataTheme.kt: BengaliFontFamily wired into all 15 M3 Typography text roles
+- [x] Catalog + FAB crash investigated — all static checks clean (Migration5To6 registered, DAO columns match, TrialPolicy safe, no Composable issues); build + unit tests pass
+- [ ] Per-screen device audit: card surfaces (#F2EDE7), FAB (maroon #800000), nav indicator (green #B8F0D4), Bengali digits
+- [ ] **Exit-gate:** screenshot test at max font-scale — no tab-label clip, no lavender surfaces
+  - নোট: In-progress — theme tokens pushed (this PR). Device verification pending.
+
 ---
 
 ## পোস্ট-GA (চলমান)
