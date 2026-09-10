@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -96,7 +95,7 @@ private fun HomeContent(data: HomeData) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(vertical = 16.dp),
     ) {
-        // ── Trident 1: নগদ ব্যালেন্স ──────────────────────────────────────────
+        // ── Trident 1: নগদ ব্যালেন্স ────────────────────────────────────
         item {
             TridentCard(
                 title = stringResource(R.string.cash_balance),
@@ -105,7 +104,7 @@ private fun HomeContent(data: HomeData) {
                 amountColor = ColorSemanticPositive,
             )
         }
-        // ── Trident 2: গ্রাহক বাকি ───────────────────────────────────────────
+        // ── Trident 2: গ্রাহক বাকি ─────────────────────────────────────
         item {
             TridentCard(
                 title = stringResource(R.string.customer_dues),
@@ -114,7 +113,7 @@ private fun HomeContent(data: HomeData) {
                 amountColor = ColorSemanticCaution,
             )
         }
-        // ── Trident 3: সাপ্লায়ার পাওনা ──────────────────────────────────────
+        // ── Trident 3: সাপ্লায়ার পাওনা ──────────────────────────────────
         item {
             TridentCard(
                 title = stringResource(R.string.supplier_dues),
@@ -123,7 +122,7 @@ private fun HomeContent(data: HomeData) {
                 amountColor = ColorSemanticCaution,
             )
         }
-        // ── Section header: শীর্ষ বাকিদার ─────────────────────────────────────
+        // ── Section header: শীর্ষ বাকিদার ─────────────────────────────────
         item {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
