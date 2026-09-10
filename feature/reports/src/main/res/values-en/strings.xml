@@ -89,4 +89,7 @@
     <string name="comparison_metric">Metric</string>
     <string name="comparison_change">Δ%</string>
     <string name="share_comparison">Share comparison</string>
+    <string name="improved">Improved</string>
+    <string name="declined">Declined</string>
+    <string name="no_change">No change</string>
 </resources>
