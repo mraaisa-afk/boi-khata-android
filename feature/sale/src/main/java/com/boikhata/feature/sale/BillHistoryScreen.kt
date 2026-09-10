@@ -33,6 +33,11 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// D71 §1 color palette — do NOT add new semantic colors without a new DECISIONS.md entry
+private val ColorSemanticPositive = Color(0xFF1B6E3F) // ✅ প্রাপ্ত/পেড স্ট্যাটাস — muted forest green
+private val ColorSemanticCaution = Color(0xFF9E5C00)  // ⚠ বাকি/আংশিক দেনা সতর্কতা — deep amber
+private val ColorPrimary = Color(0xFF800000)           // 🏷 ব্র্যান্ড/আইডেন্টিটি ONLY — maroon
+
 /**
  * P2b: Bill history — the shopkeeper's record of what was sold.
  */
@@ -86,7 +91,8 @@ fun BillHistoryScreen(
 
 @Composable
 private fun BillCard(bill: BillSummary, dateFormat: SimpleDateFormat, onClick: () -> Unit) {
-    val statusColor = if (bill.status == "PARTIAL") Color(0xFFC62828) else Color(0xFF2E7D32)
+    // D71 §1: PARTIAL (বাকি আছে) → ColorSemanticCaution; পেড → ColorSemanticPositive
+    val statusColor = if (bill.status == "PARTIAL") ColorSemanticCaution else ColorSemanticPositive
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
