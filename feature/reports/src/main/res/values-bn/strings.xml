@@ -83,4 +83,7 @@
     <string name="comparison_metric">হিসাব</string>
     <string name="comparison_change">পরিবর্তন</string>
     <string name="share_comparison">তুলনা শেয়ার</string>
+    <string name="improved">বেড়েছে</string>
+    <string name="declined">কমেছে</string>
+    <string name="no_change">অপরিবর্তিত</string>
 </resources>
