@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tab_pnl">লাভ-ক্ষতি</string>
     <string name="tab_balance_sheet">ব্যালেন্স-শিট</string>
@@ -8,7 +9,7 @@
     <string name="gregorian">গ্রেগরিয়ান</string>
     <string name="bengali_year">বাংলা বর্ষ</string>
     <string name="revenue">মোট বিক্রি</string>
-    <string name="discount">ছাড়</string>
+    <string name="discount">ছাড়</string>
     <string name="net_revenue">নিট বিক্রি</string>
     <string name="cogs_purchase">ক্রয়-COGS</string>
     <string name="cogs_consignment">কনসাইনমেন্ট-কমিশন</string>
@@ -42,13 +43,13 @@
     <string name="no_budget_alerts">কোনো বাজেট সতর্কতা নেই</string>
     <string name="warning">সতর্কতা</string>
     <string name="over">সীমা অতিক্রান্ত</string>
-    <string name="sales_by_method">বিক্রি (মাধ্যম অনুযায়ী)</string>
+    <string name="sales_by_method">বিক্রি (মাধ্যম অনুয়ায়ী)</string>
     <string name="cash_sales">নগদ বিক্রি</string>
     <string name="bkash_sales">বিকাশ বিক্রি</string>
     <string name="nagad_sales">নগদ (Nagad) বিক্রি</string>
     <string name="credit_sales">বাকি বিক্রি</string>
     <string name="total_sales">মোট বিক্রি</string>
-    <string name="expenses_by_category">খরচ (শ্রেণি অনুযায়ী)</string>
+    <string name="expenses_by_category">খরচ (শ্রেণি অনুয়ায়ী)</string>
     <string name="total_expenses">মোট খরচ</string>
     <string name="mfs_fee">MFS-ফি (আনুমানিক)</string>
     <string name="mfs_fee_rate">MFS-ফি হার (%)</string>
@@ -70,6 +71,16 @@
     <string name="mom_change">মাসের পরিবর্তন: %1$.1f%%</string>
     <string name="top_books">সেরা বিক্রি বই</string>
     <string name="top_customers">বেশি কেনা ক্রেতা</string>
-    <string name="top_expenses">বড় খরচের শ্রেণি</string>
+    <string name="top_expenses">বড় খরচের শ্রেণি</string>
     <string name="share_report">রিপোর্ট শেয়ার</string>
+
+    <!-- P6: Comparison tab -->
+    <string name="tab_comparison">মাস তুলনা</string>
+    <string name="comparison_month_a">মাস ক</string>
+    <string name="comparison_month_b">মাস খ</string>
+    <string name="comparison_prev_month">আগের মাস</string>
+    <string name="comparison_next_month">পরের মাস</string>
+    <string name="comparison_metric">হিসাব</string>
+    <string name="comparison_change">পরিবর্তন</string>
+    <string name="share_comparison">তুলনা শেয়ার</string>
 </resources>
