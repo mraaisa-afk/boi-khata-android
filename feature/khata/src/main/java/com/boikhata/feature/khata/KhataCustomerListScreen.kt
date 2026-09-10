@@ -39,9 +39,15 @@ import com.boikhata.core.domain.model.KhataCustomer
 import com.boikhata.core.domain.model.KhataCustomerDue
 import com.boikhata.feature.khata.R
 
+// D71 §1 semantic palette — only these four colors are permitted
+private val ColorSemanticPositive = Color(0xFF1B6E3F) // muted forest green: credit, positive balance
+private val ColorSemanticCaution  = Color(0xFF9E5C00) // deep amber: overdue, debt warnings
+private val ColorPrimary          = Color(0xFF800000) // maroon: brand/RED aging bucket
+
 /**
  * P2a: Khata customer list — name+area keyed, with Bengali search.
  * Blueprint §7.4: নাম+এলাকা-কী (ফোন ঐচ্ছিক).
+ * D77: bucket colors migrated to D71 §1 palette.
  */
 @Composable
 fun KhataCustomerListScreen(
@@ -139,11 +145,12 @@ private fun CustomerCard(customer: KhataCustomer, due: KhataCustomerDue?, onClic
                 customer.phone?.let { if (it.isNotBlank()) Text(it, style = MaterialTheme.typography.bodySmall) }
             }
             if (due != null) {
+                // D71 §1: only four semantic colors; no raw hex literals
                 val bucketColor = when (due.agingBucket) {
-                    "GREEN" -> Color(0xFF2E7D32)
-                    "YELLOW" -> Color(0xFFF57F17)
-                    "RED" -> Color(0xFFC62828)
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    "GREEN"  -> ColorSemanticPositive // মুক্ত / healthy
+                    "YELLOW" -> ColorSemanticCaution  // সতর্কতা / approaching overdue
+                    "RED"    -> ColorPrimary           // বাকি / overdue (brand maroon, not error-red)
+                    else     -> MaterialTheme.colorScheme.onSurfaceVariant
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(

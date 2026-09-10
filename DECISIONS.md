@@ -743,3 +743,20 @@ HomeScreen showed two summary cards (Total Due, Today's Sales) using hardcoded h
 **Decision:** (1) Replace `fillMaxSize()` with `fillMaxWidth()` on the scrollable Column — width fills parent, height is determined by content height (correct for vertically scrollable forms). (2) Remove `.clickable` from `OutlinedTextField.modifier` in both dropdowns. Instead, add a transparent `Box(Modifier.matchParentSize().clickable { expanded = true })` as the last child of the outer Box — clicks are captured by the overlay without interfering with the TextField's own interaction chain. D74's Row/weight fix is preserved unchanged. Edit-mode field assignments updated to match non-nullable `Book` domain model fields (no `?: default` on non-nullable fields).
 **Alternatives considered:** Remove nested Scaffold (rejected: other feature screens use the same pattern without issue; over-engineered); keep fillMaxSize() and remove verticalScroll (rejected: form content requires scrolling on small screens); use `enabled = false` on TextField (rejected: grays out the field visually — D2 mandates clear touch targets).
 **Supersedes:** D74 partially — D74's Row/weight fix is preserved; D76 fixes the two additional crash causes D74 missed.
+
+---
+
+## D77 — Apply D71 §1 color palette to feature/khata screens
+**Date:** 2026-09-10
+**Phase:** P10
+**Context:** After D75 fixed HomeScreen hardcoded colors, `KhataCustomerListScreen` and `KhataCustomerDetailScreen` still contained three violations of D71 §1:
+- `CustomerCard` aging buckets: `Color(0xFF2E7D32)` (GREEN), `Color(0xFFF57F17)` (YELLOW), `Color(0xFFC62828)` (RED) — all raw hex, none declared in the D71 palette.
+- `KhataCustomerDetailScreen` credit-limit warning: `Color(0xFFC62828)` — hard red outside D71.
+- `InstallmentCard` paid label: `Color(0xFF2E7D32)` — correct semantic intent but wrong hex (D71 positive = `#1B6E3F`).
+**Decision:**
+1. Declare three private file-level `val` constants at the top of each file: `ColorSemanticPositive = Color(0xFF1B6E3F)`, `ColorSemanticCaution = Color(0xFF9E5C00)`, `ColorPrimary = Color(0xFF800000)` — with D71 §1 inline comments.
+2. `KhataCustomerListScreen` — `CustomerCard`: GREEN→`ColorSemanticPositive`, YELLOW→`ColorSemanticCaution`, RED→`ColorPrimary`. Inline Bengali comments on each bucket.
+3. `KhataCustomerDetailScreen` — credit_limit_warning: `Color(0xFFC62828)` → `ColorSemanticCaution` (caution intent, not hard-red). InstallmentCard paid: `Color(0xFF2E7D32)` → `ColorSemanticPositive`.
+4. No functional or layout changes; no new string resources required.
+**Alternatives considered:** Use MaterialTheme.colorScheme.error for credit-limit warning (rejected: error slot is M3-managed, not part of D71's four-role model); centralize D71 constants in designsystem (deferred: needs a shared module export, D77 is a targeted P10 patch).
+**Supersedes:** — (D71 §1 applies; this entry documents the enforcement on feature/khata)
