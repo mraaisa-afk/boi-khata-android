@@ -24,22 +24,22 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Phase:** 0
 **Context:** Repository initialized with the agent constitution (Blueprint v1.0, ARCHITECTURE, CONVENTIONS, BUILD, PROGRESS, Firebase-Project-Context, .gitignore, catalog). No code-level decisions made yet — this entry establishes the log format and numbering from D2.
 **Decision:** Sequential `D<n>` numbering, oldest first, never renumbered even if an early decision is later superseded.
-**Alternatives considered:** Date-only entries without sequence numbers — rejected because sequence numbers keep "supersedes" references unambiguous even for same-day decisions.
+**Alternatives considered:** Date-only entries without sequence numbers — rejected because sequence numbers keep “supersedes” references unambiguous even for same-day decisions.
 **Supersedes:** —
 
 ---
 
-## D2 — Bangladesh Demographic UI/UX Optimization ("Lal Khata" theme)
+## D2 — Bangladesh Demographic UI/UX Optimization (“Lal Khata” theme)
 **Date:** 2026-08-29
 **Phase:** 0
 **Context:** Need to optimize the UI/UX architecture to cater strictly to the target demographic: 45+ year-old BD shopkeepers in noisy environments using low-end devices. Prevailing Material 3 default configurations are too subtle, hard to tap, cause eye-strain under harsh lights, and rendering PNGs on 3GB RAM devices risks OutOfMemory (OOM) crashes.
 **Decision:**
 1. **Receipts:** Abandon PNG rendering entirely. Use Unicode text or lightweight PDF for WhatsApp sharing.
-2. **Colors & Theming:** Implement "Lal Khata" Theme (`#800000` primary, `#FDFAF6` ivory background to reduce eye strain).
+2. **Colors & Theming:** Implement “Lal Khata” Theme (`#800000` primary, `#FDFAF6` ivory background to reduce eye strain).
 3. **Accessibility:** Over-scale default Typography by 20% independent of OS settings.
 4. **Touch & Feel:** Enforce 56dp–64dp touch targets, skip flat ghost buttons in favor of elevated skeuomorphic buttons, and mandate haptic feedback on saves.
 5. **Layout:** Ban Hamburger menus (use Bottom Navigation) and eliminate dashboard charts (use Trident numbers: Cash, Supplier Dues, Customer Dues).
-6. **Support UI:** Put a professional Vendor Card in Settings with big "Call" and "WhatsApp" buttons; no logos on login/dashboard.
+6. **Support UI:** Put a professional Vendor Card in Settings with big “Call” and “WhatsApp” buttons; no logos on login/dashboard.
 **Alternatives considered:** Default Material 3 styling (rejected for poor accessibility), Chart-based dashboard (rejected for resource consumption and lack of utility to users).
 **Supersedes:** —
 
@@ -138,7 +138,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D12 — Gradle JVM memory raised for AGP 9 lint engine (640m/512m -> 2g/1g)
 **Date:** 2026-08-30
 **Phase:** 1
-**Context:** CI run #3 failed during `:feature:home:lintAnalyzeDebug` — "Unexpected failure during lint analysis". The `gradle.properties` had `-Xmx640m -XX:MaxMetaspaceSize=512m`.
+**Context:** CI run #3 failed during `:feature:home:lintAnalyzeDebug` — “Unexpected failure during lint analysis”. The `gradle.properties` had `-Xmx640m -XX:MaxMetaspaceSize=512m`.
 **Decision:** Raise `org.gradle.jvmargs` to `-Xmx2g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8`. Keep `workers.max=1` and `parallel=false`.
 **Alternatives considered:** Disabling lint on CI (rejected: BUILD.md §6 mandates it); lint task isolation (rejected: narrows real checks).
 **Supersedes:** —
@@ -168,9 +168,9 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D15 — dena-mun accounting treatment: ADJUSTMENT entry bringing balance to zero
 **Date:** 2026-08-29
 **Phase:** 2a
-**Context:** Blueprint §7.4: "1-tap dena mun -> bad-debt journal-entry". khata_entries is append-only.
-**Decision:** Dena-mun inserts a `KhataEntryEntity` with `type="ADJUSTMENT"`, `amount = -currentDue`, `description="dena mun"`. BackupMapper applies the "Negative Adj: " prefix when uploading.
-**Alternatives considered:** Positive magnitude + special type (rejected); deleting entries (forbidden: append-only); a separate "forgiven" flag (rejected: loses audit trail).
+**Context:** Blueprint §7.4: “1-tap dena mun -> bad-debt journal-entry”. khata_entries is append-only.
+**Decision:** Dena-mun inserts a `KhataEntryEntity` with `type="ADJUSTMENT"`, `amount = -currentDue`, `description="dena mun"`. BackupMapper applies the “Negative Adj: ” prefix when uploading.
+**Alternatives considered:** Positive magnitude + special type (rejected); deleting entries (forbidden: append-only); a separate “forgiven” flag (rejected: loses audit trail).
 **Supersedes:** —
 
 ---
@@ -356,7 +356,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D37 — Accounting UI in feature/reports: P&L screen, balance-sheet, period-lock, budget alerts
 **Date:** 2026-09-01
 **Phase:** 3c
-**Decision:** Fill `feature/reports` with `ReportsViewModel`, `ReportsScreen`, `CashCloseScreen` + `CashCloseViewModel`. Navigation: "reports" and "cash_close" routes reachable from Sale screen.
+**Decision:** Fill `feature/reports` with `ReportsViewModel`, `ReportsScreen`, `CashCloseScreen` + `CashCloseViewModel`. Navigation: “reports” and “cash_close” routes reachable from Sale screen.
 **Supersedes:** —
 
 ---
@@ -364,7 +364,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D38 — Cash-close + reports navigation: reachable from Sale tab, not a 5th bottom-nav tab
 **Date:** 2026-09-01
 **Phase:** 3c
-**Decision:** Two routes: "reports" and "cash_close". Both reachable from Sale screen. No new bottom-nav tab. 4-tab invariant preserved.
+**Decision:** Two routes: “reports” and “cash_close”. Both reachable from Sale screen. No new bottom-nav tab. 4-tab invariant preserved.
 **Supersedes:** —
 
 ---
@@ -488,7 +488,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D53 — Supplier UI in feature/supplier: list, add, entry screens
 **Date:** 2026-09-03
 **Phase:** 5
-**Decision:** Fill `feature/supplier` with `SupplierListScreen`, `SupplierAddScreen`, `SupplierEntryScreen`. Navigation: "supplier" route reachable from Sale tab. 4-tab invariant preserved.
+**Decision:** Fill `feature/supplier` with `SupplierListScreen`, `SupplierAddScreen`, `SupplierEntryScreen`. Navigation: “supplier” route reachable from Sale tab. 4-tab invariant preserved.
 **Supersedes:** —
 
 ---
@@ -512,7 +512,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D56 — P5 navigation: supplier route added to Sale tab cluster
 **Date:** 2026-09-03
 **Phase:** 5
-**Decision:** Add "supplier" route to `BoiKhataNavigation`. Reachable from Sale screen. No new bottom-nav tab.
+**Decision:** Add “supplier” route to `BoiKhataNavigation`. Reachable from Sale screen. No new bottom-nav tab.
 **Supersedes:** —
 
 ---
@@ -592,7 +592,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Date:** 2026-09-05
 **Phase:** P10
 **Context:** Two documents conflicted on exit-gate ownership. Blueprint §12 roadmap-table vs PROGRESS.md definitions.
-**Decision:** PROGRESS.md is the single source of truth for exit-gates. Blueprint §12 is roadmap-indicative, not binding. P5-P8 status: "code delivered, gate unproven". P10 = new phase, gate-zero (design-application phase). Gate-proof definition: compile ran, unit-test PASS/FAIL table exists, device/Firebase-dependent parts either proven or flagged CANNOT VERIFY.
+**Decision:** PROGRESS.md is the single source of truth for exit-gates. Blueprint §12 is roadmap-indicative, not binding. P5-P8 status: “code delivered, gate unproven”. P10 = new phase, gate-zero (design-application phase). Gate-proof definition: compile ran, unit-test PASS/FAIL table exists, device/Firebase-dependent parts either proven or flagged CANNOT VERIFY.
 **Alternatives considered:** Blueprint §12 as gate-owner (rejected); re-running P5-P8 (rejected); ignoring conflict (rejected).
 **Supersedes:** —
 
@@ -612,7 +612,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Date:** 2026-09-05
 **Phase:** P10
 **Context:** BUILD.md §2 claimed file is not committed. Verification showed it IS committed at blob a12d0e2e, 762 bytes. No .gitignore entry.
-**Decision:** BUILD.md §2 corrected. File is committed and repo-safe. "Attach per session" instruction cancelled. Never use file absence as build-failure explanation.
+**Decision:** BUILD.md §2 corrected. File is committed and repo-safe. “Attach per session” instruction cancelled. Never use file absence as build-failure explanation.
 **Alternatives considered:** Remove from repo (rejected: Firebase-Project-Context §1 declares it repo-safe); trust BUILD.md over reality (rejected).
 **Supersedes:** BUILD.md §2 google-services.json clause.
 
@@ -760,3 +760,21 @@ HomeScreen showed two summary cards (Total Due, Today's Sales) using hardcoded h
 4. No functional or layout changes; no new string resources required.
 **Alternatives considered:** Use MaterialTheme.colorScheme.error for credit-limit warning (rejected: error slot is M3-managed, not part of D71's four-role model); centralize D71 constants in designsystem (deferred: needs a shared module export, D77 is a targeted P10 patch).
 **Supersedes:** — (D71 §1 applies; this entry documents the enforcement on feature/khata)
+
+---
+
+## D78 — Apply D71 §1 color palette to BillHistoryScreen (feature/sale)
+**Date:** 2026-09-10
+**Phase:** P10
+**Context:** Per-screen D71 §1 audit (Session #8) found one remaining violation in `feature/sale/BillHistoryScreen.kt`:
+- `BillCard.statusColor`: `if (bill.status == "PARTIAL") Color(0xFFC62828) else Color(0xFF2E7D32)` — both raw hex values outside the four-role D71 palette.
+- `Color(0xFFC62828)` (hard red) was used for PARTIAL (baki/debt) bills.
+- `Color(0xFF2E7D32)` (Material green) was used for fully paid bills.
+All other screens audited (PosScreen, BillDetailScreen, CatalogScreen, ExpenseScreen, SupplierScreen) contain no `Color(0xFF...)` raw hex literals — they use `MaterialTheme.colorScheme.*` tokens exclusively.
+**Decision:**
+1. Declare three private file-level `val` constants before the first composable in `BillHistoryScreen.kt`: `ColorSemanticPositive = Color(0xFF1B6E3F)`, `ColorSemanticCaution = Color(0xFF9E5C00)`, `ColorPrimary = Color(0xFF800000)` — with D71 §1 inline comments.
+2. `BillCard.statusColor`: PARTIAL (বাকি/আংশিক দেনা) → `ColorSemanticCaution` (caution/debt warning intent, deep amber); paid → `ColorSemanticPositive` (positive balance intent, forest green).
+3. No functional, layout, or string resource changes.
+4. This completes the code-level D71 §1 enforcement sweep across all feature screens. Remaining PROGRESS.md item (per-screen device audit: card surfaces, FAB, nav indicator, Bengali digits) requires device verification by Sakira.
+**Alternatives considered:** Use `MaterialTheme.colorScheme.error` for PARTIAL status (rejected: error slot is M3-managed, not D71's four-role model; D77 set the same precedent for credit-limit warning); use `ColorPrimary` maroon for PARTIAL (rejected: D71 §1 states Primary is brand/identity ONLY — not a semantic debt indicator).
+**Supersedes:** — (D71 §1 applies; this entry documents enforcement on feature/sale)
