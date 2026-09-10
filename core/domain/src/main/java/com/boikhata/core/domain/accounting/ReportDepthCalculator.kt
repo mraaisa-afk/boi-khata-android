@@ -18,6 +18,45 @@ object ReportDepthCalculator {
 
     data class RankedItem(val label: String, val quantity: Int, val amount: Double)
 
+    /**
+     * P6: Side-by-side comparison of two P&L months.
+     * Returns a list of [ComparisonRow] showing each metric for both months plus delta.
+     */
+    data class ComparisonRow(
+        val labelBn: String,
+        val valueA: Double,
+        val valueB: Double,
+        val deltaPercent: Double, // positive = B improved over A, negative = worsened
+    )
+
+    data class MonthComparison(
+        val labelA: String,
+        val labelB: String,
+        val rows: List<ComparisonRow>,
+    )
+
+    fun compare(a: PnLReport, b: PnLReport): MonthComparison {
+        fun row(label: String, aVal: Double, bVal: Double) = ComparisonRow(
+            labelBn = label,
+            valueA = aVal,
+            valueB = bVal,
+            deltaPercent = changePercent(aVal, bVal),
+        )
+        val rows = listOf(
+            row("নিট বিক্রি", a.netRevenue, b.netRevenue),
+            row("মোট COGS", a.totalCogs, b.totalCogs),
+            row("সর্বমোট লাভ", a.grossProfit, b.grossProfit),
+            row("খরচ", a.expenses, b.expenses),
+            row("নিট লাভ", a.netProfit, b.netProfit),
+            row("মার্জিন (%)", a.marginPercent, b.marginPercent),
+        )
+        return MonthComparison(
+            labelA = "${a.gregorianMonthNameBn} ${a.gregorianYear}",
+            labelB = "${b.gregorianMonthNameBn} ${b.gregorianYear}",
+            rows = rows,
+        )
+    }
+
     fun twelveMonthTrend(reports: List<PnLReport>): List<MonthPoint> {
         val ordered = reports.sortedWith(compareBy<PnLReport> { it.gregorianYear }.thenBy { it.gregorianMonth })
         return ordered.mapIndexed { index, report ->
