@@ -55,10 +55,15 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// D71 §1 semantic palette — only these four colors are permitted
+private val ColorSemanticPositive = Color(0xFF1B6E3F) // muted forest green: credit, paid status
+private val ColorSemanticCaution  = Color(0xFF9E5C00) // deep amber: overdue, credit-limit warnings
+
 /**
  * P2a: Khata customer detail — entries, aging, credit-limit warning,
  * installment tracking, দেনা-মুন, shareable বাকি হিসাব statement.
  * Blueprint §7.4: the project's heart.
+ * D77: hardcoded hex colors replaced with D71 §1 palette.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -220,11 +225,12 @@ private fun DetailContent(
                     )
                     if (stmt.exceedsCreditLimit) {
                         Spacer(Modifier.height(4.dp))
+                        // D71 §1: credit-limit warning = caution (deep amber), not hard-red
                         Text(
                             text = stringResource(R.string.credit_limit_warning,
                                 NumberFormatter.formatMoney(stmt.creditLimit, DigitStyle.BANGLA)),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFFC62828),
+                            color = ColorSemanticCaution,
                             fontWeight = FontWeight.Bold,
                         )
                     }
@@ -344,7 +350,8 @@ private fun InstallmentCard(
                 Text(NumberFormatter.formatMoney(inst.amount, DigitStyle.BANGLA), style = MaterialTheme.typography.bodyMedium)
             }
             if (inst.isPaid) {
-                Text(stringResource(R.string.paid), color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold)
+                // D71 §1: paid = positive outcome -> ColorSemanticPositive (muted forest green)
+                Text(stringResource(R.string.paid), color = ColorSemanticPositive, fontWeight = FontWeight.Bold)
             } else {
                 TextButton(onClick = { onMarkPaid(inst.id) }) { Text(stringResource(R.string.mark_paid)) }
             }
