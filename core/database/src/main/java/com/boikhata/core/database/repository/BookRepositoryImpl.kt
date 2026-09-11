@@ -6,6 +6,7 @@ import com.boikhata.core.domain.enums.BookCategory
 import com.boikhata.core.domain.enums.BookCondition
 import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.model.Book
+import com.boikhata.core.domain.model.LowStockBookSummary
 import com.boikhata.core.domain.pilot.TrialPolicy
 import com.boikhata.core.domain.repository.BookRepository
 import com.boikhata.core.domain.text.BengaliNormalizer
@@ -124,22 +125,46 @@ class BookRepositoryImpl @Inject constructor(
         )
     }
 
+    /**
+     * D79 PR D: Returns active books where initialStock ≤ lowStockThreshold,
+     * sorted by stock ascending (most critical first).
+     *
+     * NOTE: Uses initialStock as a proxy for current stock.
+     * Real current stock = initialStock + stock_ledger delta.
+     * Stock-ledger join is deferred to PR E (requires StockLedgerDao query).
+     * This is safe for MVP: books start low and get restocked via stock-in flow.
+     */
+    override suspend fun getLowStockBookSummaries(tenantId: String): List<LowStockBookSummary> {
+        return bookDao.getActiveByTenant(tenantId)
+            .filter { it.initialStock <= it.lowStockThreshold }
+            .sortedBy { it.initialStock }
+            .map {
+                LowStockBookSummary(
+                    bookId           = it.id,
+                    bookTitleBn      = it.titleBn,
+                    classLevel       = it.classLevel,
+                    currentStock     = it.initialStock, // proxy — see note above
+                    lowStockThreshold = it.lowStockThreshold,
+                )
+            }
+    }
+
     private fun BookEntity.toDomain() = Book(
-        id = id,
-        isbn = isbn,
-        titleBn = titleBn,
-        titleEn = titleEn,
-        author = author,
-        publisher = publisher,
-        classLevel = classLevel,
-        subject = subject,
-        editionYear = editionYear,
-        category = BookCategory.valueOf(category),
-        condition = BookCondition.valueOf(condition),
-        purchasePrice = purchasePrice,
-        sellingPrice = sellingPrice,
-        initialStock = initialStock,
+        id               = id,
+        isbn             = isbn,
+        titleBn          = titleBn,
+        titleEn          = titleEn,
+        author           = author,
+        publisher        = publisher,
+        classLevel       = classLevel,
+        subject          = subject,
+        editionYear      = editionYear,
+        category         = BookCategory.valueOf(category),
+        condition        = BookCondition.valueOf(condition),
+        purchasePrice    = purchasePrice,
+        sellingPrice     = sellingPrice,
+        initialStock     = initialStock,
         lowStockThreshold = lowStockThreshold,
-        isActive = isActive,
+        isActive         = isActive,
     )
 }

@@ -18,6 +18,7 @@ import com.boikhata.core.domain.model.Expense
 import com.boikhata.core.domain.model.ExpenseCategory
 import com.boikhata.core.domain.model.KhataCustomer
 import com.boikhata.core.domain.model.KhataInstallment
+import com.boikhata.core.domain.model.LowStockBookSummary
 import com.boikhata.core.domain.model.OwnerDrawing
 
 /**
@@ -30,7 +31,7 @@ interface UserRepository {
     suspend fun verifyPin(tenantId: String, pin: String): com.boikhata.core.domain.model.User?
 }
 
-// ── P2a: Catalog ──────────────────────────────────────────────────────────────
+// ── P2a: Catalog ──────────────────────────────────────────────────
 
 interface BookRepository {
     suspend fun getBooks(tenantId: String): List<Book>
@@ -72,9 +73,16 @@ interface BookRepository {
         lowStockThreshold: Int,
         isActive: Boolean,
     )
+
+    /**
+     * D79 PR D: Returns books whose effective stock (initialStock + stock-ledger delta)
+     * is at or below their lowStockThreshold, ordered by currentStock ASC.
+     * Implementation joins books with stock_ledger; feature module is shielded from Room.
+     */
+    suspend fun getLowStockBookSummaries(tenantId: String): List<LowStockBookSummary>
 }
 
-// ── P2a: Khata depth ──────────────────────────────────────────────────────────
+// ── P2a: Khata depth ──────────────────────────────────────────────
 
 interface KhataRepository {
     suspend fun getCustomers(tenantId: String): List<KhataCustomer>
@@ -97,7 +105,7 @@ interface KhataRepository {
         description: String,
         referenceBillId: String?,
         collectedByUserId: String,
-        cashbookAccount: CashbookAccount? = null, // D34: for PAYMENT type — the account the customer paid into
+        cashbookAccount: CashbookAccount? = null,
     ): String
 
     suspend fun forgiveDebt(
@@ -118,7 +126,7 @@ interface KhataRepository {
     suspend fun markInstallmentPaid(id: String)
 }
 
-// ── P2b: POS / Billing ───────────────────────────────────────────────────────
+// ── P2b: POS / Billing ───────────────────────────────────────────────
 
 interface BillRepository {
     suspend fun getBillsByDate(tenantId: String, startOfDay: Long, endOfDay: Long): List<com.boikhata.core.domain.model.BillSummary>
@@ -156,7 +164,7 @@ interface LicenseRepository {
     suspend fun isWifiOnlySync(tenantId: String): Boolean
 }
 
-// ── P3a: Expense ─────────────────────────────────────────────────────────────
+// ── P3a: Expense ──────────────────────────────────────────────────
 
 interface ExpenseRepository {
     suspend fun getCategories(tenantId: String): List<ExpenseCategory>
@@ -185,7 +193,7 @@ interface ExpenseRepository {
     ): String
 }
 
-// ── P3a: Cashbook ────────────────────────────────────────────────────────────
+// ── P3a: Cashbook ──────────────────────────────────────────────────
 
 interface CashbookRepository {
     suspend fun getEntries(tenantId: String): List<CashbookEntry>
@@ -201,7 +209,7 @@ interface CashbookRepository {
     ): String
 }
 
-// ── P3a: Owner Drawing ──────────────────────────────────────────────────────
+// ── P3a: Owner Drawing ──────────────────────────────────────────────
 
 interface OwnerDrawingRepository {
     suspend fun getDrawings(tenantId: String): List<OwnerDrawing>
@@ -214,26 +222,20 @@ interface OwnerDrawingRepository {
     ): String
 }
 
-// ── P3b: Accounting (P&L + balance sheet + period-lock) ──────────────────────
+// ── P3b: Accounting (P&L + balance sheet + period-lock) ──────────────────
 
 interface AccountingRepository {
-    // P&L
     suspend fun getMonthlyPnL(tenantId: String, year: Int, month: Int): com.boikhata.core.domain.model.PnLReport
-    // Balance sheet lite
     suspend fun getBalanceSheet(tenantId: String, asOfDate: Long): com.boikhata.core.domain.model.BalanceSheetLite
-    // Period lock
     suspend fun isPeriodLocked(tenantId: String, year: Int, month: Int): Boolean
     suspend fun lockPeriod(tenantId: String, year: Int, month: Int, userId: String): String
     suspend fun getLockedPeriods(tenantId: String): List<com.boikhata.core.domain.model.PeriodLock>
-    // Khata aging summary
     suspend fun getKhataAgingSummary(tenantId: String, asOfDate: Long): com.boikhata.core.domain.model.KhataAgingSummary
-    // VAT summary
     suspend fun getVatSummary(tenantId: String, start: Long, end: Long): com.boikhata.core.domain.model.VatSummary
-    // Full হিসাব-প্যাক
     suspend fun getHisabPack(tenantId: String, year: Int, month: Int, shopName: String): com.boikhata.core.domain.model.HisabPack
 }
 
-// ── P3b: Recurring Expense (D35) ─────────────────────────────────────────────
+// ── P3b: Recurring Expense (D35) ───────────────────────────────────────
 
 interface RecurringExpenseRepository {
     suspend fun getTemplates(tenantId: String): List<com.boikhata.core.domain.model.RecurringExpenseTemplate>
@@ -249,7 +251,7 @@ interface RecurringExpenseRepository {
     suspend fun getDueTemplates(tenantId: String, now: Long): List<com.boikhata.core.domain.model.RecurringExpenseTemplate>
 }
 
-// ── P3b: Budget (D35) ─────────────────────────────────────────────────────────
+// ── P3b: Budget (D35) ────────────────────────────────────────────────────
 
 interface BudgetRepository {
     suspend fun getBudgets(tenantId: String): List<com.boikhata.core.domain.accounting.BudgetAlertCalculator.Budget>
@@ -257,7 +259,7 @@ interface BudgetRepository {
     suspend fun getMonthlyAlerts(tenantId: String, year: Int, month: Int): List<com.boikhata.core.domain.accounting.BudgetAlertCalculator.BudgetAlert>
 }
 
-// ── P3c: Cash-close (D36) ────────────────────────────────────────────────────
+// ── P3c: Cash-close (D36) ──────────────────────────────────────────────
 
 interface CashCloseRepository {
     suspend fun getDailyClose(
@@ -269,7 +271,7 @@ interface CashCloseRepository {
     ): com.boikhata.core.domain.model.CashCloseReport
 }
 
-// ── P4a: Cloud Auth + License Sync + Tenant Rebind ──────────────────────────
+// ── P4a: Cloud Auth + License Sync + Tenant Rebind ───────────────────────────
 
 interface AuthRepository {
     suspend fun startPhoneVerification(phone: String): Boolean
@@ -287,9 +289,8 @@ interface TenantRebindRepository {
     suspend fun rebind(oldTenantId: String, newTenantId: String): Int
 }
 
-// ── P4b: Backup + Restore ────────────────────────────────────────────────────
+// ── P4b: Backup + Restore ─────────────────────────────────────────────────
 
-/** D46: Result of an incremental backup. */
 sealed class BackupResult {
     data class Success(val collectionsBackedUp: Int, val rowsUploaded: Int, val timestamp: Long) : BackupResult()
     data object NotOwner : BackupResult()
@@ -298,17 +299,15 @@ sealed class BackupResult {
     data class Partial(val collectionsBackedUp: Int, val rowsUploaded: Int, val collectionErrors: Map<String, String>) : BackupResult()
 }
 
-/** D46: Strategy for restore when both sides have data. */
 enum class RestoreStrategy {
-    CLOUD_OVERWRITES_LOCAL, // fresh device — wipe local + download all
-    KEEP_LOCAL,             // cancel — keep local data
+    CLOUD_OVERWRITES_LOCAL,
+    KEEP_LOCAL,
 }
 
-/** D46: Result of a restore. */
 sealed class RestoreResult {
     data class Success(val rowsRestored: Int) : RestoreResult()
     data object NotOwner : RestoreResult()
-    data object BothSidesHaveData : RestoreResult() // requires user choice — never auto-merge
+    data object BothSidesHaveData : RestoreResult()
     data class Error(val message: String) : RestoreResult()
 }
 
@@ -326,7 +325,6 @@ interface RestoreRepository {
 
 // ── P4b: Subscription (manual bKash) ──────────────────────────────────────────
 
-/** D48: Result of recording a subscription payment. */
 sealed class SubscriptionResult {
     data class Success(val paymentId: String) : SubscriptionResult()
     data object NotOwner : SubscriptionResult()
@@ -343,9 +341,8 @@ interface SubscriptionRepository {
     ): SubscriptionResult
 }
 
-// ── P4b: Master Catalog Refresh (read-only) ───────────────────────────────────
+// ── P4b: Master Catalog Refresh (read-only) ──────────────────────────────────
 
-/** D49: Result of a master catalog refresh. */
 sealed class CatalogRefreshResult {
     data class Success(
         val newBooks: List<com.boikhata.core.domain.cloud.CatalogDeltaDetector.NewBook>,
@@ -360,8 +357,6 @@ interface MasterCatalogRepository {
     suspend fun refreshCatalog(tenantId: String): CatalogRefreshResult
     suspend fun applyPriceChange(tenantId: String, bookId: String, newPrice: Double): Boolean
 }
-
-// ── P4b: Tenant info (shop name from Firestore) ───────────────────────────────
 
 interface TenantInfoRepository {
     suspend fun fetchShopName(tenantId: String): String?
@@ -394,7 +389,6 @@ interface SupplierRepository {
         cashbookAccount: com.boikhata.core.domain.enums.CashbookAccount? = null,
     ): String
 
-    // D53: Supplier PAYMENT with optional trxID note → cashbook EXPENSE in the account.
     suspend fun addPayment(
         tenantId: String,
         supplierId: String,
@@ -405,7 +399,6 @@ interface SupplierRepository {
         cashbookAccount: com.boikhata.core.domain.enums.CashbookAccount,
     ): String
 
-    // Convenience: opening / consignment / purchase credits.
     suspend fun addOpeningBalance(tenantId: String, supplierId: String, amount: Double, userId: String): String
     suspend fun addConsignment(tenantId: String, supplierId: String, amount: Double, description: String, userId: String): String
     suspend fun addPurchase(tenantId: String, supplierId: String, amount: Double, description: String, userId: String): String
@@ -414,7 +407,6 @@ interface SupplierRepository {
     suspend fun getSupplierAgingSummary(tenantId: String, now: Long): com.boikhata.core.domain.model.SupplierAgingSummary
     suspend fun getSettlementReminders(tenantId: String, now: Long): List<com.boikhata.core.domain.model.SupplierBalance>
 
-    // D54: settlement statement (shareable text data model)
     suspend fun getSettlementStatement(
         tenantId: String,
         supplierId: String,
@@ -424,7 +416,7 @@ interface SupplierRepository {
     ): com.boikhata.core.domain.model.SupplierStatement
 }
 
-// ── P5: Mela mode (book fair / seasonal) ─────────────────────────────────────
+// ── P5: Mela mode (book fair / seasonal) ───────────────────────────────────
 
 interface MelaRepository {
     suspend fun getCurrentSession(tenantId: String): com.boikhata.core.domain.model.MelaSession?
@@ -441,12 +433,11 @@ interface MelaRepository {
     suspend fun endSession(tenantId: String, userId: String): Boolean
     suspend fun isSessionPaused(tenantId: String): Boolean
 
-    // D56: stock-cycle move (MELA_IN / MELA_OUT) — appends to stock_ledger.
     suspend fun moveStock(
         tenantId: String,
         bookId: String,
         quantity: Int,
-        direction: com.boikhata.core.domain.enums.StockChangeReason, // MELA_IN or MELA_OUT
+        direction: com.boikhata.core.domain.enums.StockChangeReason,
         userId: String,
     ): String
 
