@@ -33,19 +33,22 @@ data class BillSummary(
 )
 
 /**
- * D75: Trident dashboard data model.
- * Three Trident arms: cashBalance (নগদ), totalDue (গ্রাহক বাকি), supplierDuesTotal (সাপ্লায়ার পাওনা).
- * Blueprint §2: Trident numbers only — no chart, no additional metric, no percentage.
+ * D79 §2.2: HomeScreen hero card data model.
+ * নিট লাভ = todaySalesTotal − todayExpenseTotal (সরল নগদ বিয়োগ, বাকি বাদ).
+ * yesterdayNetProfit used for ▲/▼ trend delta badge.
+ * D75 Trident arms retained: cashBalance, totalDue, supplierDuesTotal.
  */
 data class HomeData(
     val totalDue: Double,
     val dueCustomerCount: Int,
-    val todaySalesTotal: Double,
+    val todaySalesTotal: Double,         // D79: আয় — sum of today's bill totals (taka)
+    val todayExpenseTotal: Double = 0.0, // D79: ব্যয় — sum of today's expenses (taka)
     val todayBillCount: Int,
     val topDueCustomers: List<KhataCustomerDue>,
-    val cashBalance: Double,        // D75: নগদ ব্যালেন্স (CASH account balance from cashbook)
-    val supplierDuesTotal: Double,  // D75: সাপ্লায়ার পাওনা (total supplier payable)
-    val supplierCount: Int,         // D75: number of suppliers with outstanding balance
+    val cashBalance: Double,             // D75: নগদ ব্যালেন্স (CASH account balance)
+    val supplierDuesTotal: Double,       // D75: সাপ্লায়ার পাওনা (total supplier payable)
+    val supplierCount: Int,              // D75: number of suppliers with outstanding balance
+    val yesterdayNetProfit: Double = 0.0, // D79 §2.2: for ▲/▼ trend delta vs yesterday
 )
 
 data class KhataCustomerDue(
