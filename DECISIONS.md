@@ -778,3 +778,40 @@ All other screens audited (PosScreen, BillDetailScreen, CatalogScreen, ExpenseSc
 4. This completes the code-level D71 §1 enforcement sweep across all feature screens. Remaining PROGRESS.md item (per-screen device audit: card surfaces, FAB, nav indicator, Bengali digits) requires device verification by Sakira.
 **Alternatives considered:** Use `MaterialTheme.colorScheme.error` for PARTIAL status (rejected: error slot is M3-managed, not D71's four-role model; D77 set the same precedent for credit-limit warning); use `ColorPrimary` maroon for PARTIAL (rejected: D71 §1 states Primary is brand/identity ONLY — not a semantic debt indicator).
 **Supersedes:** — (D71 §1 applies; this entry documents enforcement on feature/sale)
+
+---
+
+## D79 — Locked Design Spec: HomeScreen v2 & Bottom Navigation Redesign
+**Date:** 2026-09-12
+**Phase:** P10
+**Context:**
+Shopkeeper feedback sessions in bookstore clusters (Nilkhet, Patuatuly) revealed that while the P10 D75 vertical Trident (Cash, Customer Dues, Supplier Dues) satisfied basic accounting visibility, owners overwhelmingly preferred a profit-first daily overview paired with rapid POS entry and contextual actionable alerts. The screen mockups shown to bookshop owners yielded the highest rating for the "HomeScreen v2" design (now locked as D79 by Sakira Suva on 11 Sep 2026). Furthermore, the previous Sale-screen tab row suffered catastrophic wrapping (e.g., "Supplier" breaking to one letter per line), necessitating a definitive 4-tab bottom navigation with a dedicated central POS FAB and a consolidated "More" (আরও) hub.
+
+**Decision:**
+1. **HomeScreen v2 Layout Hierarchy:**
+   - **App Bar:** Branded maroon `#800000` header with circular book icon, wordmark «বই খাতা», premium badge, shop name selector, sync status chip (offline-first status indicator), notification bell, and user avatar.
+   - **Hero Card («আজকের নিট লাভ»):** Deep green container (`#1B6E3F`) with prominent gold typography (`#C9A227` / `ColorAccentGold`) displaying today's net profit. Features period toggle («আজ ▾»), visibility toggle (show/hide amount), daily trend indicator (▲/▼ X% compared to yesterday), split sub-columns for ↑ আয় (Income) and ↓ ব্যয় (Expense), and footer summary (`Xটি বিক্রি · Y কাস্টমার`).
+   - **Net Profit Formula (Formal Definition):**
+     `আজকের নিট লাভ = (আজকের নগদ বিক্রি + আজকের খাতা আদায়) − আজকের নগদ ব্যয়`
+   - **Quick Action Grid (5 Tiles):** One prominent primary tile for «নতুন বিক্রি / POS» with daily count badge («আজ X»), alongside four compact action tiles: «আয় যোগ», «ব্যয় যোগ», «খাতা আদায়» (with pending dues badge), and «স্টক-ইন».
+   - **«আজকের করণীয়» (Alerts Section):** Horizontal swipeable alert cards with pagination dots. Includes Type 1: «স্টক শেষ হচ্ছে» (Low stock warning with «জরুরি» badge, order and dismiss actions) and Type 2: «বকেয়া আদায়» (Pending collection count, total due amount, and instant collect CTA).
+   - **«বিশ্লেষণ» (Collapsible Analytics Sheet):** Drag-handle expandable bottom sheet showing monthly progress and sparkline mini bar chart. Line and pie charts remain strictly forbidden per G21.
+
+2. **Navigation Invariant (4 Tabs + Central Gold FAB):**
+   - Bottom navigation locked to 4 tabs with 100% Bengali labels:
+     `হোম` (Home) | `স্টক` (Catalog/Stock) | `[ ৳+ FAB ]` (Central New Sale POS) | `খাতা` (Ledger) | `আরও` (More Hub).
+   - The central elevated gold FAB (`৳+`, 64dp, `ColorAccentGold` container with `#800000` icon) serves as the primary unmissable trigger for New Sale (POS).
+   - The «আরও» (More) screen acts as the canonical launchpad for secondary and administrative modules: রিপোর্ট (Reports), আজকের হিসাব (Cash Close), খরচ ও ক্যাশবুক (Expenses), সাপ্লায়ার (Suppliers), মেলা মোড (Mela Mode), সাবস্ক্রিপশন (Subscription), বিলের ইতিহাস (Bill History), and সেটিংস (Settings). Horizontal overflow strips on secondary screens are deprecated and removed.
+
+3. **Color Palette & Contrast Ruling:**
+   - App bar and primary branding: Maroon `#800000`.
+   - Surfaces: Warm Ivory `#FDFAF6`.
+   - Hero card: Forest Green `#1B6E3F` with Gold `#C9A227` text.
+   - Contrast waiver: The gold-on-green 2.59:1 ratio is explicitly ruled as owner-approved aesthetic branding for large headline numerals, with standard accessibility overrides available under Lite mode.
+
+**Alternatives considered:**
+- Maintaining the D75 Trident 3-card summary on Home (rejected: shopkeepers prioritized actionable profit and rapid billing access over raw balance sheets on the landing screen).
+- Hamburger navigation drawer for secondary tools (rejected: violates constitutional G23).
+- Adding a 5th bottom navigation tab for POS (rejected: violates 4-tab invariant G22; central FAB successfully resolves primary action prominence without crowding the tab bar).
+
+**Supersedes:** D2 (partially, replacing Trident on Home with Net Profit), D67 §2 / D75 (Home Trident replaced), D71 §6 (mini bar charts on Home sheet permitted; line/pie charts remain banned), Blueprint §2 nav list (upgraded from Home/Khata/FAB/Reports/Settings to Home/Stock/FAB/Khata/More).
