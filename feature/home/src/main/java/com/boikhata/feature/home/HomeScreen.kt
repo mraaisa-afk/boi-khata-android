@@ -8,7 +8,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.TrendingDown
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -28,22 +37,21 @@ import com.boikhata.core.designsystem.ColorAccentGold
 import com.boikhata.core.designsystem.ColorBrandMaroon
 import com.boikhata.core.designsystem.ColorSemanticPositive
 import com.boikhata.core.designsystem.ColorSurfaceIvory
+import com.boikhata.core.domain.model.HomeData
 
 // D79 §4.5 — Hero card colors
 private val ColorHeroBg     = ColorSemanticPositive  // #1B6E3F
 private val ColorHeroAmount = ColorAccentGold         // #C9A227 — contrast 2.59:1 vs bg
 // ⚠️ WCAG AA FAILURE: contrast ratio = 2.59:1 (required ≥4.5:1 normal, ≥3.0:1 large)
-// Owner ruling required before GA (spec §4.5: "WCAG AA পাস করতে হবে — PR B-তে যাচাই করে রিপোর্ট দিতে হবে")
+// Owner ruling required before GA (spec §4.5)
 
 /**
  * HomeScreen v2 — D79 Locked Design Spec implementation.
  * PR B scope: AppBar + HeroCard + QuickActionGrid.
- * Data source: existing HomeViewModel fields (PR C will wire net-profit calculation).
  *
  * @param tenantId   Active tenant identifier (Room isolation).
  * @param shopName   Shop name displayed in AppBar row 2.
- * @param isLicensed §5.1 OPEN ITEM: premium badge state pending owner ruling.
- *                   For PR B: badge shown only when true; hidden otherwise.
+ * @param isLicensed §5.1 OPEN ITEM: premium badge; badge shown only when true.
  * @param onNavigate Navigation callback for quick-action tiles.
  */
 @Composable
@@ -79,7 +87,7 @@ fun HomeScreen(
     }
 }
 
-// ────────────────────────────────────────────────────────────────────────────────
+// ──────────────────────────────────────────────────────────────────────────────
 private val ScreenPadding   = 16.dp
 private val SmallTileHeight = 56.dp  // minTouchTarget token
 private val LargeTileHeight = SmallTileHeight * 2 + 8.dp  // = 120dp
@@ -121,12 +129,10 @@ private fun HomeContent(
                 modifier          = Modifier.padding(horizontal = ScreenPadding, vertical = 8.dp),
             )
         }
-        // §2.4 আজকের করণীয় (alert cards) — PR D scope
-        // §2.5 বিশ্লেষণ (collapsible sheet) — PR E scope
     }
 }
 
-// ─── §2.1 App bar ────────────────────────────────────────────────────────────────────
+// ─── §2.1 App bar ─────────────────────────────────────────────────────────────────
 
 @Composable
 private fun HomeAppBar(
@@ -165,9 +171,9 @@ private fun HomeAppBar(
                     )
                 }
                 Spacer(Modifier.width(8.dp))
-                // Wordmark
+                // Wordmark — uses feature-scoped string key (not app module's app_name)
                 Text(
-                    text       = stringResource(R.string.app_name),
+                    text       = stringResource(R.string.home_wordmark),
                     style      = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color      = Color.White,
@@ -195,12 +201,13 @@ private fun HomeAppBar(
                 }
                 Spacer(Modifier.width(2.dp))
                 // User avatar — first letter of shop name
+                val avatarCd = shopName
                 Box(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.2f))
-                        .semantics { contentDescription = shopName },
+                        .semantics { contentDescription = avatarCd },
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -217,7 +224,7 @@ private fun HomeAppBar(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier          = Modifier.clickable(
-                    onClick = { /* TODO: shop switcher — multi-shop, future PR */ },
+                    onClick = { /* TODO: shop switcher — future PR */ },
                 ),
             ) {
                 Text(
@@ -241,7 +248,6 @@ private fun HomeAppBar(
 
 @Composable
 private fun PremiumBadge() {
-    // §5.1 OPEN ITEM: exact text/color per license state pending owner ruling.
     Surface(
         shape = RoundedCornerShape(4.dp),
         color = ColorAccentGold,
@@ -258,7 +264,6 @@ private fun PremiumBadge() {
 
 @Composable
 private fun SyncStatusChip() {
-    // Offline-first: Room-backed, never network-dependent — always "সিংক্‌ড".
     Surface(
         shape = RoundedCornerShape(12.dp),
         color = Color.White.copy(alpha = 0.15f),
@@ -283,7 +288,7 @@ private fun SyncStatusChip() {
     }
 }
 
-// ─── §2.2 Hero card ────────────────────────────────────────────────────────────────────
+// ─── §2.2 Hero card ─────────────────────────────────────────────────────────────────
 
 @Composable
 private fun HeroCard(
@@ -292,11 +297,10 @@ private fun HeroCard(
     onAmountToggle: () -> Unit,
     modifier:       Modifier = Modifier,
 ) {
-    // PR B proxy: todaySalesTotal used as নিট লাভ.
-    // PR C will wire: netProfit = todaySalesTotal - todayExpenseTotal per spec §5.2 ruling.
-    val heroAmount = data.todaySalesTotal
-    val heroText   = if (amountVisible) formatBengaliAmount(heroAmount)
-                     else stringResource(R.string.home_hero_amount_hidden)
+    // PR B proxy: todaySalesTotal (Double, taka) used as নিট লাভ.
+    // PR C: wire netProfit = todaySalesTotal - todayExpenseTotal per spec §5.2 ruling.
+    val heroText = if (amountVisible) formatBengaliTaka(data.todaySalesTotal)
+                   else stringResource(R.string.home_hero_amount_hidden)
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -304,7 +308,6 @@ private fun HeroCard(
         color    = ColorHeroBg,
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            // Title row
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text     = stringResource(R.string.home_hero_title),
@@ -316,7 +319,7 @@ private fun HeroCard(
                 Surface(
                     shape    = RoundedCornerShape(8.dp),
                     color    = Color.White.copy(alpha = 0.15f),
-                    modifier = Modifier.clickable { /* TODO PR C: period selector */ },
+                    modifier = Modifier.clickable { /* TODO PR C */ },
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -336,7 +339,6 @@ private fun HeroCard(
                     }
                 }
                 Spacer(Modifier.width(4.dp))
-                // Eye icon: amount hide / show
                 IconButton(
                     onClick  = onAmountToggle,
                     modifier = Modifier.size(32.dp),
@@ -354,7 +356,6 @@ private fun HeroCard(
                 }
             }
             Spacer(Modifier.height(8.dp))
-            // Hero amount
             AnimatedContent(targetState = heroText, label = "hero_amount") { text ->
                 Text(
                     text       = text,
@@ -363,7 +364,7 @@ private fun HeroCard(
                     color      = ColorHeroAmount,
                 )
             }
-            // Delta pill: ▲/▼ — no yesterday data in PR B; PR C will add
+            // Delta pill: ▲/▼ — PR C scope (no yesterday data yet)
             Spacer(Modifier.height(14.dp))
             HorizontalDivider(color = Color.White.copy(alpha = 0.20f), thickness = 0.5.dp)
             Spacer(Modifier.height(14.dp))
@@ -379,13 +380,12 @@ private fun HeroCard(
                 HeroSubAmount(
                     label         = stringResource(R.string.home_hero_expense_label),
                     directionIcon = "↓",
-                    amount        = 0L,  // PR C: wire todayExpenseTotal
+                    amount        = 0.0,  // PR C: wire todayExpenseTotal
                     amountVisible = amountVisible,
                     modifier      = Modifier.weight(1f),
                 )
             }
             Spacer(Modifier.height(12.dp))
-            // Footer: "৫টি বিক্রি · ৩ কাস্টমার"
             Text(
                 text  = stringResource(
                     R.string.home_hero_footer,
@@ -403,7 +403,7 @@ private fun HeroCard(
 private fun HeroSubAmount(
     label:         String,
     directionIcon: String,
-    amount:        Long,
+    amount:        Double,   // taka (Double), matches HomeData.todaySalesTotal type
     amountVisible: Boolean,
     modifier:      Modifier = Modifier,
 ) {
@@ -414,7 +414,7 @@ private fun HeroSubAmount(
             color = Color.White.copy(alpha = 0.65f),
         )
         Text(
-            text       = if (amountVisible) formatBengaliAmount(amount)
+            text       = if (amountVisible) formatBengaliTaka(amount)
                          else stringResource(R.string.home_hero_amount_hidden),
             style      = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold,
@@ -423,7 +423,7 @@ private fun HeroSubAmount(
     }
 }
 
-// ─── §2.3 Quick action grid ──────────────────────────────────────────────────────────
+// ─── §2.3 Quick action grid ─────────────────────────────────────────────────────────
 
 @Composable
 private fun QuickActionGrid(
@@ -437,16 +437,14 @@ private fun QuickActionGrid(
         modifier              = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(tileGap),
     ) {
-        // বড় primary tile: নতুন বিক্রি / POS
+        // বড় primary tile: নতুন বিক্রি / POS
         ActionTile(
             label     = stringResource(R.string.home_action_new_sale),
             icon      = Icons.Filled.ShoppingCart,
             isPrimary = true,
             badge     = stringResource(R.string.home_action_today_count, banglaDigit(todayBillCount)),
             onClick   = { onNavigate("sale") },
-            modifier  = Modifier
-                .weight(1f)
-                .height(LargeTileHeight),
+            modifier  = Modifier.weight(1f).height(LargeTileHeight),
         )
         // ছোট ৪ tiles: 2×2 grid
         Column(
@@ -527,7 +525,6 @@ private fun ActionTile(
                     overflow  = TextOverflow.Ellipsis,
                 )
             }
-            // Badge — top-right corner (spec §2.3)
             if (badge != null) {
                 Surface(
                     modifier = Modifier.align(Alignment.TopEnd),
@@ -549,18 +546,21 @@ private fun ActionTile(
     }
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────────────
-
+// ─── Helpers ───────────────────────────────────────────────────────────────────────
 private fun banglaDigit(n: Int): String {
     val map = "০১২৩৪৫৬৭৮৯"
     return n.toString().map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
 }
 
-private fun formatBengaliAmount(paise: Long): String {
-    val taka = paise / 100
-    val formatted = String.format("%,d", taka)
-    val bangla = formatted.map { c ->
-        if (c.isDigit()) "০১২৩৪৫৬৭৮৯"[c - '0'] else c
-    }.joinToString("")
+/**
+ * Formats a Double taka value into a Bengali-digit currency string.
+ * Example: 1500.0 → "৳ ১,৫০০"
+ * Note: HomeData.todaySalesTotal is already in taka (not paise).
+ */
+private fun formatBengaliTaka(taka: Double): String {
+    val rounded = taka.toLong()
+    val formatted = String.format("%,d", rounded)
+    val map = "০১২৩৪৫৬৭৮৯"
+    val bangla = formatted.map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
     return "\u09f3\u00a0$bangla"
 }

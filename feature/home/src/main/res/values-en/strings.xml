@@ -12,6 +12,7 @@
     <string name="supplier_dues">Supplier Dues</string>
     <string name="supplier_count">%1$s suppliers</string>
     <string name="cash_account">Cash Account</string>
+    <string name="home_wordmark">Boi Khata</string>
     <string name="home_notification_cd">Notifications</string>
     <string name="home_sync_label">Synced</string>
     <string name="home_premium_badge">Premium</string>

@@ -12,6 +12,7 @@
     <string name="supplier_dues">সাপ্লায়ার পাওনা</string>
     <string name="supplier_count">%1$s জন সাপ্লায়ার</string>
     <string name="cash_account">নগদ একাউন্ট</string>
+    <string name="home_wordmark">বই খাতা</string>
     <string name="home_notification_cd">বিজ্ঞপ্তি</string>
     <string name="home_sync_label">সিংক্‌ড</string>
     <string name="home_premium_badge">প্রিমিয়াম</string>

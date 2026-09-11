@@ -22,7 +22,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
@@ -42,6 +41,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
+    // PR B: Icons used in HomeScreen AppBar + QuickActionGrid
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -60,4 +61,3 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
 }
-
