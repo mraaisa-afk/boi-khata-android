@@ -32,4 +32,17 @@
     <string name="home_action_collection">খাতা আদায়</string>
     <string name="home_action_stock_in">স্টক-ইন</string>
     <string name="home_action_today_count">আজ %1$s</string>
+    <!-- D79 §2.4 PR D: আজকের করণীয় alerts -->
+    <string name="home_alerts_header">আজকের করণীয়</string>
+    <string name="home_alerts_all">সব দেখুন</string>
+    <string name="home_alerts_count">%1$sটি অ্যালার্ট</string>
+    <string name="home_alert_urgent_badge">জরুরি</string>
+    <string name="home_alert_low_stock_title">স্টক শেষ হচ্ছে</string>
+    <string name="home_alert_low_stock_copy">মাত্র %1$s কপি বাকি</string>
+    <string name="home_alert_low_stock_order">অর্ডার দিন</string>
+    <string name="home_alert_low_stock_later">পরে দেখব</string>
+    <string name="home_alert_due_title">বেকয়া আদায়</string>
+    <string name="home_alert_due_customers">%1$s জন কাস্টমার</string>
+    <string name="home_alert_due_total">মোট বেকয়া</string>
+    <string name="home_alert_due_action">এখনই আদায়</string>
 </resources>
