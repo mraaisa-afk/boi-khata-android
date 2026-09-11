@@ -32,4 +32,17 @@
     <string name="home_action_collection">Khata Collect</string>
     <string name="home_action_stock_in">Stock In</string>
     <string name="home_action_today_count">Today %1$s</string>
+    <!-- D79 §2.4 PR D: alerts section -->
+    <string name="home_alerts_header">আজকের করণীয়</string>
+    <string name="home_alerts_all">See all</string>
+    <string name="home_alerts_count">%1$s alerts</string>
+    <string name="home_alert_urgent_badge">Urgent</string>
+    <string name="home_alert_low_stock_title">Low Stock</string>
+    <string name="home_alert_low_stock_copy">Only %1$s copies left</string>
+    <string name="home_alert_low_stock_order">Order Now</string>
+    <string name="home_alert_low_stock_later">Later</string>
+    <string name="home_alert_due_title">Collect Dues</string>
+    <string name="home_alert_due_customers">%1$s customers</string>
+    <string name="home_alert_due_total">Total due</string>
+    <string name="home_alert_due_action">Collect Now</string>
 </resources>
