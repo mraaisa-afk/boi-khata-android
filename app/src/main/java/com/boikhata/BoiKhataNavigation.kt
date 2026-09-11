@@ -1,26 +1,41 @@
 package com.boikhata
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -44,10 +59,17 @@ import com.boikhata.feature.subscription.SubscriptionScreen
 import com.boikhata.feature.supplier.SupplierScreen
 
 /**
- * D18: Bottom navigation (Home/Catalog/Khata/Sale) via Navigation-Compose.
- * Blueprint §2: দৃশ্যমান Bottom Navigation Bar (সর্বোচ্চ ৪ ট্যাব) — no hamburger.
- * P2b: 4th tab (বিক্রয়) added.
+ * D18: Bottom navigation via Navigation-Compose.
+ * D79 (Locked Design Spec — HomeScreen v2): হোম · স্টক · [৳+ FAB] · খাতা · আরও.
+ * Blueprint §2 / G22: max 4 tabs — the central FAB is not a tab, so the limit holds.
+ * G19: every label comes from strings.xml. G23: no drawer.
+ * Locked Design Spec §4.5 (hybrid palette): maroon chrome, ivory surface, gold FAB.
  */
+private val ColorPrimaryMaroon = Color(0xFF800000)
+private val ColorSurfaceIvory = Color(0xFFFDFAF6)
+private val ColorAccentGold = Color(0xFFC9A227)
+private val ColorNavUnselected = Color(0xFF6B6B6B)
+
 @Composable
 fun BoiKhataMainScreen(
     tenantId: String,
@@ -62,11 +84,14 @@ fun BoiKhataMainScreen(
     val navController = rememberNavController()
     val context = LocalContext.current
 
-    val tabs = listOf(
+    // D79: POS left the tab row and became the central FAB, so "sale" is not in this list.
+    val leadingTabs = listOf(
         NavTab("home", R.string.nav_home, Icons.Default.Home),
-        NavTab("catalog", R.string.nav_catalog, Icons.Default.Book),
+        NavTab("catalog", R.string.nav_stock, Icons.Default.Book),
+    )
+    val trailingTabs = listOf(
         NavTab("khata", R.string.nav_khata, Icons.Default.People),
-        NavTab("sale", R.string.nav_sale, Icons.Default.PointOfSale),
+        NavTab("more", R.string.nav_more, Icons.Default.List),
     )
 
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -79,23 +104,31 @@ fun BoiKhataMainScreen(
             }
         },
         bottomBar = {
-            NavigationBar {
-                tabs.forEach { tab ->
-                    val selected = currentRoute?.startsWith(tab.route) == true ||
-                        (tab.route == "home" && currentRoute == null)
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(tab.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(tab.icon, contentDescription = stringResource(tab.labelRes)) },
-                        label = { Text(stringResource(tab.labelRes)) },
+            Box(modifier = Modifier.fillMaxWidth()) {
+                NavigationBar(containerColor = ColorSurfaceIvory) {
+                    leadingTabs.forEach { tab ->
+                        NavBarTab(tab = tab, currentRoute = currentRoute, navController = navController)
+                    }
+                    // Reserved gap for the central FAB — keeps the tab row balanced.
+                    Spacer(modifier = Modifier.weight(1f))
+                    trailingTabs.forEach { tab ->
+                        NavBarTab(tab = tab, currentRoute = currentRoute, navController = navController)
+                    }
+                }
+                FloatingActionButton(
+                    onClick = { navController.navigateToTab("sale") },
+                    shape = CircleShape,
+                    containerColor = ColorAccentGold,
+                    contentColor = ColorPrimaryMaroon,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-20).dp)
+                        .size(64.dp) // primaryTouchTarget token
+                        .semantics { contentDescription = newSaleLabel },
+                ) {
+                    Text(
+                        text = stringResource(R.string.fab_new_sale_symbol),
+                        style = MaterialTheme.typography.titleLarge,
                     )
                 }
             }
@@ -152,7 +185,11 @@ fun BoiKhataMainScreen(
                     onBack = { navController.popBackStack() },
                 )
             }
-            // P2b: POS sale screen
+            // D79: "আরও" hub — everything that left the tab row lives here.
+            composable("more") {
+                MoreScreen(onEntryClick = { route -> navController.navigate(route) })
+            }
+            // P2b: POS sale screen — now reached from the central FAB.
             composable("sale") {
                 PosScreen(
                     tenantId = tenantId,
@@ -230,6 +267,41 @@ fun BoiKhataMainScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun androidx.compose.foundation.layout.RowScope.NavBarTab(
+    tab: NavTab,
+    currentRoute: String?,
+    navController: NavHostController,
+) {
+    val selected = currentRoute?.startsWith(tab.route) == true ||
+        (tab.route == "home" && currentRoute == null)
+    val label = stringResource(tab.labelRes)
+    NavigationBarItem(
+        selected = selected,
+        onClick = { navController.navigateToTab(tab.route) },
+        icon = { Icon(tab.icon, contentDescription = label) },
+        label = { Text(label) },
+        alwaysShowLabel = true,
+        colors = NavigationBarItemDefaults.colors(
+            selectedIconColor = ColorPrimaryMaroon,
+            selectedTextColor = ColorPrimaryMaroon,
+            indicatorColor = ColorAccentGold.copy(alpha = 0.20f),
+            unselectedIconColor = ColorNavUnselected,
+            unselectedTextColor = ColorNavUnselected,
+        ),
+    )
+}
+
+private fun NavHostController.navigateToTab(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }
 

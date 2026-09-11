@@ -10,6 +10,23 @@
     <string name="nav_khata">Khata</string>
     <string name="nav_sale">Sale</string>
 
+    <!-- P10 / D79: bottom navigation + central POS FAB -->
+    <string name="nav_stock">Stock</string>
+    <string name="nav_more">More</string>
+    <string name="fab_new_sale">New sale</string>
+    <string name="fab_new_sale_symbol">৳+</string>
+
+    <!-- P10 / D79: "More" hub -->
+    <string name="more_title">More</string>
+    <string name="more_reports">Reports</string>
+    <string name="more_cash_close">Today\'s cash close</string>
+    <string name="more_expense">Expenses &amp; cashbook</string>
+    <string name="more_supplier">Supplier payables</string>
+    <string name="more_bill_history">Bill history</string>
+    <string name="more_mela">Mela mode</string>
+    <string name="more_subscription">Subscription</string>
+    <string name="more_settings">Settings</string>
+
     <!-- P4a: Phone OTP Login -->
     <string name="login_title">Boi Khata — Login</string>
     <string name="enter_phone">Enter your phone number</string>

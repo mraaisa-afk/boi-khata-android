@@ -10,6 +10,23 @@
     <string name="nav_khata">খাতা</string>
     <string name="nav_sale">বিক্রয়</string>
 
+    <!-- P10 / D79: bottom navigation + central POS FAB -->
+    <string name="nav_stock">স্টক</string>
+    <string name="nav_more">আরও</string>
+    <string name="fab_new_sale">নতুন বিক্রি</string>
+    <string name="fab_new_sale_symbol">৳+</string>
+
+    <!-- P10 / D79: "আরও" hub -->
+    <string name="more_title">আরও</string>
+    <string name="more_reports">রিপোর্ট</string>
+    <string name="more_cash_close">আজকের হিসাব</string>
+    <string name="more_expense">খরচ ও ক্যাশবুক</string>
+    <string name="more_supplier">সাপ্লায়ার দেনা-খাতা</string>
+    <string name="more_bill_history">বিলের ইতিহাস</string>
+    <string name="more_mela">মেলা মোড</string>
+    <string name="more_subscription">সাবস্ক্রিপশন</string>
+    <string name="more_settings">সেটিংস</string>
+
     <!-- P4a: Phone OTP Login -->
     <string name="login_title">বই খাতা — লগইন</string>
     <string name="enter_phone">আপনার ফোন নম্বর লিখুন</string>
