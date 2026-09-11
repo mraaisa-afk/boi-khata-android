@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -12,11 +14,13 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.TrendingDown
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,6 +42,7 @@ import com.boikhata.core.designsystem.ColorBrandMaroon
 import com.boikhata.core.designsystem.ColorSemanticPositive
 import com.boikhata.core.designsystem.ColorSurfaceIvory
 import com.boikhata.core.domain.model.HomeData
+import com.boikhata.core.domain.model.LowStockBookSummary
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -49,14 +54,14 @@ private val ColorHeroAmount = ColorAccentGold         // #C9A227 — contrast 2.
 
 /**
  * HomeScreen v2 — D79 Locked Design Spec.
- * PR B scope: AppBar + HeroCard + QuickActionGrid (visual skeleton).
- * PR C scope: Real data wired — নিট লাভ = todaySalesTotal − todayExpenseTotal, trend badge.
+ * PR B: AppBar + HeroCard + QuickActionGrid.
+ * PR C: Real data — নিট লাভ = todaySalesTotal − todayExpenseTotal, trend badge.
+ * PR D: আজকের করণীয় alerts section — horizontal scroll cards (low-stock + due-collection).
  *
  * @param tenantId   Active tenant identifier (Room isolation).
  * @param shopName   Shop name displayed in AppBar row 2.
- * @param isLicensed §5.1: premium badge shown when true. FREE = false (no badge).
- *                   GRACE / SOFT_LOCKED states: pending PR D (LicenseState enum).
- * @param onNavigate Navigation callback for quick-action tiles.
+ * @param isLicensed §5.1: premium badge shown when true.
+ * @param onNavigate Navigation callback for quick-action tiles and alert CTAs.
  */
 @Composable
 fun HomeScreen(
@@ -93,7 +98,7 @@ fun HomeScreen(
     }
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────────────
 private val ScreenPadding   = 16.dp
 private val SmallTileHeight = 56.dp
 private val LargeTileHeight = SmallTileHeight * 2 + 8.dp  // 120dp
@@ -132,10 +137,18 @@ private fun HomeContent(
                 modifier          = Modifier.padding(horizontal = ScreenPadding, vertical = 8.dp),
             )
         }
+        // D79 PR D: আজকের করণীয় section
+        item(key = "alerts_section") {
+            AlertsSection(
+                data       = data,
+                onNavigate = onNavigate,
+                modifier   = Modifier.padding(top = 4.dp, bottom = 8.dp),
+            )
+        }
     }
 }
 
-// ─── §2.1 App bar ─────────────────────────────────────────────────────────────────────
+// ─── §2.1 App bar ─────────────────────────────────────────────────────────────
 
 @Composable
 private fun HomeAppBar(
@@ -178,8 +191,6 @@ private fun HomeAppBar(
                     fontWeight = FontWeight.Bold,
                     color      = Color.White,
                 )
-                // §5.1: badge shown for PREMIUM (isLicensed=true).
-                // FREE → no badge. GRACE/SOFT_LOCKED → pending PR D (LicenseState enum).
                 if (isLicensed) {
                     Spacer(Modifier.width(6.dp))
                     PremiumBadge()
@@ -188,7 +199,7 @@ private fun HomeAppBar(
                 SyncStatusChip()
                 Spacer(Modifier.width(4.dp))
                 IconButton(
-                    onClick  = { /* TODO: notification screen — PR D */ },
+                    onClick  = { /* TODO: notification screen */ },
                     modifier = Modifier.size(40.dp),
                 ) {
                     Icon(
@@ -220,7 +231,7 @@ private fun HomeAppBar(
             Spacer(Modifier.height(6.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier          = Modifier.clickable { /* TODO: shop switcher — future PR */ },
+                modifier          = Modifier.clickable { /* TODO: shop switcher */ },
             ) {
                 Text(
                     text     = shopName,
@@ -283,7 +294,7 @@ private fun SyncStatusChip() {
     }
 }
 
-// ─── §2.2 Hero card ─────────────────────────────────────────────────────────────────────
+// ─── §2.2 Hero card ───────────────────────────────────────────────────────────
 
 @Composable
 private fun HeroCard(
@@ -292,13 +303,10 @@ private fun HeroCard(
     onAmountToggle: () -> Unit,
     modifier:       Modifier = Modifier,
 ) {
-    // D79 §5.2 (owner ruling 12 Sep 2026): নিট লাভ = আয় − ব্যয় (নগদ বিক্রয় − নগদ খরচ)
     val netProfit = data.todaySalesTotal - data.todayExpenseTotal
     val heroText  = if (amountVisible) formatBengaliTaka(netProfit)
                     else stringResource(R.string.home_hero_amount_hidden)
 
-    // D79 §2.2: trend delta vs yesterday (▲/▼ % গতকালের চেয়ে)
-    // Only shown when yesterdayNetProfit > 0 (avoids divide-by-zero + negative-base artifacts)
     val trendPercent: Float? = if (data.yesterdayNetProfit > 0.01) {
         ((netProfit - data.yesterdayNetProfit) / data.yesterdayNetProfit * 100).toFloat()
     } else null
@@ -309,7 +317,6 @@ private fun HeroCard(
         color    = ColorHeroBg,
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            // Header: title | period chip | eye toggle
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text     = stringResource(R.string.home_hero_title),
@@ -320,7 +327,7 @@ private fun HeroCard(
                 Surface(
                     shape    = RoundedCornerShape(8.dp),
                     color    = Color.White.copy(alpha = 0.15f),
-                    modifier = Modifier.clickable { /* TODO PR D: period selector */ },
+                    modifier = Modifier.clickable { /* TODO PR E: period selector */ },
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -358,7 +365,6 @@ private fun HeroCard(
             }
             Spacer(Modifier.height(8.dp))
 
-            // Big amount + trend badge side by side
             Row(
                 verticalAlignment = Alignment.Bottom,
                 modifier          = Modifier.fillMaxWidth(),
@@ -385,19 +391,18 @@ private fun HeroCard(
             HorizontalDivider(color = Color.White.copy(alpha = 0.20f), thickness = 0.5.dp)
             Spacer(Modifier.height(14.dp))
 
-            // আয় | ব্যয় two-column breakdown (real data wired in PR C)
             Row(modifier = Modifier.fillMaxWidth()) {
                 HeroSubAmount(
                     label         = stringResource(R.string.home_hero_income_label),
                     directionIcon = "↑",
-                    amount        = data.todaySalesTotal,   // আয়: আজের মোট বিক্রয়
+                    amount        = data.todaySalesTotal,
                     amountVisible = amountVisible,
                     modifier      = Modifier.weight(1f),
                 )
                 HeroSubAmount(
                     label         = stringResource(R.string.home_hero_expense_label),
                     directionIcon = "↓",
-                    amount        = data.todayExpenseTotal, // ব্যয়: আজের মোট খরচ (PR C থেকে রিয়েল)
+                    amount        = data.todayExpenseTotal,
                     amountVisible = amountVisible,
                     modifier      = Modifier.weight(1f),
                 )
@@ -416,7 +421,6 @@ private fun HeroCard(
     }
 }
 
-/** D79 §2.2: Trend badge — ▲/▼ X% গতকালের চেয়ে */
 @Composable
 private fun TrendBadge(
     trendPercent: Float,
@@ -465,7 +469,7 @@ private fun HeroSubAmount(
     }
 }
 
-// ─── §2.3 Quick action grid ────────────────────────────────────────────────────────────
+// ─── §2.3 Quick action grid ───────────────────────────────────────────────────
 
 @Composable
 private fun QuickActionGrid(
@@ -586,21 +590,254 @@ private fun ActionTile(
     }
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────────────────────
+// ─── §2.4 Alerts section — আজকের করণীয় (D79 PR D) ───────────────────────────
+
+@Composable
+private fun AlertsSection(
+    data:       HomeData,
+    onNavigate: (String) -> Unit,
+    modifier:   Modifier = Modifier,
+) {
+    val hasLowStock = data.lowStockAlerts.isNotEmpty()
+    val hasDue      = data.dueCustomerCount > 0
+    if (!hasLowStock && !hasDue) return
+
+    val cardCount   = data.lowStockAlerts.size + if (hasDue) 1 else 0
+    val alertCount  = banglaDigit(cardCount)
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Header row
+        Row(
+            modifier          = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = ScreenPadding, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text       = stringResource(R.string.home_alerts_header),
+                style      = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color      = MaterialTheme.colorScheme.onSurface,
+                modifier   = Modifier.weight(1f),
+            )
+            Text(
+                text  = stringResource(R.string.home_alerts_count, alertCount),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text     = stringResource(R.string.home_alerts_all),
+                style    = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color    = ColorBrandMaroon,
+                modifier = Modifier.clickable { onNavigate("alerts") },
+            )
+        }
+
+        // Horizontal card carousel
+        LazyRow(
+            contentPadding        = PaddingValues(horizontal = ScreenPadding, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            itemsIndexed(data.lowStockAlerts) { _, alert ->
+                LowStockAlertCard(
+                    alert     = alert,
+                    onOrder   = { onNavigate("catalog/order/${alert.bookId}") },
+                    onLater   = { /* dismiss stub — PR E */ },
+                    modifier  = Modifier.width(260.dp),
+                )
+            }
+            if (hasDue) {
+                item {
+                    DueCollectionAlertCard(
+                        dueCustomerCount = data.dueCustomerCount,
+                        totalDue         = data.totalDue,
+                        onCollect        = { onNavigate("khata") },
+                        modifier         = Modifier.width(260.dp),
+                    )
+                }
+            }
+        }
+
+        // Dot indicator (static, first dot active — pager state tracking is PR E scope)
+        if (cardCount > 1) {
+            Row(
+                modifier              = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 6.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment     = Alignment.CenterVertically,
+            ) {
+                repeat(cardCount) { i ->
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 3.dp)
+                            .size(if (i == 0) 6.dp else 4.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (i == 0) ColorBrandMaroon
+                                else MaterialTheme.colorScheme.outlineVariant,
+                            ),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LowStockAlertCard(
+    alert:    LowStockBookSummary,
+    onOrder:  () -> Unit,
+    onLater:  () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        modifier       = modifier,
+        shape          = RoundedCornerShape(12.dp),
+        color          = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector        = Icons.Filled.Warning,
+                    contentDescription = null,
+                    tint               = MaterialTheme.colorScheme.error,
+                    modifier           = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text       = stringResource(R.string.home_alert_low_stock_title),
+                    style      = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color      = MaterialTheme.colorScheme.onSurface,
+                    modifier   = Modifier.weight(1f),
+                )
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.errorContainer,
+                ) {
+                    Text(
+                        text     = stringResource(R.string.home_alert_urgent_badge),
+                        style    = MaterialTheme.typography.labelSmall,
+                        color    = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text     = "${alert.bookTitleBn} — ${alert.classLevel}",
+                style    = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color    = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text  = stringResource(R.string.home_alert_low_stock_copy, banglaDigit(alert.currentStock)),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick          = onOrder,
+                    colors           = ButtonDefaults.buttonColors(containerColor = ColorBrandMaroon),
+                    contentPadding   = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    modifier         = Modifier.height(32.dp),
+                ) {
+                    Text(
+                        text  = stringResource(R.string.home_alert_low_stock_order),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                    )
+                }
+                OutlinedButton(
+                    onClick        = onLater,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    modifier       = Modifier.height(32.dp),
+                ) {
+                    Text(
+                        text  = stringResource(R.string.home_alert_low_stock_later),
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DueCollectionAlertCard(
+    dueCustomerCount: Int,
+    totalDue:         Double,
+    onCollect:        () -> Unit,
+    modifier:         Modifier = Modifier,
+) {
+    Surface(
+        modifier       = modifier,
+        shape          = RoundedCornerShape(12.dp),
+        color          = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector        = Icons.Filled.Person,
+                    contentDescription = null,
+                    tint               = ColorBrandMaroon,
+                    modifier           = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text       = stringResource(R.string.home_alert_due_title),
+                    style      = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color      = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text  = stringResource(R.string.home_alert_due_customers, banglaDigit(dueCustomerCount)),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text       = "${stringResource(R.string.home_alert_due_total)} ${formatBengaliTaka(totalDue)}",
+                style      = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color      = ColorBrandMaroon,
+            )
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick        = onCollect,
+                colors         = ButtonDefaults.buttonColors(containerColor = ColorBrandMaroon),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                modifier       = Modifier.height(32.dp),
+            ) {
+                Text(
+                    text  = stringResource(R.string.home_alert_due_action),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                )
+            }
+        }
+    }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 private fun banglaDigit(n: Int): String {
     val map = "০১২৩৪৫৬৭৮৯"
     return n.toString().map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
 }
 
-/**
- * Formats a Double taka value into Bengali-digit currency string.
- * Example: 12450.0 → "৳ ১২,৪৫০"
- * HomeData.todaySalesTotal / todayExpenseTotal are already in taka (not paise).
- */
 private fun formatBengaliTaka(taka: Double): String {
     val rounded   = taka.toLong()
     val formatted = String.format("%,d", rounded)
     val map       = "০১২৩৪৫৬৭৮৯"
     val bangla    = formatted.map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
-    return "৳ $bangla"
+    return "৳ $bangla"
 }
