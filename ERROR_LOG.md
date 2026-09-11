@@ -47,6 +47,28 @@
 
 ---
 
+## ERR-003 — 2026-09-12 — P10 — PR D CI Run 1: BookRepositoryImpl missing getLowStockBookSummaries
+
+**Type:** Build failure
+**Phase:** P10
+**Date:** 2026-09-12
+**Task:** PR D — HomeScreen «আজকের করণীয়» alerts section (D79 §2.4)
+**Error:**
+```
+e: BookRepositoryImpl.kt:19:1 Class 'BookRepositoryImpl' is not abstract and does not implement abstract member:
+suspend fun getLowStockBookSummaries(tenantId: String): List<LowStockBookSummary>
+Task :core:database:compileDebugKotlin FAILED
+```
+**Root cause:** `getLowStockBookSummaries` was added to the `BookRepository` interface in `Repositories.kt` but its implementation was never written in `BookRepositoryImpl`. The agent wrote the interface contract and the ViewModel/UI callers but failed to read `BookRepositoryImpl.kt` before pushing — violating the rule of always reading existing impl files before adding interface methods.
+**Fix applied:** Commit `533d0ffc` on branch `agent/phase-10-homescreen-alerts`:
+- Added `override suspend fun getLowStockBookSummaries(tenantId: String): List<LowStockBookSummary>` to `BookRepositoryImpl`
+- Implementation filters `bookDao.getActiveByTenant(tenantId)` client-side: `initialStock ≤ lowStockThreshold`, sorted ascending
+- Uses `initialStock` as a proxy for current stock; stock-ledger join deferred to PR E (noted in KDoc comment)
+- Added `import com.boikhata.core.domain.model.LowStockBookSummary` to impl file
+**Lesson:** Before adding any method to a repository interface, always fetch and read the corresponding `*RepositoryImpl.kt` file first — then write the interface method AND its implementation in the same PR commit.
+
+---
+
 ## ERR-002 — 2026-09-11 — P10 — PR B CI Run 1: 4 compile errors in HomeScreen
 
 **Type:** Build failure
@@ -90,5 +112,5 @@ e: HomeScreen.kt:203 Unresolved reference 'contentDescription'
 
 ---
 
-*Last updated: 2026-09-11 · Maintained by: Agent (append) + Builder/Sakira (review)*
+*Last updated: 2026-09-12 · Maintained by: Agent (append) + Builder/Sakira (review)*
 *Read by: the agent every session, last 10 entries mandatory*
