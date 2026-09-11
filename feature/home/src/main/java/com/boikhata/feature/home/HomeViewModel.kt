@@ -9,6 +9,7 @@ import com.boikhata.core.domain.enums.CashbookAccount
 import com.boikhata.core.domain.model.HomeData
 import com.boikhata.core.domain.model.KhataCustomerDue
 import com.boikhata.core.domain.repository.BillRepository
+import com.boikhata.core.domain.repository.BookRepository
 import com.boikhata.core.domain.repository.CashbookRepository
 import com.boikhata.core.domain.repository.ExpenseRepository
 import com.boikhata.core.domain.repository.KhataRepository
@@ -28,6 +29,7 @@ class HomeViewModel @Inject constructor(
     private val cashbookRepository: CashbookRepository,   // D75: নগদ ব্যালেন্স
     private val supplierRepository: SupplierRepository,   // D75: সাপ্লায়ার পাওনা
     private val expenseRepository: ExpenseRepository,     // D79 §5.2: ব্যয় for নিট লাভ
+    private val bookRepository: BookRepository,           // D79 PR D: স্টক শেষ হচ্ছে alerts
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -44,15 +46,14 @@ class HomeViewModel @Inject constructor(
                 }
                 val startOfToday     = cal.timeInMillis
                 val endOfToday       = now
-                // D79 §2.2: গতকালের পরিসর (trend delta)
                 val startOfYesterday = startOfToday - 24L * 60 * 60 * 1000
                 val endOfYesterday   = startOfToday - 1L
 
-                // ── গ্রাহক বাকি (khata customer dues) ───────────────────────────────
-                val customers = khataRepository.getCustomers(tenantId)
+                // ── গ্রাহক বাকি (khata customer dues) ────────────────────────────────────
+                val customers  = khataRepository.getCustomers(tenantId)
                 val todayBills = billRepository.getBillsByDate(tenantId, startOfToday, endOfToday)
 
-                val dueList = mutableListOf<KhataCustomerDue>()
+                val dueList  = mutableListOf<KhataCustomerDue>()
                 var totalDue = 0.0
 
                 for (customer in customers) {
@@ -82,13 +83,13 @@ class HomeViewModel @Inject constructor(
                 val todaySalesTotal = todayBills.sumOf { it.totalAmount }
                 val todayBillCount  = todayBills.size
 
-                // ── D79 §5.2: ব্যয় — নিট লাভ = আয় − ব্যয় ─────────────────────────
+                // ── D79 §5.2: ব্যয় — নিট লাভ = আয় − ব্যয় ────────────────────────────
                 val todayExpenses     = expenseRepository.getExpensesByDateRange(
                     tenantId, startOfToday, endOfToday,
                 )
                 val todayExpenseTotal = todayExpenses.sumOf { it.amount }
 
-                // ── D79 §2.2: গতকালের নিট লাভ (▲/▼ trend badge) ──────────────────
+                // ── D79 §2.2: গতকালের নিট লাভ (▲/▼ trend badge) ────────────────────────
                 val yesterdayBills    = billRepository.getBillsByDate(
                     tenantId, startOfYesterday, endOfYesterday,
                 )
@@ -98,7 +99,7 @@ class HomeViewModel @Inject constructor(
                 val yesterdayNetProfit = yesterdayBills.sumOf { it.totalAmount } -
                                         yesterdayExpenses.sumOf { it.amount }
 
-                // ── নগদ ব্যালেন্স (D75) ────────────────────────────────────────────
+                // ── নগদ ব্যালেন্স (D75) ──────────────────────────────────────────
                 val balances    = cashbookRepository.getBalances(tenantId)
                 val cashBalance = balances
                     .firstOrNull { it.account == CashbookAccount.CASH }
@@ -106,6 +107,10 @@ class HomeViewModel @Inject constructor(
 
                 // ── সাপ্লায়ার পাওনা (D75) ────────────────────────────────────────
                 val supplierSummary = supplierRepository.getSupplierAgingSummary(tenantId, now)
+
+                // ── D79 PR D: স্টক শেষ হচ্ছে alerts (আজকের করণীয়) ──────────────────────
+                // Capped at 3 cards to keep the carousel scannable.
+                val lowStockAlerts = bookRepository.getLowStockBookSummaries(tenantId).take(3)
 
                 _uiState.value = HomeUiState.Success(
                     HomeData(
@@ -119,6 +124,7 @@ class HomeViewModel @Inject constructor(
                         supplierDuesTotal  = supplierSummary.totalPayable,
                         supplierCount      = supplierSummary.supplierCount,
                         yesterdayNetProfit = yesterdayNetProfit,
+                        lowStockAlerts     = lowStockAlerts,
                     )
                 )
             } catch (e: Exception) {
