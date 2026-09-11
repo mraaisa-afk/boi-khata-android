@@ -1,328 +1,566 @@
 package com.boikhata.feature.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.boikhata.core.designsystem.format.DigitStyle
-import com.boikhata.core.designsystem.format.NumberFormatter
-import com.boikhata.core.domain.model.HomeData
-import com.boikhata.core.domain.model.KhataCustomerDue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.boikhata.core.designsystem.ColorAccentGold
+import com.boikhata.core.designsystem.ColorBrandMaroon
+import com.boikhata.core.designsystem.ColorSemanticPositive
+import com.boikhata.core.designsystem.ColorSurfaceIvory
 
-// D71 §1 semantic colors — only these roles; do NOT add more without a D-entry.
-private val ColorSemanticPositive = Color(0xFF1B6E3F)  // credit amounts, positive balances
-private val ColorSemanticCaution  = Color(0xFF9E5C00)  // overdue indicators, debt warnings
-private val ColorPrimary          = Color(0xFF800000)  // brand/identity — key actions + highest urgency
+// D79 §4.5 — Hero card colors
+private val ColorHeroBg     = ColorSemanticPositive  // #1B6E3F
+private val ColorHeroAmount = ColorAccentGold         // #C9A227 — contrast 2.59:1 vs bg
+// ⚠️ WCAG AA FAILURE: contrast ratio = 2.59:1 (required ≥4.5:1 normal, ≥3.0:1 large)
+// Owner ruling required before GA (spec §4.5: "WCAG AA পাস করতে হবে — PR B-তে যাচাই করে রিপোর্ট দিতে হবে")
 
 /**
- * D67 §2 + D75: Trident dashboard.
- * Three Trident cards (নগদ / গ্রাহক বাকি / সাপ্লায়ার পাওনা) + আজকের বিক্রি + শীর্ষ বাকিদার list.
+ * HomeScreen v2 — D79 Locked Design Spec implementation.
+ * PR B scope: AppBar + HeroCard + QuickActionGrid.
+ * Data source: existing HomeViewModel fields (PR C will wire net-profit calculation).
  *
- * D71 §6: No charts. D2: Trident numbers only — no extra metric, no percentage.
- * Blueprint §2: খাতা-প্রথম হোম = দেনা-তালিকা + Trident metrics.
- *
- * D76: HomeScreen reloads on every ON_RESUME lifecycle event so that
- * entries added in other tabs (Khata, Sale) are immediately visible
- * when the user switches back to Home — without killing the app.
+ * @param tenantId   Active tenant identifier (Room isolation).
+ * @param shopName   Shop name displayed in AppBar row 2.
+ * @param isLicensed §5.1 OPEN ITEM: premium badge state pending owner ruling.
+ *                   For PR B: badge shown only when true; hidden otherwise.
+ * @param onNavigate Navigation callback for quick-action tiles.
  */
 @Composable
 fun HomeScreen(
     tenantId: String,
+    shopName: String,
+    isLicensed: Boolean = false,
+    onNavigate: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    // D76: Reload on every resume so cross-tab entries show immediately.
-    // Repository methods are one-shot suspend funs (not Flow), so we must
-    // trigger a fresh load whenever this screen becomes active again.
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(tenantId, lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.loadHome(tenantId)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var amountVisible by remember { mutableStateOf(true) }
 
-    val uiState by viewModel.uiState.collectAsState()
+    when (val s = uiState) {
+        is HomeUiState.Loading -> Box(
+            Modifier.fillMaxSize().background(ColorSurfaceIvory),
+            contentAlignment = Alignment.Center,
+        ) { CircularProgressIndicator(color = ColorBrandMaroon) }
 
-    when (val state = uiState) {
-        is HomeUiState.Loading -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                CircularProgressIndicator(color = ColorPrimary)
-            }
-        }
-        is HomeUiState.Error -> {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-            ) {
-                Text(text = state.message, color = MaterialTheme.colorScheme.error)
-            }
-        }
-        is HomeUiState.Success -> {
-            HomeContent(state.data)
-        }
+        is HomeUiState.Error -> Box(
+            Modifier.fillMaxSize().background(ColorSurfaceIvory),
+            contentAlignment = Alignment.Center,
+        ) { Text(s.message, color = MaterialTheme.colorScheme.error) }
+
+        is HomeUiState.Success -> HomeContent(
+            data           = s.data,
+            shopName       = shopName,
+            isLicensed     = isLicensed,
+            amountVisible  = amountVisible,
+            onAmountToggle = { amountVisible = !amountVisible },
+            onNavigate     = onNavigate,
+        )
     }
 }
 
+// ────────────────────────────────────────────────────────────────────────────────
+private val ScreenPadding   = 16.dp
+private val SmallTileHeight = 56.dp  // minTouchTarget token
+private val LargeTileHeight = SmallTileHeight * 2 + 8.dp  // = 120dp
+
 @Composable
-private fun HomeContent(data: HomeData) {
+private fun HomeContent(
+    data:           HomeData,
+    shopName:       String,
+    isLicensed:     Boolean,
+    amountVisible:  Boolean,
+    onAmountToggle: () -> Unit,
+    onNavigate:     (String) -> Unit,
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(vertical = 16.dp),
+            .background(ColorSurfaceIvory),
+        contentPadding = PaddingValues(bottom = 88.dp),
     ) {
-        // ── Trident 1: নগদ ব্যালেন্স ────────────────────────────────────────────
-        item {
-            TridentCard(
-                title = stringResource(R.string.cash_balance),
-                value = NumberFormatter.formatMoney(data.cashBalance, DigitStyle.BANGLA),
-                subtitle = stringResource(R.string.cash_account),
-                amountColor = ColorSemanticPositive,
+        // §2.1 App bar (embedded; replaces temporary Scaffold topBar from PR A)
+        item(key = "app_bar") {
+            HomeAppBar(shopName = shopName, isLicensed = isLicensed)
+        }
+        // §2.2 Hero card — আজকের নিট লাভ
+        item(key = "hero_card") {
+            HeroCard(
+                data           = data,
+                amountVisible  = amountVisible,
+                onAmountToggle = onAmountToggle,
+                modifier       = Modifier.padding(horizontal = ScreenPadding, vertical = 12.dp),
             )
         }
-        // ── Trident 2: গ্রাহক বাকি ───────────────────────────────────────────
-        item {
-            TridentCard(
-                title = stringResource(R.string.customer_dues),
-                value = NumberFormatter.formatMoney(data.totalDue, DigitStyle.BANGLA),
-                subtitle = stringResource(R.string.due_customers, banglaDigit(data.dueCustomerCount.toLong())),
-                amountColor = ColorSemanticCaution,
+        // §2.3 Quick actions (5 tiles)
+        item(key = "quick_actions") {
+            QuickActionGrid(
+                todayBillCount    = data.todayBillCount,
+                pendingKhataCount = data.dueCustomerCount,
+                onNavigate        = onNavigate,
+                modifier          = Modifier.padding(horizontal = ScreenPadding, vertical = 8.dp),
             )
         }
-        // ── Trident 3: সাপ্লায়ার পাওনা ──────────────────────────────────────────
-        item {
-            TridentCard(
-                title = stringResource(R.string.supplier_dues),
-                value = NumberFormatter.formatMoney(data.supplierDuesTotal, DigitStyle.BANGLA),
-                subtitle = stringResource(R.string.supplier_count, banglaDigit(data.supplierCount.toLong())),
-                amountColor = ColorSemanticCaution,
-            )
-        }
-        // ── আজকের বিক্রি ─────────────────────────────────────────────────────
-        item {
-            TodaySalesCard(
-                todaySalesTotal = data.todaySalesTotal,
-                todayBillCount = data.todayBillCount,
-            )
-        }
-        // ── Section header: শীর্ষ বাকিদার ───────────────────────────────────────────
-        item {
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.top_due),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            HorizontalDivider(modifier = Modifier.padding(top = 4.dp))
-        }
-        if (data.topDueCustomers.isEmpty()) {
-            item { EmptyDueState() }
-        } else {
-            items(data.topDueCustomers) { due ->
-                DueCustomerCard(due)
-            }
-        }
+        // §2.4 আজকের করণীয় (alert cards) — PR D scope
+        // §2.5 বিশ্লেষণ (collapsible sheet) — PR E scope
     }
 }
 
-/**
- * আজকের বিক্রি summary — today's sales total + bill count.
- * Blueprint §2: দেনা-তালিকা + today's number on Home.
- * D71 §3: corner radius 16dp; elevation 2dp.
- */
+// ─── §2.1 App bar ────────────────────────────────────────────────────────────────────
+
 @Composable
-private fun TodaySalesCard(
-    todaySalesTotal: Double,
-    todayBillCount: Int,
+private fun HomeAppBar(
+    shopName:   String,
+    isLicensed: Boolean,
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    Surface(
+        modifier       = Modifier.fillMaxWidth(),
+        color          = ColorBrandMaroon,
+        tonalElevation = 0.dp,
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.today_sales),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = NumberFormatter.formatMoney(todaySalesTotal, DigitStyle.BANGLA),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = ColorSemanticPositive,
-            )
-            Text(
-                text = stringResource(R.string.today_bills, banglaDigit(todayBillCount.toLong())),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-/**
- * Actionable empty state when no customers have dues.
- * Design KB: "Bengali, actionable, with a next step — never a one-line English sentence."
- */
-@Composable
-private fun EmptyDueState() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            text = stringResource(R.string.no_due),
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium,
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = stringResource(R.string.no_due_hint),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
-}
-
-/**
- * One arm of the Trident — a single key metric with a colored amount.
- * D71 §3: corner radius 16dp; elevation 2dp; no border combined with elevation.
- */
-@Composable
-private fun TridentCard(
-    title: String,
-    value: String,
-    subtitle: String,
-    amountColor: Color,
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = amountColor,
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-/**
- * A single customer-due row. Aging-bucket color uses D71 §1 semantic palette only.
- * D71 §3: corner radius 16dp; elevation 1dp.
- * age rendered via banglaDigit() — no Latin digits in Bengali UI (Design KB digit law).
- */
-@Composable
-private fun DueCustomerCard(due: KhataCustomerDue) {
-    // D71 §1: ONLY the four declared semantic colors; no new colors without a D-entry.
-    val amountColor = when (due.agingBucket) {
-        "GREEN"  -> ColorSemanticPositive  // recent — within normal range
-        "YELLOW" -> ColorSemanticCaution   // moderately overdue
-        "RED"    -> ColorPrimary           // severely overdue — maroon for highest urgency
-        else     -> MaterialTheme.colorScheme.onSurface
-    }
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-    ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            // Row 1: Logo | wordmark | premium badge ┃ sync | notifications | avatar
+            Row(
+                modifier          = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                // বৃত্তাকার logo circle
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.18f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector        = Icons.Filled.Book,
+                        contentDescription = null,
+                        tint               = Color.White,
+                        modifier           = Modifier.size(18.dp),
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                // Wordmark
                 Text(
-                    text = due.customer.nameBn,
-                    style = MaterialTheme.typography.titleSmall,
+                    text       = stringResource(R.string.app_name),
+                    style      = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
+                    color      = Color.White,
                 )
+                // §5.1 OPEN ITEM: badge behavior for FREE/GRACE/SOFT_LOCKED pending owner ruling
+                if (isLicensed) {
+                    Spacer(Modifier.width(6.dp))
+                    PremiumBadge()
+                }
+                Spacer(Modifier.weight(1f))
+                // Sync chip (offline-first — Room-backed, always synced)
+                SyncStatusChip()
+                Spacer(Modifier.width(4.dp))
+                // Notification bell
+                IconButton(
+                    onClick  = { /* TODO: notification screen — future PR */ },
+                    modifier = Modifier.size(40.dp),
+                ) {
+                    Icon(
+                        imageVector        = Icons.Filled.Notifications,
+                        contentDescription = stringResource(R.string.home_notification_cd),
+                        tint               = Color.White,
+                        modifier           = Modifier.size(22.dp),
+                    )
+                }
+                Spacer(Modifier.width(2.dp))
+                // User avatar — first letter of shop name
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f))
+                        .semantics { contentDescription = shopName },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text       = shopName.firstOrNull()?.toString()
+                                     ?: stringResource(R.string.home_avatar_fallback),
+                        style      = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color      = Color.White,
+                    )
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            // Row 2: shop name + ▾ switcher
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier          = Modifier.clickable(
+                    onClick = { /* TODO: shop switcher — multi-shop, future PR */ },
+                ),
+            ) {
                 Text(
-                    text = stringResource(R.string.age_days, banglaDigit(due.ageDays)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = amountColor,
+                    text     = shopName,
+                    style    = MaterialTheme.typography.bodySmall,
+                    color    = Color.White.copy(alpha = 0.80f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                Icon(
+                    imageVector        = Icons.Filled.ArrowDropDown,
+                    contentDescription = null,
+                    tint               = Color.White.copy(alpha = 0.6f),
+                    modifier           = Modifier.size(16.dp),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun PremiumBadge() {
+    // §5.1 OPEN ITEM: exact text/color per license state pending owner ruling.
+    Surface(
+        shape = RoundedCornerShape(4.dp),
+        color = ColorAccentGold,
+    ) {
+        Text(
+            text       = stringResource(R.string.home_premium_badge),
+            style      = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color      = ColorBrandMaroon,
+            modifier   = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+        )
+    }
+}
+
+@Composable
+private fun SyncStatusChip() {
+    // Offline-first: Room-backed, never network-dependent — always "সিংক্‌ড".
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color.White.copy(alpha = 0.15f),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier          = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(ColorSemanticPositive),
+            )
+            Spacer(Modifier.width(4.dp))
             Text(
-                text = NumberFormatter.formatMoney(due.dueAmount, DigitStyle.BANGLA),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = amountColor,
+                text  = stringResource(R.string.home_sync_label),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White,
             )
         }
     }
 }
 
-/**
- * Converts a non-negative integer to Bengali digit string.
- * Example: 15L → "১৫". Used for counts/ages where formatMoney is inappropriate.
- * Digit law: no Latin digits in Bengali UI paths (Design KB).
- */
-private fun banglaDigit(n: Long): String {
-    val b = "০১২৩৪৫৬৭৮৯"
-    return n.toString().map { c -> if (c.isDigit()) b[c - '0'] else c }.joinToString("")
+// ─── §2.2 Hero card ────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun HeroCard(
+    data:           HomeData,
+    amountVisible:  Boolean,
+    onAmountToggle: () -> Unit,
+    modifier:       Modifier = Modifier,
+) {
+    // PR B proxy: todaySalesTotal used as নিট লাভ.
+    // PR C will wire: netProfit = todaySalesTotal - todayExpenseTotal per spec §5.2 ruling.
+    val heroAmount = data.todaySalesTotal
+    val heroText   = if (amountVisible) formatBengaliAmount(heroAmount)
+                     else stringResource(R.string.home_hero_amount_hidden)
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape    = RoundedCornerShape(16.dp),
+        color    = ColorHeroBg,
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            // Title row
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text     = stringResource(R.string.home_hero_title),
+                    style    = MaterialTheme.typography.bodyMedium,
+                    color    = Color.White.copy(alpha = 0.80f),
+                    modifier = Modifier.weight(1f),
+                )
+                // Period chip: "আজ ▾" (PR C will wire period selector)
+                Surface(
+                    shape    = RoundedCornerShape(8.dp),
+                    color    = Color.White.copy(alpha = 0.15f),
+                    modifier = Modifier.clickable { /* TODO PR C: period selector */ },
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier          = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    ) {
+                        Text(
+                            text  = stringResource(R.string.home_hero_period),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = Color.White,
+                        )
+                        Icon(
+                            imageVector        = Icons.Filled.ArrowDropDown,
+                            contentDescription = null,
+                            tint               = Color.White,
+                            modifier           = Modifier.size(14.dp),
+                        )
+                    }
+                }
+                Spacer(Modifier.width(4.dp))
+                // Eye icon: amount hide / show
+                IconButton(
+                    onClick  = onAmountToggle,
+                    modifier = Modifier.size(32.dp),
+                ) {
+                    Icon(
+                        imageVector = if (amountVisible) Icons.Filled.Visibility
+                                      else Icons.Filled.VisibilityOff,
+                        contentDescription = stringResource(
+                            if (amountVisible) R.string.home_hero_hide_amount
+                            else R.string.home_hero_show_amount,
+                        ),
+                        tint     = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            // Hero amount
+            AnimatedContent(targetState = heroText, label = "hero_amount") { text ->
+                Text(
+                    text       = text,
+                    style      = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color      = ColorHeroAmount,
+                )
+            }
+            // Delta pill: ▲/▼ — no yesterday data in PR B; PR C will add
+            Spacer(Modifier.height(14.dp))
+            HorizontalDivider(color = Color.White.copy(alpha = 0.20f), thickness = 0.5.dp)
+            Spacer(Modifier.height(14.dp))
+            // আয় | ব্যয় two-column breakdown
+            Row(modifier = Modifier.fillMaxWidth()) {
+                HeroSubAmount(
+                    label         = stringResource(R.string.home_hero_income_label),
+                    directionIcon = "↑",
+                    amount        = data.todaySalesTotal,  // proxy until PR C
+                    amountVisible = amountVisible,
+                    modifier      = Modifier.weight(1f),
+                )
+                HeroSubAmount(
+                    label         = stringResource(R.string.home_hero_expense_label),
+                    directionIcon = "↓",
+                    amount        = 0L,  // PR C: wire todayExpenseTotal
+                    amountVisible = amountVisible,
+                    modifier      = Modifier.weight(1f),
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+            // Footer: "৫টি বিক্রি · ৩ কাস্টমার"
+            Text(
+                text  = stringResource(
+                    R.string.home_hero_footer,
+                    banglaDigit(data.todayBillCount),
+                    banglaDigit(data.dueCustomerCount),
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.60f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HeroSubAmount(
+    label:         String,
+    directionIcon: String,
+    amount:        Long,
+    amountVisible: Boolean,
+    modifier:      Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        Text(
+            text  = "$directionIcon $label",
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.White.copy(alpha = 0.65f),
+        )
+        Text(
+            text       = if (amountVisible) formatBengaliAmount(amount)
+                         else stringResource(R.string.home_hero_amount_hidden),
+            style      = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold,
+            color      = Color.White,
+        )
+    }
+}
+
+// ─── §2.3 Quick action grid ──────────────────────────────────────────────────────────
+
+@Composable
+private fun QuickActionGrid(
+    todayBillCount:    Int,
+    pendingKhataCount: Int,
+    onNavigate:        (String) -> Unit,
+    modifier:          Modifier = Modifier,
+) {
+    val tileGap = 8.dp
+    Row(
+        modifier              = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(tileGap),
+    ) {
+        // বড় primary tile: নতুন বিক্রি / POS
+        ActionTile(
+            label     = stringResource(R.string.home_action_new_sale),
+            icon      = Icons.Filled.ShoppingCart,
+            isPrimary = true,
+            badge     = stringResource(R.string.home_action_today_count, banglaDigit(todayBillCount)),
+            onClick   = { onNavigate("sale") },
+            modifier  = Modifier
+                .weight(1f)
+                .height(LargeTileHeight),
+        )
+        // ছোট ৪ tiles: 2×2 grid
+        Column(
+            modifier            = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(tileGap),
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(tileGap)) {
+                ActionTile(
+                    label    = stringResource(R.string.home_action_income),
+                    icon     = Icons.Filled.TrendingUp,
+                    onClick  = { onNavigate("expense") },
+                    modifier = Modifier.weight(1f).height(SmallTileHeight),
+                )
+                ActionTile(
+                    label    = stringResource(R.string.home_action_expense),
+                    icon     = Icons.Filled.TrendingDown,
+                    onClick  = { onNavigate("expense") },
+                    modifier = Modifier.weight(1f).height(SmallTileHeight),
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(tileGap)) {
+                ActionTile(
+                    label    = stringResource(R.string.home_action_collection),
+                    icon     = Icons.Filled.Book,
+                    badge    = if (pendingKhataCount > 0) banglaDigit(pendingKhataCount) else null,
+                    onClick  = { onNavigate("khata") },
+                    modifier = Modifier.weight(1f).height(SmallTileHeight),
+                )
+                ActionTile(
+                    label    = stringResource(R.string.home_action_stock_in),
+                    icon     = Icons.Filled.Inventory,
+                    onClick  = { onNavigate("catalog") },
+                    modifier = Modifier.weight(1f).height(SmallTileHeight),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActionTile(
+    label:     String,
+    icon:      ImageVector,
+    onClick:   () -> Unit,
+    modifier:  Modifier = Modifier,
+    isPrimary: Boolean  = false,
+    badge:     String?  = null,
+) {
+    Surface(
+        modifier = modifier,
+        shape    = RoundedCornerShape(12.dp),
+        color    = if (isPrimary) ColorBrandMaroon else MaterialTheme.colorScheme.surfaceVariant,
+        onClick  = onClick,
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier            = Modifier
+                    .align(Alignment.Center)
+                    .padding(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    imageVector        = icon,
+                    contentDescription = null,
+                    tint               = if (isPrimary) ColorAccentGold
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier           = Modifier.size(if (isPrimary) 28.dp else 22.dp),
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text      = label,
+                    style     = MaterialTheme.typography.labelSmall,
+                    color     = if (isPrimary) Color.White
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    maxLines  = 1,
+                    overflow  = TextOverflow.Ellipsis,
+                )
+            }
+            // Badge — top-right corner (spec §2.3)
+            if (badge != null) {
+                Surface(
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    shape    = RoundedCornerShape(topEnd = 12.dp, bottomStart = 8.dp),
+                    color    = if (isPrimary) ColorAccentGold
+                               else MaterialTheme.colorScheme.primary,
+                ) {
+                    Text(
+                        text       = badge,
+                        style      = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color      = if (isPrimary) ColorBrandMaroon
+                                     else MaterialTheme.colorScheme.onPrimary,
+                        modifier   = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────────────────
+
+private fun banglaDigit(n: Int): String {
+    val map = "০১২৩৪৫৬৭৮৯"
+    return n.toString().map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
+}
+
+private fun formatBengaliAmount(paise: Long): String {
+    val taka = paise / 100
+    val formatted = String.format("%,d", taka)
+    val bangla = formatted.map { c ->
+        if (c.isDigit()) "০১২৩৪৫৬৭৮৯"[c - '0'] else c
+    }.joinToString("")
+    return "\u09f3\u00a0$bangla"
 }

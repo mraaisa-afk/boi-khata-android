@@ -7,10 +7,27 @@
     <string name="no_due">No dues right now</string>
     <string name="no_due_hint">Add a due — go to Khata tab</string>
     <string name="age_days">%1$s days overdue</string>
-    <!-- D75: Trident dashboard strings -->
     <string name="cash_balance">Cash Balance</string>
     <string name="customer_dues">Customer Dues</string>
     <string name="supplier_dues">Supplier Dues</string>
     <string name="supplier_count">%1$s suppliers</string>
     <string name="cash_account">Cash Account</string>
+    <string name="home_notification_cd">Notifications</string>
+    <string name="home_sync_label">Synced</string>
+    <string name="home_premium_badge">Premium</string>
+    <string name="home_avatar_fallback">B</string>
+    <string name="home_hero_title">Today\'s Net Profit</string>
+    <string name="home_hero_period">Today</string>
+    <string name="home_hero_hide_amount">Hide amount</string>
+    <string name="home_hero_show_amount">Show amount</string>
+    <string name="home_hero_amount_hidden">••••</string>
+    <string name="home_hero_income_label">Income</string>
+    <string name="home_hero_expense_label">Expense</string>
+    <string name="home_hero_footer">%1$s sales · %2$s customers</string>
+    <string name="home_action_new_sale">New Sale</string>
+    <string name="home_action_income">Add Income</string>
+    <string name="home_action_expense">Add Expense</string>
+    <string name="home_action_collection">Khata Collect</string>
+    <string name="home_action_stock_in">Stock In</string>
+    <string name="home_action_today_count">Today %1$s</string>
 </resources>

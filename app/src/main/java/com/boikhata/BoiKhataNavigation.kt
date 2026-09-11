@@ -13,10 +13,8 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -27,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -42,6 +39,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.boikhata.core.designsystem.ColorAccentGold
+import com.boikhata.core.designsystem.ColorBrandMaroon
+import com.boikhata.core.designsystem.ColorNavUnselected
+import com.boikhata.core.designsystem.ColorSurfaceIvory
 import com.boikhata.feature.catalog.BookAddEditScreen
 import com.boikhata.feature.catalog.CatalogScreen
 import com.boikhata.feature.expense.ExpenseScreen
@@ -64,12 +65,10 @@ import com.boikhata.feature.supplier.SupplierScreen
  * Blueprint §2 / G22: max 4 tabs — the central FAB is not a tab, so the limit holds.
  * G19: every label comes from strings.xml. G23: no drawer.
  * Locked Design Spec §4.5 (hybrid palette): maroon chrome, ivory surface, gold FAB.
+ *
+ * PR B: topBar removed — HomeScreen now embeds its own AppBar in LazyColumn (D79 §2.1).
+ * Other screens will add their own TopAppBar in future PRs.
  */
-private val ColorPrimaryMaroon = Color(0xFF800000)
-private val ColorSurfaceIvory = Color(0xFFFDFAF6)
-private val ColorAccentGold = Color(0xFFC9A227)
-private val ColorNavUnselected = Color(0xFF6B6B6B)
-
 @Composable
 fun BoiKhataMainScreen(
     tenantId: String,
@@ -102,18 +101,15 @@ fun BoiKhataMainScreen(
     val currentRoute = backStackEntry?.destination?.route
 
     Scaffold(
-        topBar = {
-            IconButton(onClick = { navController.navigate("settings") }) {
-                Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.settings_title))
-            }
-        },
+        // topBar removed in PR B — HomeScreen embeds its own AppBar (D79 §2.1).
+        // Other screens will add their own TopAppBar in future PRs.
         bottomBar = {
             Box(modifier = Modifier.fillMaxWidth()) {
                 NavigationBar(containerColor = ColorSurfaceIvory) {
                     leadingTabs.forEach { tab ->
                         NavBarTab(tab = tab, currentRoute = currentRoute, navController = navController)
                     }
-                    // Reserved gap for the central FAB — keeps the tab row balanced.
+                    // Reserved gap for the central FAB
                     Spacer(modifier = Modifier.weight(1f))
                     trailingTabs.forEach { tab ->
                         NavBarTab(tab = tab, currentRoute = currentRoute, navController = navController)
@@ -123,11 +119,11 @@ fun BoiKhataMainScreen(
                     onClick = { navController.navigateToTab("sale") },
                     shape = CircleShape,
                     containerColor = ColorAccentGold,
-                    contentColor = ColorPrimaryMaroon,
+                    contentColor = ColorBrandMaroon,
                     modifier = Modifier
                         .align(Alignment.TopCenter)
                         .offset(y = (-20).dp)
-                        .size(64.dp) // primaryTouchTarget token
+                        .size(64.dp)
                         .semantics { contentDescription = newSaleLabel },
                 ) {
                     Text(
@@ -141,10 +137,17 @@ fun BoiKhataMainScreen(
         NavHost(
             navController = navController,
             startDestination = "home",
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
         ) {
             composable("home") {
-                HomeScreen(tenantId = tenantId)
+                HomeScreen(
+                    tenantId   = tenantId,
+                    shopName   = shopName,
+                    isLicensed = false, // §5.1 OPEN ITEM: pending Sakira ruling on license states
+                    onNavigate = { route -> navController.navigate(route) },
+                )
             }
             composable("catalog") {
                 CatalogScreen(
@@ -189,17 +192,13 @@ fun BoiKhataMainScreen(
                     onBack = { navController.popBackStack() },
                 )
             }
-            // D79: "আরও" hub — everything that left the tab row lives here.
             composable("more") {
                 MoreScreen(onEntryClick = { route -> navController.navigate(route) })
             }
-            // P2b: POS sale screen — now reached from the central FAB.
             composable("sale") {
                 PosScreen(
                     tenantId = tenantId,
-                    onCheckoutComplete = { billId ->
-                        navController.navigate("bill_detail/$billId")
-                    },
+                    onCheckoutComplete = { billId -> navController.navigate("bill_detail/$billId") },
                     onExpenseClick = { navController.navigate("expense") },
                     onReportsClick = { navController.navigate("reports") },
                     onCashCloseClick = { navController.navigate("cash_close") },
@@ -208,27 +207,21 @@ fun BoiKhataMainScreen(
                     onMelaClick = { navController.navigate("mela") },
                 )
             }
-            // P3a: Expense + Cashbook + Owner Drawing
             composable("expense") {
                 ExpenseScreen(tenantId = tenantId)
             }
-            // P3c: Accounting reports (P&L + balance-sheet + period-lock + budget)
             composable("reports") {
                 ReportsScreen(tenantId = tenantId)
             }
-            // P3c: Daily cash-close "আজকের হিসাব"
             composable("cash_close") {
                 CashCloseScreen(tenantId = tenantId)
             }
-            // P4b: Subscription screen (manual bKash, OWNER-gated)
             composable("subscription") {
                 SubscriptionScreen(tenantId = tenantId, role = role)
             }
-            // P5: Supplier/publisher payable ledger (দেনা-খাতা)
             composable("supplier") {
                 SupplierScreen(tenantId = tenantId, shopName = shopName)
             }
-            // P5: Mela mode (book fair / seasonal)
             composable("mela") {
                 MelaScreen(tenantId = tenantId)
             }
@@ -249,14 +242,12 @@ fun BoiKhataMainScreen(
             composable("number_migration") {
                 NumberMigrationScreen(onSignOut = onSignOut)
             }
-            // P2b: Bill history
             composable("bill_history") {
                 BillHistoryScreen(
                     tenantId = tenantId,
                     onBillClick = { billId -> navController.navigate("bill_detail/$billId") },
                 )
             }
-            // P2b: Bill detail
             composable(
                 route = "bill_detail/{billId}",
                 arguments = listOf(navArgument("billId") { type = NavType.StringType }),
@@ -290,8 +281,8 @@ private fun androidx.compose.foundation.layout.RowScope.NavBarTab(
         label = { Text(label) },
         alwaysShowLabel = true,
         colors = NavigationBarItemDefaults.colors(
-            selectedIconColor = ColorPrimaryMaroon,
-            selectedTextColor = ColorPrimaryMaroon,
+            selectedIconColor = ColorBrandMaroon,
+            selectedTextColor = ColorBrandMaroon,
             indicatorColor = ColorAccentGold.copy(alpha = 0.20f),
             unselectedIconColor = ColorNavUnselected,
             unselectedTextColor = ColorNavUnselected,
