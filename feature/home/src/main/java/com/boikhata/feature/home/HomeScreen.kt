@@ -19,7 +19,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -29,6 +29,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.boikhata.core.designsystem.format.DigitStyle
 import com.boikhata.core.designsystem.format.NumberFormatter
 import com.boikhata.core.domain.model.HomeData
@@ -45,14 +48,30 @@ private val ColorPrimary          = Color(0xFF800000)  // brand/identity — key
  *
  * D71 §6: No charts. D2: Trident numbers only — no extra metric, no percentage.
  * Blueprint §2: খাতা-প্রথম হোম = দেনা-তালিকা + Trident metrics.
+ *
+ * D76: HomeScreen reloads on every ON_RESUME lifecycle event so that
+ * entries added in other tabs (Khata, Sale) are immediately visible
+ * when the user switches back to Home — without killing the app.
  */
 @Composable
 fun HomeScreen(
     tenantId: String,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
-    LaunchedEffect(tenantId) {
-        viewModel.loadHome(tenantId)
+    // D76: Reload on every resume so cross-tab entries show immediately.
+    // Repository methods are one-shot suspend funs (not Flow), so we must
+    // trigger a fresh load whenever this screen becomes active again.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(tenantId, lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.loadHome(tenantId)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     val uiState by viewModel.uiState.collectAsState()
@@ -95,7 +114,7 @@ private fun HomeContent(data: HomeData) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         contentPadding = PaddingValues(vertical = 16.dp),
     ) {
-        // ── Trident 1: নগদ ব্যালেন্স ──────────────────────────────────
+        // ── Trident 1: নগদ ব্যালেন্স ────────────────────────────────────────────
         item {
             TridentCard(
                 title = stringResource(R.string.cash_balance),
@@ -104,7 +123,7 @@ private fun HomeContent(data: HomeData) {
                 amountColor = ColorSemanticPositive,
             )
         }
-        // ── Trident 2: গ্রাহক বাকি ───────────────────────────────────
+        // ── Trident 2: গ্রাহক বাকি ───────────────────────────────────────────
         item {
             TridentCard(
                 title = stringResource(R.string.customer_dues),
@@ -113,7 +132,7 @@ private fun HomeContent(data: HomeData) {
                 amountColor = ColorSemanticCaution,
             )
         }
-        // ── Trident 3: সাপ্লায়ার পাওনা ──────────────────────────────────
+        // ── Trident 3: সাপ্লায়ার পাওনা ──────────────────────────────────────────
         item {
             TridentCard(
                 title = stringResource(R.string.supplier_dues),
@@ -122,14 +141,14 @@ private fun HomeContent(data: HomeData) {
                 amountColor = ColorSemanticCaution,
             )
         }
-        // ── আজকের বিক্রি ────────────────────────────────────────────────────
+        // ── আজকের বিক্রি ─────────────────────────────────────────────────────
         item {
             TodaySalesCard(
                 todaySalesTotal = data.todaySalesTotal,
                 todayBillCount = data.todayBillCount,
             )
         }
-        // ── Section header: শীর্ষ বাকিদার ────────────────────────────────────
+        // ── Section header: শীর্ষ বাকিদার ───────────────────────────────────────────
         item {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -150,8 +169,8 @@ private fun HomeContent(data: HomeData) {
 }
 
 /**
- * আজকের বিক্রি summary — today’s sales total + bill count.
- * Blueprint §2: দেনা-তালিকা + today’s number on Home.
+ * আজকের বিক্রি summary — today's sales total + bill count.
+ * Blueprint §2: দেনা-তালিকা + today's number on Home.
  * D71 §3: corner radius 16dp; elevation 2dp.
  */
 @Composable
@@ -188,7 +207,7 @@ private fun TodaySalesCard(
 
 /**
  * Actionable empty state when no customers have dues.
- * Design KB: “Bengali, actionable, with a next step — never a one-line English sentence.”
+ * Design KB: "Bengali, actionable, with a next step — never a one-line English sentence."
  */
 @Composable
 private fun EmptyDueState() {
