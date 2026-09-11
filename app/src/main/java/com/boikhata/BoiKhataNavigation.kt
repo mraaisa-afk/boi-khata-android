@@ -84,6 +84,10 @@ fun BoiKhataMainScreen(
     val navController = rememberNavController()
     val context = LocalContext.current
 
+    // G19 + a11y: stringResource is @Composable, so the FAB's spoken label is read
+    // here and captured by the semantics lambda below.
+    val newSaleLabel = stringResource(R.string.fab_new_sale)
+
     // D79: POS left the tab row and became the central FAB, so "sale" is not in this list.
     val leadingTabs = listOf(
         NavTab("home", R.string.nav_home, Icons.Default.Home),
