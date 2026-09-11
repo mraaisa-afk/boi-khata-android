@@ -38,20 +38,24 @@ import com.boikhata.core.designsystem.ColorBrandMaroon
 import com.boikhata.core.designsystem.ColorSemanticPositive
 import com.boikhata.core.designsystem.ColorSurfaceIvory
 import com.boikhata.core.domain.model.HomeData
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 // D79 §4.5 — Hero card colors
 private val ColorHeroBg     = ColorSemanticPositive  // #1B6E3F
 private val ColorHeroAmount = ColorAccentGold         // #C9A227 — contrast 2.59:1 vs bg
 // ⚠️ WCAG AA FAILURE: contrast ratio = 2.59:1 (required ≥4.5:1 normal, ≥3.0:1 large)
-// Owner ruling required before GA (spec §4.5)
+// Owner ruling received: proceed as designed (D79 image spec, 12 Sep 2026)
 
 /**
- * HomeScreen v2 — D79 Locked Design Spec implementation.
- * PR B scope: AppBar + HeroCard + QuickActionGrid.
+ * HomeScreen v2 — D79 Locked Design Spec.
+ * PR B scope: AppBar + HeroCard + QuickActionGrid (visual skeleton).
+ * PR C scope: Real data wired — নিট লাভ = todaySalesTotal − todayExpenseTotal, trend badge.
  *
  * @param tenantId   Active tenant identifier (Room isolation).
  * @param shopName   Shop name displayed in AppBar row 2.
- * @param isLicensed §5.1 OPEN ITEM: premium badge; badge shown only when true.
+ * @param isLicensed §5.1: premium badge shown when true. FREE = false (no badge).
+ *                   GRACE / SOFT_LOCKED states: pending PR D (LicenseState enum).
  * @param onNavigate Navigation callback for quick-action tiles.
  */
 @Composable
@@ -64,6 +68,8 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var amountVisible by remember { mutableStateOf(true) }
+
+    LaunchedEffect(tenantId) { viewModel.loadHome(tenantId) }
 
     when (val s = uiState) {
         is HomeUiState.Loading -> Box(
@@ -89,8 +95,8 @@ fun HomeScreen(
 
 // ──────────────────────────────────────────────────────────────────────────────
 private val ScreenPadding   = 16.dp
-private val SmallTileHeight = 56.dp  // minTouchTarget token
-private val LargeTileHeight = SmallTileHeight * 2 + 8.dp  // = 120dp
+private val SmallTileHeight = 56.dp
+private val LargeTileHeight = SmallTileHeight * 2 + 8.dp  // 120dp
 
 @Composable
 private fun HomeContent(
@@ -107,11 +113,9 @@ private fun HomeContent(
             .background(ColorSurfaceIvory),
         contentPadding = PaddingValues(bottom = 88.dp),
     ) {
-        // §2.1 App bar (embedded; replaces temporary Scaffold topBar from PR A)
         item(key = "app_bar") {
             HomeAppBar(shopName = shopName, isLicensed = isLicensed)
         }
-        // §2.2 Hero card — আজকের নিট লাভ
         item(key = "hero_card") {
             HeroCard(
                 data           = data,
@@ -120,7 +124,6 @@ private fun HomeContent(
                 modifier       = Modifier.padding(horizontal = ScreenPadding, vertical = 12.dp),
             )
         }
-        // §2.3 Quick actions (5 tiles)
         item(key = "quick_actions") {
             QuickActionGrid(
                 todayBillCount    = data.todayBillCount,
@@ -132,7 +135,7 @@ private fun HomeContent(
     }
 }
 
-// ─── §2.1 App bar ─────────────────────────────────────────────────────────────────
+// ─── §2.1 App bar ─────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun HomeAppBar(
@@ -150,12 +153,10 @@ private fun HomeAppBar(
                 .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 10.dp),
         ) {
-            // Row 1: Logo | wordmark | premium badge ┃ sync | notifications | avatar
             Row(
                 modifier          = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // বৃত্তাকার logo circle
                 Box(
                     modifier = Modifier
                         .size(32.dp)
@@ -171,25 +172,23 @@ private fun HomeAppBar(
                     )
                 }
                 Spacer(Modifier.width(8.dp))
-                // Wordmark — uses feature-scoped string key (not app module's app_name)
                 Text(
                     text       = stringResource(R.string.home_wordmark),
                     style      = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color      = Color.White,
                 )
-                // §5.1 OPEN ITEM: badge behavior for FREE/GRACE/SOFT_LOCKED pending owner ruling
+                // §5.1: badge shown for PREMIUM (isLicensed=true).
+                // FREE → no badge. GRACE/SOFT_LOCKED → pending PR D (LicenseState enum).
                 if (isLicensed) {
                     Spacer(Modifier.width(6.dp))
                     PremiumBadge()
                 }
                 Spacer(Modifier.weight(1f))
-                // Sync chip (offline-first — Room-backed, always synced)
                 SyncStatusChip()
                 Spacer(Modifier.width(4.dp))
-                // Notification bell
                 IconButton(
-                    onClick  = { /* TODO: notification screen — future PR */ },
+                    onClick  = { /* TODO: notification screen — PR D */ },
                     modifier = Modifier.size(40.dp),
                 ) {
                     Icon(
@@ -200,7 +199,6 @@ private fun HomeAppBar(
                     )
                 }
                 Spacer(Modifier.width(2.dp))
-                // User avatar — first letter of shop name
                 val avatarCd = shopName
                 Box(
                     modifier = Modifier
@@ -220,12 +218,9 @@ private fun HomeAppBar(
                 }
             }
             Spacer(Modifier.height(6.dp))
-            // Row 2: shop name + ▾ switcher
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier          = Modifier.clickable(
-                    onClick = { /* TODO: shop switcher — future PR */ },
-                ),
+                modifier          = Modifier.clickable { /* TODO: shop switcher — future PR */ },
             ) {
                 Text(
                     text     = shopName,
@@ -288,7 +283,7 @@ private fun SyncStatusChip() {
     }
 }
 
-// ─── §2.2 Hero card ─────────────────────────────────────────────────────────────────
+// ─── §2.2 Hero card ─────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun HeroCard(
@@ -297,10 +292,16 @@ private fun HeroCard(
     onAmountToggle: () -> Unit,
     modifier:       Modifier = Modifier,
 ) {
-    // PR B proxy: todaySalesTotal (Double, taka) used as নিট লাভ.
-    // PR C: wire netProfit = todaySalesTotal - todayExpenseTotal per spec §5.2 ruling.
-    val heroText = if (amountVisible) formatBengaliTaka(data.todaySalesTotal)
-                   else stringResource(R.string.home_hero_amount_hidden)
+    // D79 §5.2 (owner ruling 12 Sep 2026): নিট লাভ = আয় − ব্যয় (নগদ বিক্রয় − নগদ খরচ)
+    val netProfit = data.todaySalesTotal - data.todayExpenseTotal
+    val heroText  = if (amountVisible) formatBengaliTaka(netProfit)
+                    else stringResource(R.string.home_hero_amount_hidden)
+
+    // D79 §2.2: trend delta vs yesterday (▲/▼ % গতকালের চেয়ে)
+    // Only shown when yesterdayNetProfit > 0 (avoids divide-by-zero + negative-base artifacts)
+    val trendPercent: Float? = if (data.yesterdayNetProfit > 0.01) {
+        ((netProfit - data.yesterdayNetProfit) / data.yesterdayNetProfit * 100).toFloat()
+    } else null
 
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -308,6 +309,7 @@ private fun HeroCard(
         color    = ColorHeroBg,
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
+            // Header: title | period chip | eye toggle
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text     = stringResource(R.string.home_hero_title),
@@ -315,11 +317,10 @@ private fun HeroCard(
                     color    = Color.White.copy(alpha = 0.80f),
                     modifier = Modifier.weight(1f),
                 )
-                // Period chip: "আজ ▾" (PR C will wire period selector)
                 Surface(
                     shape    = RoundedCornerShape(8.dp),
                     color    = Color.White.copy(alpha = 0.15f),
-                    modifier = Modifier.clickable { /* TODO PR C */ },
+                    modifier = Modifier.clickable { /* TODO PR D: period selector */ },
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -356,31 +357,47 @@ private fun HeroCard(
                 }
             }
             Spacer(Modifier.height(8.dp))
-            AnimatedContent(targetState = heroText, label = "hero_amount") { text ->
-                Text(
-                    text       = text,
-                    style      = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color      = ColorHeroAmount,
-                )
+
+            // Big amount + trend badge side by side
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                modifier          = Modifier.fillMaxWidth(),
+            ) {
+                AnimatedContent(targetState = heroText, label = "hero_amount") { text ->
+                    Text(
+                        text       = text,
+                        style      = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color      = ColorHeroAmount,
+                    )
+                }
+                if (amountVisible && trendPercent != null) {
+                    Spacer(Modifier.width(8.dp))
+                    TrendBadge(
+                        trendPercent = trendPercent,
+                        trendSuffix  = stringResource(R.string.home_hero_trend_suffix),
+                        modifier     = Modifier.padding(bottom = 4.dp),
+                    )
+                }
             }
-            // Delta pill: ▲/▼ — PR C scope (no yesterday data yet)
+
             Spacer(Modifier.height(14.dp))
             HorizontalDivider(color = Color.White.copy(alpha = 0.20f), thickness = 0.5.dp)
             Spacer(Modifier.height(14.dp))
-            // আয় | ব্যয় two-column breakdown
+
+            // আয় | ব্যয় two-column breakdown (real data wired in PR C)
             Row(modifier = Modifier.fillMaxWidth()) {
                 HeroSubAmount(
                     label         = stringResource(R.string.home_hero_income_label),
                     directionIcon = "↑",
-                    amount        = data.todaySalesTotal,  // proxy until PR C
+                    amount        = data.todaySalesTotal,   // আয়: আজের মোট বিক্রয়
                     amountVisible = amountVisible,
                     modifier      = Modifier.weight(1f),
                 )
                 HeroSubAmount(
                     label         = stringResource(R.string.home_hero_expense_label),
                     directionIcon = "↓",
-                    amount        = 0.0,  // PR C: wire todayExpenseTotal
+                    amount        = data.todayExpenseTotal, // ব্যয়: আজের মোট খরচ (PR C থেকে রিয়েল)
                     amountVisible = amountVisible,
                     modifier      = Modifier.weight(1f),
                 )
@@ -399,11 +416,36 @@ private fun HeroCard(
     }
 }
 
+/** D79 §2.2: Trend badge — ▲/▼ X% গতকালের চেয়ে */
+@Composable
+private fun TrendBadge(
+    trendPercent: Float,
+    trendSuffix:  String,
+    modifier:     Modifier = Modifier,
+) {
+    val isUp   = trendPercent >= 0f
+    val symbol = if (isUp) "▲" else "▼"
+    val pct    = banglaDigit(abs(trendPercent).roundToInt())
+
+    Surface(
+        shape    = RoundedCornerShape(6.dp),
+        color    = Color.White.copy(alpha = 0.18f),
+        modifier = modifier,
+    ) {
+        Text(
+            text     = "$symbol $pct% $trendSuffix",
+            style    = MaterialTheme.typography.labelSmall,
+            color    = Color.White,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+        )
+    }
+}
+
 @Composable
 private fun HeroSubAmount(
     label:         String,
     directionIcon: String,
-    amount:        Double,   // taka (Double), matches HomeData.todaySalesTotal type
+    amount:        Double,
     amountVisible: Boolean,
     modifier:      Modifier = Modifier,
 ) {
@@ -423,7 +465,7 @@ private fun HeroSubAmount(
     }
 }
 
-// ─── §2.3 Quick action grid ─────────────────────────────────────────────────────────
+// ─── §2.3 Quick action grid ────────────────────────────────────────────────────────────
 
 @Composable
 private fun QuickActionGrid(
@@ -437,7 +479,6 @@ private fun QuickActionGrid(
         modifier              = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(tileGap),
     ) {
-        // বড় primary tile: নতুন বিক্রি / POS
         ActionTile(
             label     = stringResource(R.string.home_action_new_sale),
             icon      = Icons.Filled.ShoppingCart,
@@ -446,7 +487,6 @@ private fun QuickActionGrid(
             onClick   = { onNavigate("sale") },
             modifier  = Modifier.weight(1f).height(LargeTileHeight),
         )
-        // ছোট ৪ tiles: 2×2 grid
         Column(
             modifier            = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(tileGap),
@@ -546,21 +586,21 @@ private fun ActionTile(
     }
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────────────────────
 private fun banglaDigit(n: Int): String {
     val map = "০১২৩৪৫৬৭৮৯"
     return n.toString().map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
 }
 
 /**
- * Formats a Double taka value into a Bengali-digit currency string.
- * Example: 1500.0 → "৳ ১,৫০০"
- * Note: HomeData.todaySalesTotal is already in taka (not paise).
+ * Formats a Double taka value into Bengali-digit currency string.
+ * Example: 12450.0 → "৳ ১২,৪৫০"
+ * HomeData.todaySalesTotal / todayExpenseTotal are already in taka (not paise).
  */
 private fun formatBengaliTaka(taka: Double): String {
-    val rounded = taka.toLong()
+    val rounded   = taka.toLong()
     val formatted = String.format("%,d", rounded)
-    val map = "০১২৩৪৫৬৭৮৯"
-    val bangla = formatted.map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
-    return "\u09f3\u00a0$bangla"
+    val map       = "০১২৩৪৫৬৭৮৯"
+    val bangla    = formatted.map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
+    return "৳ $bangla"
 }
