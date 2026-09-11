@@ -25,6 +25,7 @@
     <string name="home_hero_income_label">আয়</string>
     <string name="home_hero_expense_label">ব্যয়</string>
     <string name="home_hero_footer">%1$sটি বিক্রি · %2$s কাস্টমার</string>
+    <string name="home_hero_trend_suffix">গতকালের চেয়ে</string>
     <string name="home_action_new_sale">নতুন বিক্রি</string>
     <string name="home_action_income">আয় যোগ</string>
     <string name="home_action_expense">ব্যয় যোগ</string>

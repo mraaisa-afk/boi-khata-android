@@ -25,6 +25,7 @@
     <string name="home_hero_income_label">Income</string>
     <string name="home_hero_expense_label">Expense</string>
     <string name="home_hero_footer">%1$s sales · %2$s customers</string>
+    <string name="home_hero_trend_suffix">than yesterday</string>
     <string name="home_action_new_sale">New Sale</string>
     <string name="home_action_income">Add Income</string>
     <string name="home_action_expense">Add Expense</string>
