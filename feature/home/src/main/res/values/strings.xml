@@ -5,12 +5,31 @@
     <string name="today_bills">আজ %1$sটি বিল</string>
     <string name="top_due">শীর্ষ বাকিদার</string>
     <string name="no_due">এখন কারো বাকি নেই</string>
-    <string name="no_due_hint">খাতায় বাকি যোগ করুন — খাতা ট্যাবে যান</string>
+    <string name="no_due_hint">খাতায় বাকি যোগ করুন — খাতা ট্যাবে যান</string>
     <string name="age_days">%1$s দিন আগের বাকি</string>
-    <!-- D75: Trident dashboard strings -->
     <string name="cash_balance">নগদ ব্যালেন্স</string>
     <string name="customer_dues">গ্রাহক বাকি</string>
     <string name="supplier_dues">সাপ্লায়ার পাওনা</string>
     <string name="supplier_count">%1$s জন সাপ্লায়ার</string>
     <string name="cash_account">নগদ একাউন্ট</string>
+    <!-- D79 §2.1–§2.3: HomeScreen v2 -->
+    <string name="home_wordmark">বই খাতা</string>
+    <string name="home_notification_cd">বিজ্ঞপ্তি</string>
+    <string name="home_sync_label">সিংক্‌ড</string>
+    <string name="home_premium_badge">প্রিমিয়াম</string>
+    <string name="home_avatar_fallback">ব</string>
+    <string name="home_hero_title">আজকের নিট লাভ</string>
+    <string name="home_hero_period">আজ</string>
+    <string name="home_hero_hide_amount">পরিমাণ লুকান</string>
+    <string name="home_hero_show_amount">পরিমাণ দেখান</string>
+    <string name="home_hero_amount_hidden">••••</string>
+    <string name="home_hero_income_label">আয়</string>
+    <string name="home_hero_expense_label">ব্যয়</string>
+    <string name="home_hero_footer">%1$sটি বিক্রি · %2$s কাস্টমার</string>
+    <string name="home_action_new_sale">নতুন বিক্রি</string>
+    <string name="home_action_income">আয় যোগ</string>
+    <string name="home_action_expense">ব্যয় যোগ</string>
+    <string name="home_action_collection">খাতা আদায়</string>
+    <string name="home_action_stock_in">স্টক-ইন</string>
+    <string name="home_action_today_count">আজ %1$s</string>
 </resources>
