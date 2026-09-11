@@ -47,6 +47,36 @@
 
 ---
 
+## ERR-002 — 2026-09-11 — P10 — PR B CI Run 1: 4 compile errors in HomeScreen
+
+**Type:** Build failure
+**Phase:** P10
+**Date:** 2026-09-11
+**Task:** PR B — HomeScreen v2 (D79 §2.1–§2.3): AppBar + Hero card + Quick-action grid
+**Error:**
+```
+e: HomeScreen.kt:89 Unresolved reference 'HomeData'
+e: HomeScreen.kt:161 Unresolved reference 'Icons'
+e: HomeScreen.kt:170 Unresolved reference 'app_name'
+e: HomeScreen.kt:203 Unresolved reference 'contentDescription'
+(+ cascading errors from the above 4 roots)
+```
+**Root cause:**
+1. `import com.boikhata.core.domain.model.HomeData` was missing — new screen, no copy-paste from old HomeScreen which also imported it.
+2. `material-icons-extended` not in `feature/home/build.gradle.kts` — new icons (Notifications, ShoppingCart, TrendingUp, TrendingDown, Inventory, Visibility, VisibilityOff) are in the extended library, not the core icons that were previously sufficient for this module.
+3. `R.string.app_name` belongs to the `:app` module, not `:feature:home`. The feature module cannot access app-module resources.
+4. `contentDescription` is a Compose semantics property extension (`androidx.compose.ui.semantics.contentDescription`) that must be explicitly imported — it is NOT included by `import androidx.compose.ui.semantics.semantics`.
+**Fix applied:** Commit `7f5e35a` on branch `agent/phase-10-homescreen-appbar-hero`:
+- Added `import com.boikhata.core.domain.model.HomeData`
+- Added `import androidx.compose.ui.semantics.contentDescription`
+- Added individual icon imports (explicit, not wildcard, to avoid future ambiguity)
+- Added `implementation(libs.androidx.compose.material.icons.extended)` to `feature/home/build.gradle.kts`
+- Replaced `R.string.app_name` with `R.string.home_wordmark`; added `home_wordmark` to all 3 locale strings.xml
+- Fixed `todaySalesTotal` type: `Double` (taka), not `Long` (paise) — renamed helper to `formatBengaliTaka(Double)`
+**Lesson:** Before pushing a new Composable screen to a feature module, verify: (a) all domain model imports, (b) all icon library dependencies in that module's build.gradle.kts, (c) all string keys exist in the *feature* module's strings.xml (never assume app-module strings are accessible), (d) explicit import for every semantics property extension.
+
+---
+
 ## ERR-001 — 2026-09-05 — Pre-Launch — Seed entry
 
 **Type:** Blocker
@@ -60,5 +90,5 @@
 
 ---
 
-*Last updated: 2026-09-05 · Maintained by: Agent (append) + Builder/Sakira (review)*
+*Last updated: 2026-09-11 · Maintained by: Agent (append) + Builder/Sakira (review)*
 *Read by: the agent every session, last 10 entries mandatory*
