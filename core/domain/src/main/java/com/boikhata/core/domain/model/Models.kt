@@ -39,9 +39,15 @@ data class BillSummary(
 data class LowStockBookSummary(
     val bookId: String,
     val bookTitleBn: String,
-    val classLevel: String,      // e.g. "এচএসসি", "এসএসসি", "Class 8"
-    val currentStock: Int,       // effective stock from stock ledger
-    val lowStockThreshold: Int,  // per-book configured threshold (default 3)
+    val classLevel: String,
+    val currentStock: Int,
+    val lowStockThreshold: Int,
+)
+
+/** D79 PR E: daily net-profit point for HomeScreen «বিশ্লেষণ» mini bar sparkline. */
+data class HomeAnalyticsPoint(
+    val dayOfMonth: Int,
+    val netProfit: Double,
 )
 
 /**
@@ -50,24 +56,27 @@ data class LowStockBookSummary(
  * yesterdayNetProfit used for ▲/▼ trend delta badge.
  * D75 Trident arms retained: cashBalance, totalDue, supplierDuesTotal.
  * PR D: lowStockAlerts added for «আজকের করণীয়» section.
+ * PR E: monthNetProfit + monthAnalytics added for «বিশ্লেষণ» mini bar sparkline.
  */
 data class HomeData(
     val totalDue: Double,
     val dueCustomerCount: Int,
-    val todaySalesTotal: Double,                           // D79: আয়
-    val todayExpenseTotal: Double = 0.0,                   // D79: ব্যয়
+    val todaySalesTotal: Double,
+    val todayExpenseTotal: Double = 0.0,
     val todayBillCount: Int,
     val topDueCustomers: List<KhataCustomerDue>,
-    val cashBalance: Double,                               // D75: নগদ ব্যালেন্স
-    val supplierDuesTotal: Double,                         // D75: সাপ্লায়ার পাওনা
-    val supplierCount: Int,                                // D75
-    val yesterdayNetProfit: Double = 0.0,                  // D79 §2.2: trend delta
-    val lowStockAlerts: List<LowStockBookSummary> = emptyList(), // D79 PR D: আজকের করণীয়
+    val cashBalance: Double,
+    val supplierDuesTotal: Double,
+    val supplierCount: Int,
+    val yesterdayNetProfit: Double = 0.0,
+    val lowStockAlerts: List<LowStockBookSummary> = emptyList(),
+    val monthNetProfit: Double = 0.0,
+    val monthAnalytics: List<HomeAnalyticsPoint> = emptyList(),
 )
 
 data class KhataCustomerDue(
     val customer: KhataCustomer,
     val dueAmount: Double,
     val ageDays: Long,
-    val agingBucket: String, // GREEN / YELLOW / RED / NONE
+    val agingBucket: String,
 )
