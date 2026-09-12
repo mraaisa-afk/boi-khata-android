@@ -29,8 +29,8 @@
   - নোট: টেস্ট সবুজ (৪৪ টেস্ট, ০ ফেইল); ক্লিন-বিল্ড সবুজ (assemble+lint+test)। এয়ারপ্লেন-মোড ডেমো = ডিভাইসে ম্যানুয়াল-চেক (স্যান্ডবক্সে ডিভাইস নেই)।
 
 ## P2 — ক্যাটালগ + POS + খাতা
-- [x] ক্যাটালগ (শর্ত+দাম; বাংলা-ফাজি-সার্চ সহজ-রূপ: LIKE+নরমালাইজড-কলাম)
-  - নোট: P2a — লোকাল বুক ক্যাটালগ (list, Bengali fuzzy search via BengaliNormalizer+LIKE, add/edit) সম্পূর্ণ অফলাইন। মাস্টার NCTB ক্যাটালগ ইমপোর্ট = P4/Firebase।
+- [x] ক্যাটালগ (শর্ত+দাম; বাংলা-ফাজি-সার্চ সহজ-রূপ: LIKE+নর্মালাইজড-কলাম)
+  - নোট: P2a — লোকাল বুক ক্যাটালগ (list, Bengali fuzzy search via BengaliNormalizer+LIKE, add/edit) সম্পূর্ণ অফলাইন। মাস্টার NCTB ক্যাটালগ ইম্পোর্ট = P4/Firebase।
 - [x] POS: কার্ট, ছাড়, ভ্যাট-স্প্লিট, আংশিক→অটো-খাতা, বিল-নম্বর-জেনারেটর
   - নোট: P2b — POS sale flow (cart, quantity, discount PERCENTAGE/FIXED, VAT per-line books 0%/stationery 15%, payment method, partial→auto-khata via atomic Room transaction, bill number INV-YYYYMMDD-NNNN). VatCalculator + BillNumberGenerator pure services. SaleRepositoryImpl with @Transaction (bill+lines+stock+khata). 9 VatCalculatorTest + 7 BillNumberGeneratorTest pass.
 - [x] WhatsApp-রসিদ (টেক্সট+PNG, দ্বৈত-অঙ্ক) shared/receipt-এ
@@ -42,9 +42,9 @@
 
 ## P3 — হিসাব-কোর
 - [x] ExpenseCategory-সিড + ১-ট্যাপ-এন্ট্রি + অটো-রুট (বই→ইনভেন্টরি) + ঘরি সাব-লেজার + recurring
-  - নোট: P3a — 8 BD expense categories seeded (ভাড়া, বিদ্যুৎ, ইন্টারনেট, বেতন, ঘরি/অ্যাডভান্স, পরিবহন, MFS-ফি, অন্যান্য)। ১-ট্যাপ expense entry with category + amount + cashbook auto-populate। D24: PurchaseRouter (book→stock_ledger PURCHASE, non-book→expense)। D26: ঘরি sub-ledger via GoriBalanceCalculator (advances − returns, description "ঘরি ফেরত")। D27: RecurringExpenseCalculator pure service (next-due logic unit-tested)। P3b completed the deferred persistence + budget alert (D35): recurring_expenses + budgets tables via Migration v2→v3, RecurringExpenseRepository (addTemplate/applyTemplate/getDueTemplates), BudgetRepository (setBudget/getMonthlyAlerts), BudgetAlertCalculator + RecurringExpenseReminder pure services। 4 PurchaseRouterTest + 6 CashbookBalanceCalculatorTest + 5 GoriBalanceCalculatorTest + 7 RecurringExpenseCalculatorTest + 9 BudgetAlertCalculatorTest + 7 RecurringExpenseReminderTest pass.
+  - নোট: P3a — 8 BD expense categories seeded। ১-ট্যাপ expense entry with category + amount + cashbook auto-populate। D24: PurchaseRouter, D26: GoriBalanceCalculator, D27: RecurringExpenseCalculator। P3b: D35 recurring_expenses + budgets tables via Migration v2→v3। 4 PurchaseRouterTest + 6 CashbookBalanceCalculatorTest + 5 GoriBalanceCalculatorTest + 7 RecurringExpenseCalculatorTest + 9 BudgetAlertCalculatorTest + 7 RecurringExpenseReminderTest pass.
 - [x] Cashbook ৩-অ্যাকাউন্ট + ম্যানুয়াল-এন্ট্রি + অটো-পপুলেট (বিল/খরচ/আদায়)
-  - নোট: P3a — CashbookBalanceCalculator (নগদ/বিকাশ/ব্যাংক, derived balances)। D25: every money flow creates a cashbook entry (expense→EXPENSE, bill payment→INCOME, khata collection→INCOME, owner drawing→EXPENSE) in same Room @Transaction। Manual entry UI with INCOME/EXPENSE/TRANSFER + account selection। P3b completed the deferred bill/khata auto-populate (D34): SaleRepositoryImpl.createBill now inserts INCOME (account from paymentMethod, amount=actualPaid) in the same transaction; KhataRepositoryImpl.addEntry now inserts INCOME for PAYMENT type (account chosen by user, default CASH).
+  - নোট: P3a — CashbookBalanceCalculator (নগদ/বিকাশ/ব্যাংক, derived balances)। D25: every money flow creates a cashbook entry in same Room @Transaction। P3b: D34 SaleRepositoryImpl + KhataRepositoryImpl auto-populate wiring.
 - [x] OwnerDrawing
 - [x] P&L (মাসিক) + বাংলা-বর্ষ-রোলআপ + ব্যালেন্স-শিট-লাইট + COGS-স্প্লিট (কনসাইনমেন্ট/ক্রয়)
   - নোট: P3b — PnLCalculator (D29) + BengaliFiscalCalendar (D30) + BalanceSheetCalculator (D31)। 40 new tests pass.
@@ -63,23 +63,28 @@
 - [x] সাবস্ক্রিপশন-স্ক্রিন
 - [x] মাস্টার-ক্যাটালগ-রিফ্রেশ
 - [x] DailyBackupWorker
-- [x] **Exit-gate:** লাইভ চেইন সবুজ: OTP → activate → ব্যানার → ব্যাকআপ → renew
+- [x] **Exit-gate:** লাইভ চেইন সবুজ: OTP → activate → ব্যানার-মেয়াদ → ব্যাকআপ(লগ-বাদ, তাৎক্ষণিক-দ্বিতীয়বার) → renew
   - নোট: 296 tests, 0 failures. ⚠ Live chain = device-only.
 
 ## P5 — সাপ্লায়ার + মেলা
-- [x] দেনা-খাতা + পাবলিশার-স্টেটমেন্ট + রি-অর্ডার-ইনসাইট
-- [x] মেলা-মোড
-- [ ] **Exit-gate:** কনসাইনমেন্ট-সেটেলমেন্ট E2E-টেস্ট
-  - নোট: pure-logic E2E written. ⚠ NOT RUN — sandbox lacks JDK/toolchain.
+- [x] দেনা-খাতা (payable, কিস্তি-রিমাইন্ডার, trxID-নোট) + পাবলিশার-স্টেটমেন্ট PDF + রি-অর্ডার-ইনসাইট
+  - নোট: P5a — SupplierAgingCalculator FIFO payable aging, SupplierStatementBuilder, ReorderInsightCalculator, supplier payable ledger সম্পন্ন।
+- [x] মেলা-মোড (স্টক-চক্র, ≤৩-সতর্কতা, ওভারসেল-রিকনসিলিয়েশন) + সিজনাল-পজ
+  - নোট: P5a — mela_sessions table (D57, Migration v3→v4), MelaStockCalculator (D56), MelaRepository সম্পন্ন।
+- [x] **Exit-gate:** কনসাইনমেন্ট-সেটেলমেন্ট E2E-টেস্ট
+  - নোট: CI-তে রান হয়েছে (PR #13)। ২টি failure fix করা হয়েছে (commit b1c2b0fd: MelaStock netStock semantics + ReorderInsight .first{}→.firstOrNull)। সব P5 tests pass — SupplierAgingCalculatorTest (16 assertions, consignment-settlement E2E সহ), SupplierStatementBuilderTest, ReorderInsightCalculatorTest (10 assertions), MelaStockCalculatorTest (20 assertions), SupplierRepositoryImplTest। Current main HEAD d53474ae বিল্ড সবুজ। ✅ P5 exit-gate: VERIFIED on CI.
 
 ## P6 — রিপোর্ট + ট্রাস্ট + ভয়েস
-- [x] রিপোর্ট-গভীরতা + মাসিক-ডেটা-কপি + ভয়েস-সেটআপ + Lite-UI-মোড
-- [x] ড্যাশবোর্ড-ফিক্স
+- [x] রিপোর্ট-গভীরতা (১২-মাস-ট্রেন্ড, টপ-১০, তুলনা) + মাসিক-ডেটা-কপি (CSV→শেয়ার) + ভয়েস-সেটআপ (ডিভাইস-TTS) + Lite-UI-মোড
+  - নোট: P6b — Room-backed monthly-copy worker + first-of-month scheduler, app-scoped CSV FileProvider handoff, repeatable Bengali setup narration, persisted Lite toggle/settings surface সম্পন্ন (PR #38). P6c (PR #39) — ReportDepthCalculator.compare() + ComparisonRow + MonthComparison; ReportsViewModel ComparisonState; ReportsScreen 7th tab "মাস তুলনা"; 12 unit tests (ReportDepthCalculatorTest). CI ✅ build ✅.
+- [x] ড্যাশবোর্ড-ফিক্স: আজকের বিক্রি কার্ড + actionable empty state + digit law + WhatsApp share
+  - নোট: PR #40 — HomeScreen: TodaySalesCard, EmptyDueState, banglaDigit() helper, সাপ্লায়ার typo fix। AndroidManifest: <queries> ACTION_SEND text/plain tag যোগ। CI ✅ merged ✅.
 - [ ] **Exit-gate:** ডেটা-কপি-ফ্লো E2E
-  - নোট: monthly data-copy worker written. Real-device verification pending.
+  - নোট: monthly data-copy worker written (P6b). Real-device verification pending (share-sheet + WorkManager on-device).
 
 ## P7 — পাইলট-হার্ডেনিং
-- [x] ট্রায়াল-মোড + anti-farm + নম্বর-মাইগ্রেশন + ডিভাইস-গ্রুপ-ম্যানেজার + ডেমো-মোড
+- [x] ট্রায়াল-মোড + anti-farm + নম্বর-মাইগ্রেশন + ডিভাইস-গ্রুপ-ম্যানেজার + ডেমো-মোড (লোকাল-রিসেটেবল)
+  - নোট: P7b (trial_redemptions, anti-farm, caps, number-migration handoff) সম্পন্ন। ডিভাইস-গ্রুপ-ম্যানেজার + ডেমো-মোড P8-এ সম্পন্ন।
 - [x] অফলাইন-কাওস-স্যুট (এয়ারপ্লেন-দিন, মিড-সিঙ্ক-কিল, ৩০-দিন-সোক+সাইজ-গেট)
   - নোট: D80 — OfflineDaySimulator + MidSyncKillGuard + DbSizeGateCalculator। 19 টেস্ট, CI সবুজ ✅, merge সবুজ ✅ (PR #48, commit fe2f9ab).
 - [ ] **Exit-gate:** ২০-দোকান-পাইলট APK রেডি
@@ -89,19 +94,19 @@
 - [x] রিলিজ: R8+সাইনড-APK+ভার্সন-সানসেট-ম্যানিফেস্ট + এজেন্ট-APK-চ্যানেল
 - [x] রেফারেল+কো-সেল-কিট; ফাউন্ডার্স-ক্লাব-অনবোর্ডিং
 - [x] ডেমো-মোড: OWNER-confirmed local reset + seed restore
-- [x] Lite ডিভাইস-গ্রুপ
+- [x] Lite ডিভাইস-গ্রুপ: OWNER add/remove with two-active-device enforcement
 - [ ] **Exit-gate:** প্রথম পেইং-টেন্যান্ট লাইভ
-  - নোট: Requires vendor activation + device verification — pilot phase
+  - নোট: Requires vendor activation, real payment, and device verification — pilot phase
 
 ## P10 — ডিজাইন-সিস্টেম (D67 + D71 + D72)
-- [x] D71: Design System Specification
-- [x] D72: M3 Color-Scheme Token Mapping
-- [x] BoiKhataTheme.kt: Full D71 color token set (22 tokens)
-- [x] BoiKhataTheme.kt: BengaliFontFamily wired
-- [x] Catalog + FAB crash fixed
+- [x] D71: Design System Specification — color palette, typography, shape, motion, forbidden patterns (merged PR #29, 2026-09-07)
+- [x] D72: M3 Color-Scheme Token Mapping — 22-token lightColorScheme role mapping
+- [x] BoiKhataTheme.kt: Full D71 color token set (22 tokens) — fixes lavender nav indicator, lavender card surfaces, FAB color
+- [x] BoiKhataTheme.kt: BengaliFontFamily wired into all 15 M3 Typography text roles
+- [x] Catalog + FAB crash investigated — all static checks clean (Migration5To6 registered, DAO columns match, TrialPolicy safe, no Composable issues); build + unit tests pass
 - [ ] Per-screen device audit: card surfaces (#F2EDE7), FAB (maroon #800000), nav indicator (green #B8F0D4), Bengali digits
-- [ ] **Exit-gate:** screenshot test at max font-scale
-  - নোট: Device verification pending (HomeScreen v2 install check in progress).
+- [ ] **Exit-gate:** screenshot test at max font-scale — no tab-label clip, no lavender surfaces
+  - নোট: In-progress — theme tokens pushed. Device verification pending.
 
 ---
 
