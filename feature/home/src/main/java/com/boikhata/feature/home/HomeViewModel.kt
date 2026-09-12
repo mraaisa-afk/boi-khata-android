@@ -79,8 +79,14 @@ class HomeViewModel @Inject constructor(
                 dueList.sortByDescending { it.dueAmount }
                 val topDue = dueList.take(5)
 
-                val todaySalesTotal = todayBills.sumOf { it.totalAmount }
+                // D81: Use paidAmount (cash received) instead of totalAmount (includes unpaid credit)
+                val todaySalesTotal = todayBills.sumOf { it.paidAmount }
                 val todayBillCount = todayBills.size
+
+                // D81: খাতা আদায় — PAYMENT-type khata entries collected today
+                val todayKhataCollection = khataRepository.getKhataCollectionByDateRange(
+                    tenantId, startOfToday, endOfToday,
+                )
 
                 val todayExpenses = expenseRepository.getExpensesByDateRange(
                     tenantId, startOfToday, endOfToday,
@@ -93,7 +99,8 @@ class HomeViewModel @Inject constructor(
                 val yesterdayExpenses = expenseRepository.getExpensesByDateRange(
                     tenantId, startOfYesterday, endOfYesterday,
                 )
-                val yesterdayNetProfit = yesterdayBills.sumOf { it.totalAmount } -
+                // D81: Fix paidAmount for yesterday trend (khata collection excluded; delta is directional)
+                val yesterdayNetProfit = yesterdayBills.sumOf { it.paidAmount } -
                     yesterdayExpenses.sumOf { it.amount }
 
                 val monthStart = Calendar.getInstance().apply {
@@ -111,7 +118,8 @@ class HomeViewModel @Inject constructor(
                     monthAnalytics.add(
                         HomeAnalyticsPoint(
                             dayOfMonth = dayCursor.get(Calendar.DAY_OF_MONTH),
-                            netProfit = dayBills.sumOf { it.totalAmount } - dayExpenses.sumOf { it.amount },
+                            // D81: paidAmount for consistent sparkline with hero formula
+                            netProfit = dayBills.sumOf { it.paidAmount } - dayExpenses.sumOf { it.amount },
                         )
                     )
                     dayCursor.add(Calendar.DAY_OF_MONTH, 1)
@@ -131,6 +139,7 @@ class HomeViewModel @Inject constructor(
                         totalDue = totalDue,
                         dueCustomerCount = dueList.size,
                         todaySalesTotal = todaySalesTotal,
+                        todayKhataCollection = todayKhataCollection,
                         todayExpenseTotal = todayExpenseTotal,
                         todayBillCount = todayBillCount,
                         topDueCustomers = topDue,
