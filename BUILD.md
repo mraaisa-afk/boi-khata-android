@@ -1,4 +1,3 @@
-```
 # BUILD.md — বই খাতা Master Android Build Architecture & Workflow
 ## বিল্ড-যন্ত্রের আইন: কীভাবে তৈরি, যাচাই, টেস্ট ও রিলিজ হয়
 
@@ -16,7 +15,7 @@ PROGRESS.md (ফেজ-চেকলিস্ট) · DECISIONS.md (সিদ্�
 - **Gradle Kotlin DSL** সর্বত্র; ভার্সনের একমাত্র উৎস `gradle/libs.versions.toml` —
   ইনলাইন ভার্সন-স্ট্রিং নিষিদ্ধ (ARCHITECTURE.md §১)।
 - রুট `build.gradle.kts`: প্লাগইন-ডিক্লারেশন (`apply false`) + `settings.gradle.kts`-এ
-  ARCHITECTURE.md §২-এর মডিউলগুলোই include — বাড়তি মডিউল নিষিদ্ধ।
+  ARCHITECTURE.md §২-এর মডিউলগুলোই include — বাড়তি মডিউল নিষিদ্ধ।
 - প্রতি মডিউলের `build.gradle.kts` সাধারণ-ছাঁচ:
   - `compileSdk`/`targetSdk` = ৩৭, `minSdk` = ২৬, JDK ১৭ টুলচেইন
   - Compose চালু (`buildFeatures.compose = true`); Compose-কম্পাইলার Kotlin-প্লাগইনের
@@ -40,12 +39,29 @@ PROGRESS.md (ফেজ-চেকলিস্ট) · DECISIONS.md (সিদ্�
 | `debug` | ডেভ/এমুলেটর/স্যান্ডবক্স | অটো debug-keystore |
 | `release` | প্রোডাকশন APK | ভেন্ডর-হোল্ড কীস্টোর — কীস্টোর/পাসওয়ার্ড কখনো রিপো/চ্যাটে নয় |
 
-- release-এ `minifyEnabled` + R8 চালু; `proguard-rules.pro` খালি-সিড হিসেবে শুরু, ফেজভিত্তিক বাড়ে।
+- release-এ `minifyEnabled` + R8 চালু; `proguard-rules.pro` খালি-সিড হিসেবে শুরু, ফেজভিত্তিক বাড়ে।
 - `versionCode`: প্রতি রিলিজে +১ · `versionName`: `0.<phase>.<build>` (যেমন `0.4.1`)।
 
 ## ৪. AI-এজেন্ট বিল্ড-যাচাই লুপ (এই ফাইলের হৃদয়)
 
-প্রতি কোড-লেখা সেশনের বাধ্যতামূলক সমাপ্তি-ক্রম:
+### PR ওয়ার্কফ্লো (২০২৬-০৯-১২ থেকে কার্যকর)
+
+**নিয়ম:**
+1. প্রতি ফেজ/ফিচারে **একটাই PR** খোলা হয়।
+2. একই PR-এ একাধিক batch/commit **push** করা যায় — **প্রতিটি push-এ CI নতুন করে চলে**।
+3. সব batch-এর সব CI সবুজ হলে — **Merge শুধু একবার**, main-এ।
+4. এতে প্রতিটি ব্যাচ merge-commit এডানো যায়, সময় বাঁচে, CI তাতক্ষণিক।
+5. branch naming: `agent/phase-<N>-<slug>` — ফেজের সমস্ত ব্যাচ একই শাখাতে।
+
+**উদাহরণ:**
+```
+[push 1] feat: core domain layer         → CI সবুজ ✓
+[push 2] feat: UI layer                  → CI সবুজ ✓
+[push 3] fix: test bound correction      → CI সবুজ ✓
+                                         → @mraaisa-afk merge — একবার
+```
+
+### সেশন-শেষের বাধ্যতামূলক সমাপ্তি-ক্রম
 
 1. **কম্পাইল চালাও** (স্যান্ডবক্স কম্পাইলার/বিল্ড-টুল দিয়ে)।
 2. ফল হুবহু রিপোর্ট করো: `Build succeeded` **অথবা** সম্পূর্ণ error-আউটপুট।
@@ -72,7 +88,9 @@ fake/stub টেস্ট-মডিউলেই; প্রোডাকশন-ক
 
 ## ৬. CI (GitHub Actions — ন্যূনতম-সোলো)
 
-প্রতি PR: checkout → JDK ১৭ → `gradlew build` (assemble + unit tests)। main-এ মার্জ = সবুজ বাধ্যতামূলক।
+**প্রতি push (PR branch):** checkout → JDK ১৭ → `gradlew build` (assemble + unit tests)।
+**এক PR-এ একাধিক batch stack করা যায়** — CI প্রতিটি push-এ নতুন করে চলে।
+**Merge শুধু সব batch সবুজ হলে, একবার** — main-এ মার্জ = সবুজ বাধ্যতামূলক।
 (detekt/ktlint/ডিভাইস-ম্যাট্রিক্স = ভবিষ্যৎ, DECISIONS-এন্ট্রির মাধ্যমেই যোগ হবে।)
 
 ## ৭. ডিপেন্ডেন্সি-নীতি
@@ -86,11 +104,10 @@ fake/stub টেস্ট-মডিউলেই; প্রোডাকশন-ক
 ট্যাগ `v<versionName>` → release-বিল্ড → R8 → zipalign → apksigner → সরাসরি-সাইনড-APK
 (এজেন্ট-চ্যানেল; Play = ভবিষ্যৎ)।
 সানসেট: ৬-মাস-পুরনো ভার্সনে sync-বন্ধ, এক্সপোর্ট সর্বদা-খোলা (P8-এ বাস্তবায়ন)।
-চেঞ্জ-ফ্রিজ: বইমেলা (২১দি), ঈদ-সপ্তাহ, ১–১৫ জানু (Blueprint §৬-ক্যালেন্ডার)।
+চেঞ্জ-ফ্রিজ: বইমেলা (২১দি), ईদ-সপ্তাহ, ১–15 জানু (Blueprint §৬-ক্যালেন্ডার)।
 
 ## ৯. পরিবেশ
 
 - ডেভ = লোকাল/AI-স্যান্ডবক্স + এমুলেটর-প্রিভিউ।
 - লাইভ = একটাই Firebase প্রজেক্ট (boi-khata-app) — পৃথক staging নেই (Spark-সরলতা);
   **ধ্বংসাত্মক-টেস্ট নিষিদ্ধ**; পরীক্ষা হয় আলাদা tenantId-র টেস্ট-টেন্যান্টে।
-```
