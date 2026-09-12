@@ -43,4 +43,21 @@ interface KhataEntryDao {
 
     @Query("SELECT * FROM khata_entries WHERE tenantId = :tenantId ORDER BY date ASC")
     suspend fun getByTenant(tenantId: String): List<KhataEntryEntity>
+
+    /**
+     * D81: Aggregate sum of PAYMENT-type entries within a date window.
+     * Used by HomeViewModel to compute the «খাতা আদায়» component of the D79
+     * net-profit formula:  নিট লাভ = (নগদ বিক্রি + খাতা আদায়) − নগদ ব্যয়.
+     * Only positive amounts are included; negative ADJUSTMENTs (দেনা মুন) are excluded.
+     */
+    @Query("""
+        SELECT COALESCE(SUM(amount), 0.0)
+        FROM khata_entries
+        WHERE tenantId  = :tenantId
+          AND type      = 'PAYMENT'
+          AND amount    > 0
+          AND date      >= :start
+          AND date      <= :end
+    """)
+    suspend fun getPaymentSumByDateRange(tenantId: String, start: Long, end: Long): Double
 }
