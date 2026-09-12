@@ -199,7 +199,9 @@ private fun SyncStatusChip() {
 
 @Composable
 private fun HeroCard(data: HomeData, amountVisible: Boolean, onAmountToggle: () -> Unit, modifier: Modifier = Modifier) {
-    val netProfit = data.todaySalesTotal - data.todayExpenseTotal
+    // D81: Full D79 formula — নিট লাভ = (নগদ বিক্রি + খাতা আদায়) − নগদ ব্যয়
+    val todayIncome = data.todaySalesTotal + data.todayKhataCollection
+    val netProfit = todayIncome - data.todayExpenseTotal
     val heroText = if (amountVisible) formatBengaliTaka(netProfit) else stringResource(R.string.home_hero_amount_hidden)
     val trendPercent: Float? = if (data.yesterdayNetProfit > 0.01) ((netProfit - data.yesterdayNetProfit) / data.yesterdayNetProfit * 100).toFloat() else null
 
@@ -237,7 +239,8 @@ private fun HeroCard(data: HomeData, amountVisible: Boolean, onAmountToggle: () 
             HorizontalDivider(color = Color.White.copy(alpha = 0.20f), thickness = 0.5.dp)
             Spacer(Modifier.height(14.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
-                HeroSubAmount(stringResource(R.string.home_hero_income_label), "↑", data.todaySalesTotal, amountVisible, Modifier.weight(1f))
+                // D81: ↑ আয় = নগদ বিক্রি + খাতা আদায় (combined income)
+                HeroSubAmount(stringResource(R.string.home_hero_income_label), "↑", todayIncome, amountVisible, Modifier.weight(1f))
                 HeroSubAmount(stringResource(R.string.home_hero_expense_label), "↓", data.todayExpenseTotal, amountVisible, Modifier.weight(1f))
             }
             Spacer(Modifier.height(12.dp))
