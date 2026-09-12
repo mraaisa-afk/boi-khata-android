@@ -34,7 +34,7 @@ data class BillSummary(
 
 /**
  * D79 PR D: Low-stock alert summary for HomeScreen «আজকের করণীয়» alerts section.
- * Repository computes currentStock from stock ledger; feature module needs no Room.
+ * Repository computes currentStock from stock ledger; feature module is shielded from Room.
  */
 data class LowStockBookSummary(
     val bookId: String,
@@ -52,7 +52,10 @@ data class HomeAnalyticsPoint(
 
 /**
  * D79 §2.2: HomeScreen hero card data model.
- * নিট লাভ = todaySalesTotal − todayExpenseTotal (সরল নগদ বিয়োগ, বাকি বাদ).
+ * D81: Full D79 formula — নিট লাভ = (todaySalesTotal + todayKhataCollection) − todayExpenseTotal.
+ *   todaySalesTotal  = sum of bills.paidAmount (cash actually received; credit portion excluded).
+ *   todayKhataCollection = sum of PAYMENT-type khata entries for today (খাতা আদায়).
+ *   todayExpenseTotal    = sum of today's cash expenses.
  * yesterdayNetProfit used for ▲/▼ trend delta badge.
  * D75 Trident arms retained: cashBalance, totalDue, supplierDuesTotal.
  * PR D: lowStockAlerts added for «আজকের করণীয়» section.
@@ -61,7 +64,10 @@ data class HomeAnalyticsPoint(
 data class HomeData(
     val totalDue: Double,
     val dueCustomerCount: Int,
+    /** D81: bills.paidAmount only — cash received from today's sales. */
     val todaySalesTotal: Double,
+    /** D81: sum of khata PAYMENT entries for today — খাতা আদায় component. */
+    val todayKhataCollection: Double = 0.0,
     val todayExpenseTotal: Double = 0.0,
     val todayBillCount: Int,
     val topDueCustomers: List<KhataCustomerDue>,

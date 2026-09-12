@@ -26,6 +26,7 @@ import javax.inject.Inject
  * installment tracking, দেনা-মুন, and search (all offline Room-only).
  * D32: Period-lock check before write.
  * D34: Cashbook auto-populate from khata collections (PAYMENT → INCOME).
+ * D81: getKhataCollectionByDateRange — delegates to KhataEntryDao aggregate query.
  */
 class KhataRepositoryImpl @Inject constructor(
     private val khataCustomerDao: KhataCustomerDao,
@@ -197,6 +198,19 @@ class KhataRepositoryImpl @Inject constructor(
     override suspend fun markInstallmentPaid(id: String) {
         writeGuard.assertWriteAllowed()
         khataInstallmentDao.markPaid(id)
+    }
+
+    /**
+     * D81: Returns the sum of PAYMENT-type khata entries within [start, end].
+     * This is the «খাতা আদায়» component of the D79 net-profit formula.
+     * Delegates to the DAO-level COALESCE(SUM(amount), 0.0) aggregate.
+     */
+    override suspend fun getKhataCollectionByDateRange(
+        tenantId: String,
+        start: Long,
+        end: Long,
+    ): Double {
+        return khataEntryDao.getPaymentSumByDateRange(tenantId, start, end)
     }
 
     private fun KhataCustomerEntity.toDomain() = KhataCustomer(

@@ -83,6 +83,7 @@
 - [x] BoiKhataTheme full D71 token set
 - [x] BengaliFontFamily wired
 - [x] Catalog + FAB crash fixes
+- [x] D81 formula fix: `paidAmount` + khata PAYMENT collection included in HomeScreen net-profit formula [PR #51]
 - [ ] Per-screen device audit
 - [ ] **Exit-gate:** screenshot test at max font-scale
   - নোট: PR #51 open on `agent/p10-d81-formula-fix`; independent P10 formula-fix workstream, not same as P5 exit-gate.
