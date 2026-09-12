@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.boikhata.core.domain.aging.AgingBucket
 import com.boikhata.core.domain.aging.AgingCalculator
-import com.boikhata.core.domain.aging.KhataEntry
 import com.boikhata.core.domain.enums.CashbookAccount
+import com.boikhata.core.domain.model.HomeAnalyticsPoint
 import com.boikhata.core.domain.model.HomeData
 import com.boikhata.core.domain.model.KhataCustomerDue
 import com.boikhata.core.domain.repository.BillRepository
@@ -26,10 +26,10 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val khataRepository: KhataRepository,
     private val billRepository: BillRepository,
-    private val cashbookRepository: CashbookRepository,   // D75: নগদ ব্যালেন্স
-    private val supplierRepository: SupplierRepository,   // D75: সাপ্লায়ার পাওনা
-    private val expenseRepository: ExpenseRepository,     // D79 §5.2: ব্যয় for নিট লাভ
-    private val bookRepository: BookRepository,           // D79 PR D: স্টক শেষ হচ্ছে alerts
+    private val cashbookRepository: CashbookRepository,
+    private val supplierRepository: SupplierRepository,
+    private val expenseRepository: ExpenseRepository,
+    private val bookRepository: BookRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -44,16 +44,15 @@ class HomeViewModel @Inject constructor(
                     set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
                     set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
                 }
-                val startOfToday     = cal.timeInMillis
-                val endOfToday       = now
+                val startOfToday = cal.timeInMillis
+                val endOfToday = now
                 val startOfYesterday = startOfToday - 24L * 60 * 60 * 1000
-                val endOfYesterday   = startOfToday - 1L
+                val endOfYesterday = startOfToday - 1L
 
-                // ── গ্রাহক বাকি (khata customer dues) ────────────────────────────────────
-                val customers  = khataRepository.getCustomers(tenantId)
+                val customers = khataRepository.getCustomers(tenantId)
                 val todayBills = billRepository.getBillsByDate(tenantId, startOfToday, endOfToday)
 
-                val dueList  = mutableListOf<KhataCustomerDue>()
+                val dueList = mutableListOf<KhataCustomerDue>()
                 var totalDue = 0.0
 
                 for (customer in customers) {
@@ -64,14 +63,14 @@ class HomeViewModel @Inject constructor(
                         totalDue += aging.totalDue
                         dueList.add(
                             KhataCustomerDue(
-                                customer    = customer,
-                                dueAmount   = aging.totalDue,
-                                ageDays     = aging.ageDays,
+                                customer = customer,
+                                dueAmount = aging.totalDue,
+                                ageDays = aging.ageDays,
                                 agingBucket = when (aging.bucket) {
-                                    AgingBucket.GREEN  -> "GREEN"
+                                    AgingBucket.GREEN -> "GREEN"
                                     AgingBucket.YELLOW -> "YELLOW"
-                                    AgingBucket.RED    -> "RED"
-                                    AgingBucket.NONE   -> "NONE"
+                                    AgingBucket.RED -> "RED"
+                                    AgingBucket.NONE -> "NONE"
                                 },
                             )
                         )
@@ -81,50 +80,67 @@ class HomeViewModel @Inject constructor(
                 val topDue = dueList.take(5)
 
                 val todaySalesTotal = todayBills.sumOf { it.totalAmount }
-                val todayBillCount  = todayBills.size
+                val todayBillCount = todayBills.size
 
-                // ── D79 §5.2: ব্যয় — নিট লাভ = আয় − ব্যয় ────────────────────────────
-                val todayExpenses     = expenseRepository.getExpensesByDateRange(
+                val todayExpenses = expenseRepository.getExpensesByDateRange(
                     tenantId, startOfToday, endOfToday,
                 )
                 val todayExpenseTotal = todayExpenses.sumOf { it.amount }
 
-                // ── D79 §2.2: গতকালের নিট লাভ (▲/▼ trend badge) ────────────────────────
-                val yesterdayBills    = billRepository.getBillsByDate(
+                val yesterdayBills = billRepository.getBillsByDate(
                     tenantId, startOfYesterday, endOfYesterday,
                 )
                 val yesterdayExpenses = expenseRepository.getExpensesByDateRange(
                     tenantId, startOfYesterday, endOfYesterday,
                 )
                 val yesterdayNetProfit = yesterdayBills.sumOf { it.totalAmount } -
-                                        yesterdayExpenses.sumOf { it.amount }
+                    yesterdayExpenses.sumOf { it.amount }
 
-                // ── নগদ ব্যালেন্স (D75) ──────────────────────────────────────────
-                val balances    = cashbookRepository.getBalances(tenantId)
+                val monthStart = Calendar.getInstance().apply {
+                    set(Calendar.DAY_OF_MONTH, 1)
+                    set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+                }
+                val monthAnalytics = mutableListOf<HomeAnalyticsPoint>()
+                val dayCursor = monthStart.clone() as Calendar
+                while (dayCursor.timeInMillis <= startOfToday) {
+                    val dayStart = dayCursor.timeInMillis
+                    val dayEnd = if (dayStart == startOfToday) endOfToday else dayStart + 24L * 60 * 60 * 1000 - 1L
+                    val dayBills = billRepository.getBillsByDate(tenantId, dayStart, dayEnd)
+                    val dayExpenses = expenseRepository.getExpensesByDateRange(tenantId, dayStart, dayEnd)
+                    monthAnalytics.add(
+                        HomeAnalyticsPoint(
+                            dayOfMonth = dayCursor.get(Calendar.DAY_OF_MONTH),
+                            netProfit = dayBills.sumOf { it.totalAmount } - dayExpenses.sumOf { it.amount },
+                        )
+                    )
+                    dayCursor.add(Calendar.DAY_OF_MONTH, 1)
+                }
+                val monthNetProfit = monthAnalytics.sumOf { it.netProfit }
+
+                val balances = cashbookRepository.getBalances(tenantId)
                 val cashBalance = balances
                     .firstOrNull { it.account == CashbookAccount.CASH }
                     ?.balance ?: 0.0
 
-                // ── সাপ্লায়ার পাওনা (D75) ────────────────────────────────────────
                 val supplierSummary = supplierRepository.getSupplierAgingSummary(tenantId, now)
-
-                // ── D79 PR D: স্টক শেষ হচ্ছে alerts (আজকের করণীয়) ──────────────────────
-                // Capped at 3 cards to keep the carousel scannable.
                 val lowStockAlerts = bookRepository.getLowStockBookSummaries(tenantId).take(3)
 
                 _uiState.value = HomeUiState.Success(
                     HomeData(
-                        totalDue           = totalDue,
-                        dueCustomerCount   = dueList.size,
-                        todaySalesTotal    = todaySalesTotal,
-                        todayExpenseTotal  = todayExpenseTotal,
-                        todayBillCount     = todayBillCount,
-                        topDueCustomers    = topDue,
-                        cashBalance        = cashBalance,
-                        supplierDuesTotal  = supplierSummary.totalPayable,
-                        supplierCount      = supplierSummary.supplierCount,
+                        totalDue = totalDue,
+                        dueCustomerCount = dueList.size,
+                        todaySalesTotal = todaySalesTotal,
+                        todayExpenseTotal = todayExpenseTotal,
+                        todayBillCount = todayBillCount,
+                        topDueCustomers = topDue,
+                        cashBalance = cashBalance,
+                        supplierDuesTotal = supplierSummary.totalPayable,
+                        supplierCount = supplierSummary.supplierCount,
                         yesterdayNetProfit = yesterdayNetProfit,
-                        lowStockAlerts     = lowStockAlerts,
+                        lowStockAlerts = lowStockAlerts,
+                        monthNetProfit = monthNetProfit,
+                        monthAnalytics = monthAnalytics,
                     )
                 )
             } catch (e: Exception) {
