@@ -828,3 +828,21 @@ Shopkeeper feedback sessions in bookstore clusters (Nilkhet, Patuatuly) revealed
 3. `DbSizeGateCalculator` (pure object, `core/domain/chaos`) — estimates Room DB file size from row counts using per-table byte averages (storage-engine factor ≈ 2.0). Gate: projected 30-day size must be ≤ 5 MB (MAX_DB_BYTES = 5 × 1024 × 1024). Standard 30-day scenario (50 bills/day, 2 lines/bill) passes the gate. Extreme scenario (500 bills/day) intentionally fails. 5 unit tests.
 **Alternatives considered:** Robolectric Room integration tests (rejected: no JDK/Android-SDK in sandbox; pure-domain coverage sufficient for logical contracts); single combined service (rejected: three distinct concerns, each independently testable and reusable).
 **Supersedes:** —
+
+---
+
+## D81 — Fix: HomeScreen hero net-profit formula aligned with D79 locked spec
+**Date:** 2026-09-12
+**Phase:** P10
+**Context:** D79 formal definition (locked): `আজকের নিট লাভ = (আজকের নগদ বিক্রি + আজকের খাতা আদায়) − আজকের নগদ ব্যয়`. Prior D79 HomeScreen v2 implementation had two deviations:
+1. `todaySalesTotal = todayBills.sumOf { it.totalAmount }` — used full invoice amount (including unpaid credit/baki portion), instead of `paidAmount` (cash actually received). This over-stated cash income by the entire unbilled khata credit on every partial bill.
+2. `todayKhataCollection` was entirely absent. Khata PAYMENT entries (খাতা আদায় — customers paying off their running balance) were not included in the income side of the formula.
+**Decision:**
+1. `KhataEntryDao.getPaymentSumByDateRange(tenantId, start, end): Double` — new SQL COALESCE(SUM(amount), 0.0) aggregate on `khata_entries` WHERE type=‘PAYMENT’ AND amount>0 AND date in [start, end]. Located in `KhataDaos.kt`.
+2. `KhataRepository.getKhataCollectionByDateRange(tenantId, start, end): Double` — new interface method added to domain contract.
+3. `KhataRepositoryImpl.getKhataCollectionByDateRange` — delegates directly to the DAO aggregate query.
+4. `HomeData.todayKhataCollection: Double = 0.0` — new field added with default 0.0 for backward compat.
+5. `HomeViewModel`: `todaySalesTotal` corrected to `bills.sumOf { it.paidAmount }`; `todayKhataCollection` queried and passed to `HomeData`. `yesterdayNetProfit` and `monthAnalytics` loop also corrected to `paidAmount` for formula consistency.
+6. `HomeScreen.HeroCard`: `val todayIncome = data.todaySalesTotal + data.todayKhataCollection`; `netProfit = todayIncome - data.todayExpenseTotal`; ↑ আয় sub-column now shows `todayIncome` (combined cash sales + khata collections).
+**Alternatives considered:** Derive khata collections from cashbook INCOME entries filtered by description (rejected: fragile string-matching, breaks if description format changes per D34); keep `totalAmount` for sales (rejected: structurally incorrect — includes unbilled credit that has not been received as cash); add a separate “Khata” sub-column in HeroCard (rejected: formula must consolidate into one ↑ আয় column per D79 §1 locked spec).
+**Supersedes:** HomeData model comment “সরল নগদ বিয়োগ, বাকি বাদ” from D79 implementation PR — that was an acknowledged simplification now replaced by the full D79 formula.
