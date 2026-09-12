@@ -1,1 +1,181 @@
-cGFja2FnZSBjb20uYm9pa2hhdGEuZmVhdHVyZS5raGF0YQoKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UuZm91bmRhdGlvbi5sYXlvdXQuQXJyYW5nZW1lbnQKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UuZm91bmRhdGlvbi5sYXlvdXQuQ29sdW1uCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24ubGF5b3V0LlJvdwppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLmxheW91dC5TcGFjZXIKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UuZm91bmRhdGlvbi5sYXlvdXQuZmlsbFNpemUKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UuZm91bmRhdGlvbi5sYXlvdXQuZmlsbFdpZHRoCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24ubGF5b3V0LmhlaWdodAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLmxheW91dC5wYWRkaW5nCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24ubGF6eS5MYXp5Q29sdW1uCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24ubGF6eS5pdGVtcwppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLnNoYXBlLlJvdW5kZWRDb3JuZXJTaGFwZQppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbC5pY29ucy5JY29ucwppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbC5pY29ucy5maWxsZWQuQWRkCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLm1hdGVyaWFsLmljb25zLmZpbGxlZC5TZWFyY2gKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UubWF0ZXJpYWwzLkNhcmQKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UubWF0ZXJpYWwzLkNhcmREZWZhdWx0cwppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbDMuQ2lyY3VsYXJQcm9ncmVzc0luZGljYXRvcgppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbDMuRmxvYXRpbmdBY3Rpb25CdXR0b24KaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UubWF0ZXJpYWwzLkljb24KaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UubWF0ZXJpYWwzLk1hdGVyaWFsVGhlbWUKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UubWF0ZXJpYWwzLk91dGxpbmVkVGV4dEZpZWxkCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLm1hdGVyaWFsMy5TY2FmZm9sZAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbDMuVGV4dAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5ydW50aW1lLkNvbXBvc2FibGUKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UucnVudGltZS5MYXVuY2hlZEVmZmVjdAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5ydW50aW1lLmNvbGxlY3RBc1N0YXRlCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLnJ1bnRpbWUuZ2V0VmFsdWUKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UudWkuQWxpZ25tZW50CmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLnVpLk1vZGlmaWVyCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLnVpLmdyYXBoaWNzLkNvbG9yCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLnVpLnJlcy5zdHJpbmdSZXNvdXJjZQppbXBvcnQgYW5kcm9pZHguY29tcG9zZS51aS50ZXh0LmZvbnQuRm9udFdlaWdodAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS51aS51bml0LmRwCmltcG9ydCBhbmRyb2lkeC5oaWx0Lm5hdmlnYXRpb24uY29tcG9zZS5oaWx0Vmlld01vZGVsCmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kZXNpZ25zeXN0ZW0uQ29sb3JCcmFuZE1hcm9vbgppbXBvcnQgY29tLmJvaWtoYXRhLmNvcmUuZGVzaWduc3lzdGVtLmZvcm1hdC5EaWdpdFN0eWxlCmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kZXNpZ25zeXN0ZW0uZm9ybWF0Lk51bWJlckZvcm1hdHRlcgppbXBvcnQgY29tLmJvaWtoYXRhLmNvcmUuZG9tYWluLm1vZGVsLktoYXRhQ3VzdG9tZXIKaW1wb3J0IGNvbS5ib2lraGF0YS5jb3JlLmRvbWFpbi5tb2RlbC5LaGF0YUN1c3RvbWVyRHVlCmltcG9ydCBjb20uYm9pa2hhdGEuZmVhdHVyZS5raGF0YS5SCgovLyBENzEgwqcxIHNlbWFudGljIHBhbGV0dGUg4oCTIG9ubHkgdGhlc2UgZm91ciBjb2xvcnMgYXJlIHBlcm1pdHRlZApwcml2YXRlIHZhbCBDb2xvclNlbWFudGljUG9zaXRpdmUgPSBDb2xvcigweEZGMUI2RTNGKSAvLyBtdXRlZCBmb3Jlc3QgZ3JlZW46IGNyZWRpdCwgcG9zaXRpdmUgYmFsYW5jZQpwcml2YXRlIHZhbCBDb2xvclNlbWFudGljQ2F1dGlvbiAgPSBDb2xvcigweEZGOUU1QzAwKSAvLyBkZWVwIGFtYmVyOiBvdmVyZHVlLCBkZWJ0IHdhcm5pbmdzCnByaXZhdGUgdmFsIENvbG9yUHJpbWFyeSAgICAgICAgICA9IENvbG9yKDB4RkY4MDAwMDApIC8vIG1hcm9vbjogYnJhbmQvUkVEIGFnaW5nIGJ1Y2tldAoKLyoqCiAqIFAyYTogS2hhdGEgY3VzdG9tZXIgbGlzdCDigJQgbmFtZSthcmVhIGtleWVkLCB3aXRoIEJlbmdhbGkgc2VhcmNoLgogKiBCbHVlcHJpbnQgwqc3LjQ6IOCmqeCmvuCmgu+AjeCmruCmvuCmsOCmvyDgpq/gpL7gpJXgpYHgpJbgpr/gpI/gpLAg4qCFKOCmq+CmvuCmqiDgpK7gpLDgpr/gpK8pLgogKiBENzc6IGJ1Y2tldCBjb2xvcnMgbWlncmF0ZWQgdG8gRDcxIMKnMSBwYWxldHRlLgogKi8KQENvbXBvc2FibGUKZnVuIEtoYXRhQ3VzdG9tZXJMaXN0U2NyZWVuKAogICAgdGVuYW50SWQ6IFN0cmluZywKICAgIG9uQWRkQ3VzdG9tZXI6ICgpIC0+IFVuaXQsCiAgICBvbkN1c3RvbWVyQ2xpY2s6IChTdHJpbmcpIC0+IFVuaXQsCiAgICB2aWV3TW9kZWw6IEtoYXRhVmlld01vZGVsID0gaGlsdFZpZXdNb2RlbCgpLAopIHsKICAgIExhdW5jaGVkRWZmZWN0KHRlbmFudElkKSB7CiAgICAgICAgdmlld01vZGVsLmxvYWRDdXN0b21lcnModGVuYW50SWQpCiAgICB9CgogICAgdmFsIHVpU3RhdGUgYnkgdmlld01vZGVsLmxpc3RTdGF0ZS5jb2xsZWN0QXNTdGF0ZSgpCiAgICB2YWwgc2VhcmNoUXVlcnkgYnkgdmlld01vZGVsLnNlYXJjaFF1ZXJ5LmNvbGxlY3RBc1N0YXRlKCkKCiAgICBTY2FmZm9sZCgKICAgICAgICBmbG9hdGluZ0FjdGlvbkJ1dHRvbiA9IHsKICAgICAgICAgICAgLy8gRDcxIMKnMTogRkFCIG11c3QgdXNlIGJyYW5kIHBhbGV0dGUg4oCTIG5vdCBNMyBkZWZhdWx0IHByaW1hcnlDb250YWluZXIgKHBpbmspCiAgICAgICAgICAgIEZsb2F0aW5nQWN0aW9uQnV0dG9uKAogICAgICAgICAgICAgICAgb25DbGljayA9IG9uQWRkQ3VzdG9tZXIsCiAgICAgICAgICAgICAgICBjb250YWluZXJDb2xvciA9IENvbG9yQnJhbmRNYXJvb24sCiAgICAgICAgICAgICAgICBjb250ZW50Q29sb3IgPSBDb2xvci5XaGl0ZSwKICAgICAgICAgICAgKSB7CiAgICAgICAgICAgICAgICBJY29uKEljb25zLkRlZmF1bHQuQWRkLCBjb250ZW50RGVzY3JpcHRpb24gPSBzdHJpbmdSZXNvdXJjZShSLnN0cmluZy5hZGRfY3VzdG9tZXIpKQogICAgICAgICAgICB9CiAgICAgICAgfQogICAgKSB7IHBhZGRpbmcgLT4KICAgICAgICBDb2x1bW4oCiAgICAgICAgICAgIG1vZGlmaWVyID0gTW9kaWZpZXIKICAgICAgICAgICAgICAgIC5maWxsU2l6ZSgpCiAgICAgICAgICAgICAgICAucGFkZGluZyhwYWRkaW5nKQogICAgICAgICAgICAgICAgLnBhZGRpbmcoaG9yaXpvbnRhbCA9IDE2LmRwKSwKICAgICAgICApIHsKICAgICAgICAgICAgT3V0bGluZWRUZXh0RmllbGQoCiAgICAgICAgICAgICAgICB2YWx1ZSA9IHNlYXJjaFF1ZXJ5LAogICAgICAgICAgICAgICAgb25WYWx1ZUNoYW5nZSA9IHZpZXdNb2RlbDo6b25TZWFyY2hRdWVyeUNoYW5nZSwKICAgICAgICAgICAgICAgIG1vZGlmaWVyID0gTW9kaWZpZXIuZmlsbFdpZHRoKCkucGFkZGluZyh0b3AgPSAxNi5kcCksCiAgICAgICAgICAgICAgICBwbGFjZWhvbGRlciA9IHsgVGV4dChzdHJpbmdSZXNvdXJjZShSLnN0cmluZy5zZWFyY2hfY3VzdG9tZXJzKSkgfSwKICAgICAgICAgICAgICAgIGxlYWRpbmdJY29uID0geyBJY29uKEljb25zLkRlZmF1bHQuU2VhcmNoLCBjb250ZW50RGVzY3JpcHRpb24gPSBudWxsKSB9LAogICAgICAgICAgICAgICAgc2luZ2xlTGluZSA9IHRydWUsCiAgICAgICAgICAgICkKCiAgICAgICAgICAgIFNwYWNlcihtb2RpZmllciA9IE1vZGlmaWVyLmhlaWdodCgxMi5kcCkpCgogICAgICAgICAgICB3aGVuICh2YWwgc3RhdGUgPSB1aVN0YXRlKSB7CiAgICAgICAgICAgICAgICBpcyBLaGF0YUxpc3RVaVN0YXRlLkxvYWRpbmcgLT4gewogICAgICAgICAgICAgICAgICAgIFJvdygKICAgICAgICAgICAgICAgICAgICAgICAgbW9kaWZpZXIgPSBNb2RpZmllci5maWxsU2l6ZSgpLAogICAgICAgICAgICAgICAgICAgICAgICBob3Jpem9udGFsQXJyYW5nZW1lbnQgPSBBcnJhbmdlbWVudC5DZW50ZXIsCiAgICAgICAgICAgICAgICAgICAgICAgIHZlcnRpY2FsQWxpZ25tZW50ID0gQWxpZ25tZW50LkNlbnRlclZlcnRpY2FsbHksCiAgICAgICAgICAgICAgICAgICAgKSB7IENpcmN1bGFyUHJvZ3Jlc3NJbmRpY2F0b3IoKSB9CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBpcyBLaGF0YUxpc3RVaVN0YXRlLkVycm9yIC0+IHsKICAgICAgICAgICAgICAgICAgICBUZXh0KAogICAgICAgICAgICAgICAgICAgICAgICB0ZXh0ID0gc3RhdGUubWVzc2FnZSwKICAgICAgICAgICAgICAgICAgICAgICAgY29sb3IgPSBNYXRlcmlhbFRoZW1lLmNvbG9yU2NoZW1lLmVycm9yLAogICAgICAgICAgICAgICAgICAgICAgICBtb2RpZmllciA9IE1vZGlmaWVyLnBhZGRpbmcoMTYuZHApLAogICAgICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIGlzIEtoYXRhTGlzdFVpU3RhdGUuU3VjY2VzcyAtPiB7CiAgICAgICAgICAgICAgICAgICAgaWYgKHN0YXRlLmN1c3RvbWVycy5pc0VtcHR5KCkpIHsKICAgICAgICAgICAgICAgICAgICAgICAgVGV4dCgKICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRleHQgPSBzdHJpbmdSZXNvdXJjZShSLnN0cmluZy5ub19jdXN0b21lcnMpLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgc3R5bGUgPSBNYXRlcmlhbFRoZW1lLnR5cG9ncmFwaHkuYm9keU1lZGl1bSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1vZGlmaWVyID0gTW9kaWZpZXIucGFkZGluZygxNi5kcCksCiAgICAgICAgICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgICAgICAgICB9IGVsc2UgewogICAgICAgICAgICAgICAgICAgICAgICBMYXp5Q29sdW1uKHZlcnRpY2FsQXJyYW5nZW1lbnQgPSBBcnJhbmdlbWVudC5zcGFjZWRCeSg4LmRwKSkgewogICAgICAgICAgICAgICAgICAgICAgICAgICAgaXRlbXMoc3RhdGUuY3VzdG9tZXJzKSB7IGN1c3RvbWVyIC0+CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdmFsIGR1ZSA9IHN0YXRlLmR1ZUxpc3QuZmluZCB7IGl0LmN1c3RvbWVyLmlkID09IGN1c3RvbWVyLmlkIH0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBDdXN0b21lckNhcmQoY3VzdG9tZXIsIGR1ZSkgeyBvbkN1c3RvbWVyQ2xpY2soY3VzdG9tZXIuaWQpIH0KICAgICAgICAgICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KfQoKQENvbXBvc2FibGUKcHJpdmF0ZSBmdW4gQ3VzdG9tZXJDYXJkKGN1c3RvbWVyOiBLaGF0YUN1c3RvbWVyLCBkdWU6IEtoYXRhQ3VzdG9tZXJEdWU/LCBvbkNsaWNrOiAoKSAtPiBVbml0KSB7CiAgICBDYXJkKAogICAgICAgIG1vZGlmaWVyID0gTW9kaWZpZXIuZmlsbFdpZHRoKCksCiAgICAgICAgb25DbGljayA9IG9uQ2xpY2ssCiAgICAgICAgc2hhcGUgPSBSb3VuZGVkQ29ybmVyU2hhcGUoMTYuZHApLCAvLyBENzEgwqczOiBjYXJkIGNvcm5lcnMg4omcMTZkcAogICAgICAgIGVsZXZhdGlvbiA9IENhcmREZWZhdWx0cy5jYXJkRWxldmF0aW9uKGRlZmF1bHRFbGV2YXRpb24gPSAxLmRwKSwKICAgICkgewogICAgICAgIFJvdygKICAgICAgICAgICAgbW9kaWZpZXIgPSBNb2RpZmllci5maWxsV2lkdGgoKS5wYWRkaW5nKDE2LmRwKSwKICAgICAgICAgICAgaG9yaXpvbnRhbEFycmFuZ2VtZW50ID0gQXJyYW5nZW1lbnQuU3BhY2VCZXR3ZWVuLAogICAgICAgICAgICB2ZXJ0aWNhbEFsaWdubWVudCA9IEFsaWdubWVudC5DZW50ZXJWZXJ0aWNhbGx5LAogICAgICAgICkgewogICAgICAgICAgICBDb2x1bW4obW9kaWZpZXIgPSBNb2RpZmllci53ZWlnaHQoMWYpKSB7CiAgICAgICAgICAgICAgICBUZXh0KAogICAgICAgICAgICAgICAgICAgIHRleHQgPSBjdXN0b21lci5uYW1lQm4sCiAgICAgICAgICAgICAgICAgICAgc3R5bGUgPSBNYXRlcmlhbFRoZW1lLnR5cG9ncmFwaHkudGl0bGVTbWFsbCwKICAgICAgICAgICAgICAgICAgICBmb250V2VpZ2h0ID0gRm9udFdlaWdodC5Cb2xkLAogICAgICAgICAgICAgICAgKQogICAgICAgICAgICAgICAgY3VzdG9tZXIuYWRkcmVzcz8ubGV0IHsgaWYgKGl0LmlzTm90QmxhbmsoKSkgVGV4dChpdCwgc3R5bGUgPSBNYXRlcmlhbFRoZW1lLnR5cG9ncmFwaHkuYm9keVNtYWxsKSB9CiAgICAgICAgICAgICAgICBjdXN0b21lci5waG9uZT8ubGV0IHsgaWYgKGl0LmlzTm90QmxhbmsoKSkgVGV4dChpdCwgc3R5bGUgPSBNYXRlcmlhbFRoZW1lLnR5cG9ncmFwaHkuYm9keVNtYWxsKSB9CiAgICAgICAgICAgIH0KICAgICAgICAgICAgaWYgKGR1ZSAhPSBudWxsKSB7CiAgICAgICAgICAgICAgICAvLyBENzEgwqcxOiBvbmx5IGZvdXIgc2VtYW50aWMgY29sb3JzOyBubyByYXcgaGV4IGxpdGVyYWxzCiAgICAgICAgICAgICAgICB2YWwgYnVja2V0Q29sb3IgPSB3aGVuIChkdWUuYWdpbmdCdWNrZXQpIHsKICAgICAgICAgICAgICAgICAgICAiR1JFRU4iICAtPiBDb2xvclNlbWFudGljUG9zaXRpdmUgLy8g4Kau4Ka44Ka/4KaVIC8gaGVhbHRoeQogICAgICAgICAgICAgICAgICAgICJZRUxMT1ciIC0+IENvbG9yU2VtYW50aWNDYXV0aW9uICAvLyDgprrngpHgpq3gpL7gpILgp4AgLyBhcHByb2FjaGluZyBvdmVyZHVlCiAgICAgICAgICAgICAgICAgICAgIlJFRCIgICAgLT4gQ29sb3JQcmltYXJ5ICAgICAgICAgICAvLyDgpqbgpr/gpLUgLyBvdmVyZHVlIChicmFuZCBtYXJvb24sIG5vdCBlcnJvci1yZWQpCiAgICAgICAgICAgICAgICAgICAgZWxzZSAgICAgLT4gTWF0ZXJpYWxUaGVtZS5jb2xvclNjaGVtZS5vblN1cmZhY2VWYXJpYW50CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBDb2x1bW4oaG9yaXpvbnRhbEFsaWdubWVudCA9IEFsaWdubWVudC5FbmQpIHsKICAgICAgICAgICAgICAgICAgICBUZXh0KAogICAgICAgICAgICAgICAgICAgICAgICB0ZXh0ID0gTnVtYmVyRm9ybWF0dGVyLmZvcm1hdE1vbmV5KGR1ZS5kdWVBbW91bnQsIERpZ2l0U3R5bGUuQkFOR0xBKSwKICAgICAgICAgICAgICAgICAgICAgICAgc3R5bGUgPSBNYXRlcmlhbFRoZW1lLnR5cG9ncmFwaHkudGl0bGVNZWRpdW0sCiAgICAgICAgICAgICAgICAgICAgICAgIGZvbnRXZWlnaHQgPSBGb250V2VpZ2h0LkJvbGQsCiAgICAgICAgICAgICAgICAgICAgICAgIGNvbG9yID0gYnVja2V0Q29sb3IsCiAgICAgICAgICAgICAgICAgICAgKQogICAgICAgICAgICAgICAgICAgIGlmIChkdWUuYWdlRGF5cyA+IDApIHsKICAgICAgICAgICAgICAgICAgICAgICAgVGV4dCgKICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRleHQgPSBzdHJpbmdSZXNvdXJjZShSLnN0cmluZy5hZ2VfZGF5cywgZHVlLmFnZURheXMudG9JbnQoKSksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBzdHlsZSA9IE1hdGVyaWFsVGhlbWUudHlwb2dyYXBoeS5ib2R5U21hbGwsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb2xvciA9IGJ1Y2tldENvbG9yLAogICAgICAgICAgICAgICAgICAgICAgICApCiAgICAgICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9Cg==
+package com.boikhata.feature.khata
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.boikhata.core.designsystem.ColorBrandMaroon
+import com.boikhata.core.designsystem.format.DigitStyle
+import com.boikhata.core.designsystem.format.NumberFormatter
+import com.boikhata.core.domain.model.KhataCustomer
+import com.boikhata.core.domain.model.KhataCustomerDue
+import com.boikhata.feature.khata.R
+
+// D71 §1 semantic palette — only these four colors are permitted
+private val ColorSemanticPositive = Color(0xFF1B6E3F) // muted forest green: credit, positive balance
+private val ColorSemanticCaution  = Color(0xFF9E5C00) // deep amber: overdue, debt warnings
+private val ColorPrimary          = Color(0xFF800000) // maroon: brand/RED aging bucket
+
+/**
+ * P2a: Khata customer list — name+area keyed, with Bengali search.
+ * Blueprint §7.4: নাম+এলাকা-কী (ফোন ঐচ্ছিক).
+ * D77: bucket colors migrated to D71 §1 palette.
+ */
+@Composable
+fun KhataCustomerListScreen(
+    tenantId: String,
+    onAddCustomer: () -> Unit,
+    onCustomerClick: (String) -> Unit,
+    viewModel: KhataViewModel = hiltViewModel(),
+) {
+    LaunchedEffect(tenantId) {
+        viewModel.loadCustomers(tenantId)
+    }
+
+    val uiState by viewModel.listState.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
+
+    Scaffold(
+        floatingActionButton = {
+            // D71 §1: FAB must use brand palette — not M3 default primaryContainer (pink)
+            FloatingActionButton(
+                onClick = onAddCustomer,
+                containerColor = ColorBrandMaroon,
+                contentColor = Color.White,
+            ) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_customer))
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp),
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = viewModel::onSearchQueryChange,
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+                placeholder = { Text(stringResource(R.string.search_customers)) },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                singleLine = true,
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            when (val state = uiState) {
+                is KhataListUiState.Loading -> {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) { CircularProgressIndicator() }
+                }
+                is KhataListUiState.Error -> {
+                    Text(
+                        text = state.message,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp),
+                    )
+                }
+                is KhataListUiState.Success -> {
+                    if (state.customers.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.no_customers),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    } else {
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(state.customers) { customer ->
+                                val due = state.dueList.find { it.customer.id == customer.id }
+                                CustomerCard(customer, due) { onCustomerClick(customer.id) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CustomerCard(customer: KhataCustomer, due: KhataCustomerDue?, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp), // D71 §3: card corners ≥ 16dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = customer.nameBn,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+                customer.address?.let { if (it.isNotBlank()) Text(it, style = MaterialTheme.typography.bodySmall) }
+                customer.phone?.let { if (it.isNotBlank()) Text(it, style = MaterialTheme.typography.bodySmall) }
+            }
+            if (due != null) {
+                // D71 §1: only four semantic colors; no raw hex literals
+                val bucketColor = when (due.agingBucket) {
+                    "GREEN"  -> ColorSemanticPositive // মুক্ত / healthy
+                    "YELLOW" -> ColorSemanticCaution  // সতর্কতা / approaching overdue
+                    "RED"    -> ColorPrimary           // বাকি / overdue (brand maroon, not error-red)
+                    else     -> MaterialTheme.colorScheme.onSurfaceVariant
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = NumberFormatter.formatMoney(due.dueAmount, DigitStyle.BANGLA),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = bucketColor,
+                    )
+                    if (due.ageDays > 0) {
+                        Text(
+                            text = stringResource(R.string.age_days, due.ageDays.toInt()),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = bucketColor,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
