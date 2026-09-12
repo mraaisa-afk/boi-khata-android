@@ -1,4 +1,3 @@
-```
 # PROGRESS.md — বই খাতা বিল্ড-চেকলিস্ট
 
 **প্রোটোকল:** প্রতি সেশনের শুরুতে ARCHITECTURE.md, CONVENTIONS.md, DECISIONS.md ও এই ফাইল পুরো পড়ো।
@@ -90,8 +89,10 @@
   - নোট: monthly data-copy worker written (P6b). Real-device verification pending (share-sheet + WorkManager on-device).
 
 ## P7 — পাইলট-হার্ডেনিং
-- [ ] ট্রায়াল-মোড + anti-farm + নম্বর-মাইগ্রেশন + ডিভাইস-গ্রুপ-ম্যানেজার + ডেমো-মোড (লোকাল-রিসেটেবল)
-- [ ] অফলাইন-কাওস-স্যুট (এয়ারপ্লেন-দিন, মিড-সিঙ্ক-কিল, ৩০-দিন-সোক+সাইজ-গেট)
+- [x] ট্রায়াল-মোড + anti-farm + নম্বর-মাইগ্রেশন + ডিভাইস-গ্রুপ-ম্যানেজার + ডেমো-মোড (লোকাল-রিসেটেবল)
+  - নোট: P7b (trial_redemptions, anti-farm, caps, number-migration handoff) সম্পন্ন। ডিভাইস-গ্রুপ-ম্যানেজার + ডেমো-মোড P8-এ সম্পন্ন (Lite device-group OWNER add/remove + two-device enforcement + demo reset + seed restore)। P7 item 1 সমস্ত সাব-আইটেম পূর্ণ।
+- [x] অফলাইন-কাওস-স্যুট (এয়ারপ্লেন-দিন, মিড-সিঙ্ক-কিল, ৩০-দিন-সোক+সাইজ-গেট)
+  - নোট: D80 — OfflineDaySimulator (pure domain; requiresFirestore=false সর্বদা; D25/D34/D22 cashbook+khata contracts verified), MidSyncKillGuard (idempotencyKey safety, NONE/LOW/HIGH risk levels, mid-kill resume safe per D46/D70), DbSizeGateCalculator (30-day soak ≤5MB gate per ARCHITECTURE §7; standard 50-bills/day passes; extreme 500-bills/day fails gate as expected). 19 নতুন টেস্ট (7 OfflineDaySimulatorTest + 7 MidSyncKillGuardTest + 5 DbSizeGateCalculatorTest). সব pure domain, JUnit 4 (D69). ⚠ Device airplane-day soak এবং real 30-day DB size measurement = ডিভাইসে ম্যানুয়াল-চেক।
 - [ ] **Exit-gate:** ২০-দোকান-পাইলট APK রেডি
   - নোট: P7b added Room v5 `trial_redemptions` persistence with device/phone anti-farm checks, authenticated first-launch redemption, bill/catalog cap guards, usage/expiry status UI, Lite/settings surface, and a Bengali number-migration vendor-approval hand-off. Claims transfer remains vendor-side; device-group manager, demo reset, and offline-chaos soak remain deferred. Unit tests and `./gradlew build` pass; OTP/TTS/share-sheet behavior is ⚠ device-only.
   - নোট: Requires device verification — pilot phase
@@ -122,4 +123,3 @@
 - [ ] প্রতি-মার্জড-ফেজে লোকাল-ভেরিফিকেশন-চেকলিস্ট (ফ্রেশ-ক্লোন+বিল্ড+বাজেট-স্পট)
 
 *অ-চেকড+নোটহীন বাক্স = "শুরু হয়নি" — অস্পষ্টতা রেখো না।*
-```
