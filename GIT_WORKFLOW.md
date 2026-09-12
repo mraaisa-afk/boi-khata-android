@@ -1,7 +1,23 @@
 # GIT_WORKFLOW.md — Boi-Khata Git Rules
 
 > All contributors, human and agent, follow these rules without exception.
-> Sakira Suva is the sole merge authority on `main`.
+> Main merge authority stays owner-only; agents never merge their own PRs.
+
+---
+
+## Exact Stacked-PR Workflow (Owner Rule)
+
+This is the required workflow for implementation work:
+
+1. **One active workstream = one branch = one PR.**
+2. A workstream may contain multiple batch commits/pushes on the same branch/PR.
+3. Every push to that same branch automatically reruns CI for that PR.
+4. If CI fails, fix it with another commit pushed to the same branch/PR.
+5. Merge happens only after all batches for that workstream are complete and CI is green.
+6. Do **not** create a new branch/PR for a follow-up fix, CI fix, small refinement, or next batch inside the same workstream.
+7. Create a separate branch/PR only when the work is truly an independent workstream, a different phase gate, or the owner explicitly approves a split.
+
+**Reason:** this avoids repeated merge cycles. A single PR can safely stack several batches because PR CI reruns on every push.
 
 ---
 
@@ -9,9 +25,9 @@
 
 | Branch | Who can push | Who can merge |
 | --- | --- | --- |
-| `main` | Nobody directly | Sakira only, via PR |
-| `agent/*` | Agent, via tool | Sakira only, via PR |
-| `fix/*` | Sakira only | Sakira only |
+| `main` | Nobody directly | Owner only, via PR |
+| `agent/*` | Agent, via tool | Owner only, via PR |
+| `fix/*` | Owner only | Owner only |
 
 **Rule:** the agent NEVER pushes to `main` and NEVER merges its own PR.
 
@@ -20,25 +36,16 @@
 ## Branch Naming
 
 ```text
-agent/phase-<N>-<slug>
+agent/<workstream-slug>
 ```
 
-| Part | Format | Example |
-| --- | --- | --- |
-| `<N>` | Phase number, 0 to 8 | `1`, `5`, `8` |
-| `<slug>` | kebab-case task summary, max 5 words | `license-write-guard`, `khata-installment-ui` |
+Preferred examples:
 
-**Examples:**
+- `agent/p10-design-rebuild`
+- `agent/p10-home-formula-fixes`
+- `agent/p5-exit-gate`
 
-- `agent/phase-1-license-write-guard`
-- `agent/phase-3-pnl-calculator`
-- `agent/phase-5-supplier-aging`
-
-**Rules:**
-
-- One branch per PR. One PR per phase task.
-- NEVER reuse a branch for a new task after merge. Create a fresh branch.
-- NEVER commit to a branch belonging to a different phase than the current task.
+Legacy `agent/phase-<N>-<slug>` names remain acceptable, but the branch must represent the active workstream, not every tiny batch.
 
 ---
 
@@ -48,86 +55,79 @@ agent/phase-<N>-<slug>
 <type>(phase<N>): <description> [D-X, D-Y]
 ```
 
-| Part | Values | Example |
-| --- | --- | --- |
-| `<type>` | `feat`, `fix`, `test`, `refactor`, `docs`, `chore` | `feat` |
-| `phase<N>` | Phase number | `phase1`, `phase5` |
-| `<description>` | Imperative mood, max 72 chars | `add LicenseWriteGuard to all write repos` |
-| `[D-X, D-Y]` | All D-decisions applied | `[D14, D25]` |
+Rules:
 
-**Full examples:**
+- Use `feat`, `fix`, `test`, `refactor`, `docs`, or `chore`.
+- Include every D-decision actually applied.
+- Never include a D-decision number not actually applied.
+- If no D-decision applies, omit the bracket. Do not write `[none]`.
+
+Examples:
 
 ```text
-feat(phase1): add LicenseWriteGuard to SaleRepository [D14]
-feat(phase3): implement PnLCalculator with COGS split [D29]
-fix(phase5): correct FIFO aging for consignment entries [D52]
-test(phase2): add BillNumberGenerator edge cases [D21]
+feat(phase10): add HomeScreen analytics sheet [D79]
+fix(phase10): align net-profit formula with paidAmount [D81]
+test(phase7): add offline chaos size gate [D80]
 ```
-
-**Rules:**
-
-- NEVER include a D-decision number you did not actually apply.
-- NEVER omit D-decision numbers if the task implements a decision.
-- If no D-decision applies, omit the bracket. Do not write `[none]`.
 
 ---
 
 ## PR Rules
 
-### Before opening a PR
+### Before opening or updating a PR
 
-- [ ] `DEFINITION_OF_DONE.md` quick self-check passed
-- [ ] `./gradlew build` green locally or in CI
-- [ ] Branch is up to date with `main` (alert Sakira before rebasing)
-- [ ] No secrets, API keys, or `google-services.json` in the diff
+- [ ] `DEFINITION_OF_DONE.md` quick self-check passed where applicable
+- [ ] Local build/test run, or clear note that CI is the verification path
+- [ ] Branch is up to date with `main` or owner has accepted the current base
+- [ ] No secrets, API keys, or `google-services.json` accidentally introduced
 
 ### PR title format
 
 ```text
-[Phase N] <description>
+[Phase N] <workstream description> [D-X]
 ```
-
-Example: `[Phase 3] Implement PnLCalculator with Bengali fiscal year rollup`
 
 ### PR description
 
-Use `.github/pull_request_template.md` exactly. Fill every section.
+Use `.github/pull_request_template.md` where applicable. Fill every section.
 
-### PR size
+### PR size and batching
 
-- Prefer small, focused PRs — one logical unit per PR
-- Max diff around 500 changed lines, excluding generated files
-- If larger, split into multiple PRs
+- Keep each batch focused.
+- Prefer <=~500 changed lines per batch where practical.
+- A PR may exceed one batch when the owner-approved workstream needs it.
+- If scope becomes unrelated, ask owner before splitting.
 
 ---
 
 ## Merge Rules
 
-- **Only Sakira merges.** The agent never clicks merge.
-- **Merge method:** squash merge preferred for agent PRs
-- **After merge:** delete the feature branch
-- **NEVER force-merge** over a failing CI run
+- Owner merges only after all batches are complete and CI is green.
+- Agent never clicks merge.
+- Squash merge is preferred for agent PRs unless owner chooses otherwise.
+- After merge, delete the feature branch.
+- Never force-merge over failing CI.
 
 ---
 
 ## Conflict Resolution
 
-1. The agent alerts Sakira: "Conflict in `agent/phase-N-slug` on files: [list]. Need rebase."
-2. Sakira decides: rebase or resolve manually
-3. The agent rebases ONLY after Sakira confirms
-4. After rebase, re-run `./gradlew build` to confirm it is still green
-5. NEVER force-push without explicit Sakira approval
+1. Agent reports: `Conflict in <branch> on files: [list]. Need owner decision.`
+2. Owner decides whether to rebase, merge base, or resolve manually.
+3. Agent rebases only after owner confirms.
+4. After rebase/fix, push to the same branch/PR and let CI rerun.
+5. Never force-push without explicit owner approval.
 
 ---
 
 ## What to Do if CI Fails
 
-1. Read the full CI log, not just the summary
-2. Identify the root cause — the agent diagnoses, not Builder
-3. Push a fix commit to the same branch: `fix(phaseN): what was wrong and what was fixed [D-X]`
-4. CI re-runs automatically on the new push
-5. Report to Sakira: "CI failed due to X. Fixed by Y. New commit: hash."
-6. Append to `ERROR_LOG.md` if it was a non-trivial mistake
+1. Read the full CI log, not just the summary.
+2. Identify the root cause.
+3. Push the fix commit to the same branch/PR.
+4. CI reruns automatically on the new push.
+5. Report: root cause, fix, files changed, new commit hash.
+6. Append to `ERROR_LOG.md` if the mistake is non-trivial.
 
 ---
 
@@ -135,11 +135,10 @@ Use `.github/pull_request_template.md` exactly. Fill every section.
 
 - Push to `main`
 - Merge a PR
-- Force-push without Sakira approval
-- Create a branch outside the `agent/*` namespace
-- Commit to a branch mid-review without flagging it
+- Force-push without explicit owner approval
+- Create extra branches for same-workstream batches
+- Close/split PRs without owner instruction
 
 ---
 
-*Last updated: 2026-09-05 · Maintained by: Builder + Sakira Suva*
-*Referenced by: AGENT_PLAYBOOK.md, .github/pull_request_template.md, AGENT_GUARDRAILS.md G1-G6*
+*Updated: 2026-09-12 · Exact stacked-PR workflow enforced.*
