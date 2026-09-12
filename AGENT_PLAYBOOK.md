@@ -1,23 +1,46 @@
 # AGENT_PLAYBOOK.md — Boi-Khata Coder Session Playbook
 
-> This is the operational workflow for the Boi-Khata Coder agent.
+> Operational workflow for Boi-Khata coding agents.
 > Follow every step, every session, no exceptions.
-> The same content is mirrored in the agent's Notion instructions page.
 
 ---
 
-## Mandatory Pre-Session Read (every session, in this order)
+## Mandatory Pre-Session Read
 
-Before writing a single line of code, read via the GitHub tool:
+Before writing code, read via GitHub:
 
-1. `PROGRESS.md` — the first unchecked item is your task
-2. `PHASE_PLAN.md` — find that phase row, note D-decisions and open blockers
-3. `DECISIONS.md` — every D-entry listed for the current phase
+1. `PROGRESS.md` — identify active workstream and first unchecked item
+2. `PHASE_PLAN.md` — phase row, D-decisions, blockers
+3. `DECISIONS.md` — every D-entry in scope
 4. `ERROR_LOG.md` — last 10 entries minimum
-5. `Boi-Khata-Master-Blueprint.md` — constraints plus the current phase section
-6. If a UI task: the Locked Design Spec in Notion, including pending owner rulings
+5. `Boi-Khata-Master-Blueprint.md` — relevant phase/screen constraints
+6. If UI work: locked design spec and pending owner rulings
+7. `GIT_WORKFLOW.md` — especially Exact Stacked-PR Workflow
 
-**Non-negotiable:** if any file is unavailable via the GitHub tool, STOP and tell Sakira which file is missing. Do not guess or proceed from memory.
+If any required file is unavailable, STOP and report the missing file. Do not guess.
+
+---
+
+## Exact Branch / PR Rule
+
+Before creating a branch or PR, decide whether the work belongs to an existing active workstream.
+
+- Same workstream, follow-up fix, CI fix, or next batch → push to the **same branch / same PR**.
+- Independent workstream or different owner-approved scope → create a separate branch / PR.
+- If unsure, STOP and ask the owner.
+
+Required pattern:
+
+```text
+same branch / same PR
+  batch 1 commit → push → CI
+  batch 2 commit → push → CI
+  CI fix commit → push → CI
+  final batch → push → CI green
+owner merges once
+```
+
+Do not create separate branches just because a new batch begins.
 
 ---
 
@@ -25,95 +48,83 @@ Before writing a single line of code, read via the GitHub tool:
 
 ### Step 1 — READ
 
-Read all mandatory pre-session files. Output a one-line confirmation:
+Output a one-line confirmation:
 
-> "Read: PROGRESS.md, PHASE_PLAN.md, DECISIONS.md D-X/D-Y, ERROR_LOG.md. Current task: [task]. D-decisions in scope: D-X, D-Y."
+> "Read: PROGRESS.md, PHASE_PLAN.md, DECISIONS.md D-X/D-Y, ERROR_LOG.md, GIT_WORKFLOW.md. Current task: [task]. Active branch/PR: [branch/PR]."
 
 ### Step 2 — UNDERSTAND
 
-Identify which modules are affected, which conventions apply, and which existing classes to reuse.
-Check whether the task touches any pending owner ruling. If yes, **STOP**, list the ruling, and wait.
+Identify affected modules, conventions, existing classes, and pending owner rulings.
+If a pending ruling blocks scope, STOP.
 
 ### Step 3 — PLAN
 
-Write a brief plan of 3 to 7 bullets:
+Write 3–7 bullets:
 
-- Which files or classes will be created or modified
-- Which Room tables or DAOs are involved
-- Which tests will be written
-- What the commit message will be
+- Files/classes to create or modify
+- Room tables/DAOs involved
+- Tests to write or why no test is needed
+- Existing branch/PR to reuse, or reason for a new one
+- Commit message
 
-Wait for Sakira or Builder to confirm before proceeding.
-Exception: a task of 10 lines or fewer that is clearly scoped — proceed directly and note that you did.
+Wait for owner confirmation unless the task is tiny and clearly scoped.
 
-### Step 4 — CONFIRM (gate check before coding)
+### Step 4 — CONFIRM
 
-- [ ] New external library needed? **STOP. Propose a D-decision. Wait.**
-- [ ] Task modifies `PROGRESS.md`, `DECISIONS.md`, or any gate file? **STOP. Gate files are owner-only.**
-- [ ] Task touches `main` directly? **STOP. Use `agent/phase-<N>-<slug>`.**
-- [ ] New Bengali UI string? It goes in `strings.xml` only. Never hardcoded.
-- [ ] Task touches `TenantRebindPlanner.ALL_TENANT_TABLES`? Read `ROOM_MIGRATION_LEDGER.md` first.
+- [ ] Same workstream? Reuse same branch/PR.
+- [ ] New external library? STOP. Propose D-decision.
+- [ ] Gate file modification? STOP unless owner explicitly requested it.
+- [ ] Touching `main` directly? STOP. Use `agent/*`.
+- [ ] New Bengali UI string? Add to required string resources, never hardcode.
+- [ ] Room schema/migration? Read `ROOM_MIGRATION_LEDGER.md` first.
 
 ### Step 5 — CODE
 
-Follow `CONVENTIONS.md` and `CODING_STANDARDS.md` strictly:
+Follow `CONVENTIONS.md` and `CODING_STANDARDS.md` strictly.
 
-- Every new logic unit gets a matching unit test in the same commit
-- Never use `String` for money amounts
-- Never add a Gradle dependency without a D-decision number in the commit message
-- Never modify the Room schema without a migration class and a `ROOM_MIGRATION_LEDGER.md` update
-- After coding, run through the `DEFINITION_OF_DONE.md` checklist
+- Every new logic unit gets a matching unit test unless clearly justified.
+- Never use `String` for money amounts.
+- Never add Gradle dependencies without owner-approved D-decision.
+- Never modify Room schema without migration and ledger update.
+- Run the relevant build/test when possible.
 
 ### Step 6 — DELIVER
 
-Commit format: `feat(phase<N>): <description> [D-X, D-Y]`
+Reply with:
 
-Reply to Sakira with:
-
-1. What was built — Bengali for UI context, English for technical names
-2. Files created or modified
-3. Test count: "X new tests, Y total passing"
-4. Build status, or a clear flag explaining why it could not be run
-5. Any assumptions made, stated explicitly
-6. Any pending owner ruling encountered
+1. What was built
+2. Files created/modified
+3. Test count and build status, or clear reason not run
+4. Branch and PR reused/created
+5. CI status if known
+6. Assumptions and pending owner rulings
 
 ---
 
-## STOP Conditions
+## CI Failure Protocol
+
+1. Read the full CI log.
+2. State root cause, not symptom.
+3. Fix on the same branch/PR.
+4. Push and let CI rerun.
+5. Report new commit hash and verification.
+6. Update `ERROR_LOG.md` if non-trivial.
+
+---
+
+## Stop Conditions
 
 | Condition | Action |
 | --- | --- |
-| New library needed | Propose a D-decision, wait |
-| Task contradicts a D-decision | Flag the conflict, wait |
-| Task contradicts observed code | Flag the discrepancy, wait |
-| Pending owner ruling blocks scope | List the ruling, wait |
-| Gate file modification requested | Refuse and explain |
+| Same workstream but a new branch would be created | STOP and reuse existing PR or ask owner |
+| New library needed | Propose D-decision, wait |
+| D-decision conflict | Flag conflict, wait |
+| Observed code contradicts docs | Flag discrepancy, wait |
+| Pending owner ruling blocks scope | List ruling, wait |
 | Push to `main` requested | Refuse and explain |
-| Room migration unclear | Read `ROOM_MIGRATION_LEDGER.md`, then ask |
-| Test fails and the cause is unknown | Share the full stack trace, wait |
+| Room migration unclear | Read ledger, then ask |
+| Unknown test failure | Share full stack trace, wait |
 
 ---
 
-## Communication Rules
-
-- **Language:** Bengali for UI and UX context, English for technical class and method names
-- **Never paraphrase** instructions — quote the exact wording
-- **Assumptions** are always explicit: "I assumed X because Y. Correct me if wrong."
-- **Errors:** share the full stack trace, not a summary
-- **No "maybe" code** — if correctness is uncertain, say so before committing
-
----
-
-## Error Recovery Protocol
-
-1. Read the full error. Do not skim.
-2. Identify the root cause, not the symptom.
-3. Propose the fix: "Root cause: X. Fix: Y. Files affected: Z."
-4. Do not wait for Builder to diagnose — find the root cause independently.
-5. After the fix, restate the test count and build status.
-6. Append an entry to `ERROR_LOG.md`.
-
----
-
-*Last updated: 2026-09-05 · Maintained by: Builder + Sakira Suva*
-*Mirrored in: the Boi-Khata Coder Notion instructions page*
+*Updated: 2026-09-12 · Exact stacked-PR workflow enforced.*
