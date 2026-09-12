@@ -31,7 +31,7 @@ interface UserRepository {
     suspend fun verifyPin(tenantId: String, pin: String): com.boikhata.core.domain.model.User?
 }
 
-// ── P2a: Catalog ──────────────────────────────────────────────────
+// ── P2a: Catalog ───────────────────────────────────────────────────
 
 interface BookRepository {
     suspend fun getBooks(tenantId: String): List<Book>
@@ -124,9 +124,17 @@ interface KhataRepository {
     ): String
 
     suspend fun markInstallmentPaid(id: String)
+
+    /**
+     * D81: Sum of PAYMENT-type khata entries in [start, end].
+     * This is the «খাতা আদায়» component of the D79 net-profit formula:
+     *   নিট লাভ = (todaySalesTotal + todayKhataCollection) − todayExpenseTotal.
+     * Only positive amounts are counted; negative ADJUSTMENTs (দেনা মুন) are excluded by the DAO.
+     */
+    suspend fun getKhataCollectionByDateRange(tenantId: String, start: Long, end: Long): Double
 }
 
-// ── P2b: POS / Billing ───────────────────────────────────────────────
+// ── P2b: POS / Billing ─────────────────────────────────────────────────────
 
 interface BillRepository {
     suspend fun getBillsByDate(tenantId: String, startOfDay: Long, endOfDay: Long): List<com.boikhata.core.domain.model.BillSummary>
@@ -164,7 +172,7 @@ interface LicenseRepository {
     suspend fun isWifiOnlySync(tenantId: String): Boolean
 }
 
-// ── P3a: Expense ──────────────────────────────────────────────────
+// ── P3a: Expense ──────────────────────────────────────────────────────
 
 interface ExpenseRepository {
     suspend fun getCategories(tenantId: String): List<ExpenseCategory>
@@ -193,7 +201,7 @@ interface ExpenseRepository {
     ): String
 }
 
-// ── P3a: Cashbook ──────────────────────────────────────────────────
+// ── P3a: Cashbook ──────────────────────────────────────────────────────
 
 interface CashbookRepository {
     suspend fun getEntries(tenantId: String): List<CashbookEntry>
@@ -209,7 +217,7 @@ interface CashbookRepository {
     ): String
 }
 
-// ── P3a: Owner Drawing ──────────────────────────────────────────────
+// ── P3a: Owner Drawing ──────────────────────────────────────────────────────
 
 interface OwnerDrawingRepository {
     suspend fun getDrawings(tenantId: String): List<OwnerDrawing>
@@ -235,7 +243,7 @@ interface AccountingRepository {
     suspend fun getHisabPack(tenantId: String, year: Int, month: Int, shopName: String): com.boikhata.core.domain.model.HisabPack
 }
 
-// ── P3b: Recurring Expense (D35) ───────────────────────────────────────
+// ── P3b: Recurring Expense (D35) ─────────────────────────────────────────────────
 
 interface RecurringExpenseRepository {
     suspend fun getTemplates(tenantId: String): List<com.boikhata.core.domain.model.RecurringExpenseTemplate>
@@ -251,7 +259,7 @@ interface RecurringExpenseRepository {
     suspend fun getDueTemplates(tenantId: String, now: Long): List<com.boikhata.core.domain.model.RecurringExpenseTemplate>
 }
 
-// ── P3b: Budget (D35) ────────────────────────────────────────────────────
+// ── P3b: Budget (D35) ────────────────────────────────────────────────────────────────
 
 interface BudgetRepository {
     suspend fun getBudgets(tenantId: String): List<com.boikhata.core.domain.accounting.BudgetAlertCalculator.Budget>
@@ -259,7 +267,7 @@ interface BudgetRepository {
     suspend fun getMonthlyAlerts(tenantId: String, year: Int, month: Int): List<com.boikhata.core.domain.accounting.BudgetAlertCalculator.BudgetAlert>
 }
 
-// ── P3c: Cash-close (D36) ──────────────────────────────────────────────
+// ── P3c: Cash-close (D36) ────────────────────────────────────────────────────
 
 interface CashCloseRepository {
     suspend fun getDailyClose(
@@ -271,7 +279,7 @@ interface CashCloseRepository {
     ): com.boikhata.core.domain.model.CashCloseReport
 }
 
-// ── P4a: Cloud Auth + License Sync + Tenant Rebind ───────────────────────────
+// ── P4a: Cloud Auth + License Sync + Tenant Rebind ───────────────────────────────
 
 interface AuthRepository {
     suspend fun startPhoneVerification(phone: String): Boolean
@@ -289,7 +297,7 @@ interface TenantRebindRepository {
     suspend fun rebind(oldTenantId: String, newTenantId: String): Int
 }
 
-// ── P4b: Backup + Restore ─────────────────────────────────────────────────
+// ── P4b: Backup + Restore ─────────────────────────────────────────────────────────────
 
 sealed class BackupResult {
     data class Success(val collectionsBackedUp: Int, val rowsUploaded: Int, val timestamp: Long) : BackupResult()
@@ -323,7 +331,7 @@ interface RestoreRepository {
     ): RestoreResult
 }
 
-// ── P4b: Subscription (manual bKash) ──────────────────────────────────────────
+// ── P4b: Subscription (manual bKash) ─────────────────────────────────────────────────
 
 sealed class SubscriptionResult {
     data class Success(val paymentId: String) : SubscriptionResult()
@@ -341,7 +349,7 @@ interface SubscriptionRepository {
     ): SubscriptionResult
 }
 
-// ── P4b: Master Catalog Refresh (read-only) ──────────────────────────────────
+// ── P4b: Master Catalog Refresh (read-only) ──────────────────────────────────────
 
 sealed class CatalogRefreshResult {
     data class Success(
@@ -416,7 +424,7 @@ interface SupplierRepository {
     ): com.boikhata.core.domain.model.SupplierStatement
 }
 
-// ── P5: Mela mode (book fair / seasonal) ───────────────────────────────────
+// ── P5: Mela mode (book fair / seasonal) ───────────────────────────────────────────
 
 interface MelaRepository {
     suspend fun getCurrentSession(tenantId: String): com.boikhata.core.domain.model.MelaSession?
