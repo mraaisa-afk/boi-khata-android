@@ -58,7 +58,7 @@
 - [x] Supplier ledger + publisher statement + reorder insight
 - [x] Mela mode
 - [ ] **Exit-gate:** consignment-settlement E2E final verification
-  - নোট: PR #50 open on `agent/p5-exit-gate`; separate phase gate, not same workstream as P10/D81.
+  - নোট: PR #50 open on `agent/p5-exit-gate`; separate phase gate, not same workstream as P10.
 
 ## P6 — রিপোর্ট + ট্রাস্ট + ভয়েস
 - [x] Report depth + monthly data copy + voice setup + Lite UI mode
@@ -83,10 +83,10 @@
 - [x] BoiKhataTheme full D71 token set
 - [x] BengaliFontFamily wired
 - [x] Catalog + FAB crash fixes
-- [x] D81 formula fix: `paidAmount` + khata PAYMENT collection included in HomeScreen net-profit formula [PR #51]
+- [x] D81 formula fix: `paidAmount` + khata PAYMENT collection included in HomeScreen net-profit formula [PR #51 — merged]
 - [ ] Per-screen device audit
 - [ ] **Exit-gate:** screenshot test at max font-scale
-  - নোট: PR #51 open on `agent/p10-d81-formula-fix`; independent P10 formula-fix workstream, not same as P5 exit-gate.
+  - নোট: D81 merged (PR #51, squash, CI green). Next: Per-screen device audit by Sakira on real device.
 
 ---
 
@@ -95,11 +95,9 @@
 | Branch | PR | Workstream | Status |
 | --- | --- | --- | --- |
 | `agent/p5-exit-gate` | #50 | P5 exit-gate verification | Open |
-| `agent/p10-d81-formula-fix` | #51 | P10 D81 formula fix | Open |
-| `agent/workflow-exact-stacked-pr` | pending | Workflow doc alignment | This PR |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
 ---
 
-*অ-চেকড+নোটহীন বাক্স = “শুরু হয়নি” — অস্পষ্টতা রেখো না।*
+*অ-চেকড+নোটহীন বাক্স = "শুরু হয়নি" — অস্পষ্টতা রেখো না।*
