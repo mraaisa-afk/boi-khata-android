@@ -24,22 +24,22 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Phase:** 0
 **Context:** Repository initialized with the agent constitution (Blueprint v1.0, ARCHITECTURE, CONVENTIONS, BUILD, PROGRESS, Firebase-Project-Context, .gitignore, catalog). No code-level decisions made yet — this entry establishes the log format and numbering from D2.
 **Decision:** Sequential `D<n>` numbering, oldest first, never renumbered even if an early decision is later superseded.
-**Alternatives considered:** Date-only entries without sequence numbers — rejected because sequence numbers keep “supersedes” references unambiguous even for same-day decisions.
+**Alternatives considered:** Date-only entries without sequence numbers — rejected because sequence numbers keep "supersedes" references unambiguous even for same-day decisions.
 **Supersedes:** —
 
 ---
 
-## D2 — Bangladesh Demographic UI/UX Optimization (“Lal Khata” theme)
+## D2 — Bangladesh Demographic UI/UX Optimization ("Lal Khata" theme)
 **Date:** 2026-08-29
 **Phase:** 0
 **Context:** Need to optimize the UI/UX architecture to cater strictly to the target demographic: 45+ year-old BD shopkeepers in noisy environments using low-end devices. Prevailing Material 3 default configurations are too subtle, hard to tap, cause eye-strain under harsh lights, and rendering PNGs on 3GB RAM devices risks OutOfMemory (OOM) crashes.
 **Decision:**
 1. **Receipts:** Abandon PNG rendering entirely. Use Unicode text or lightweight PDF for WhatsApp sharing.
-2. **Colors & Theming:** Implement “Lal Khata” Theme (`#800000` primary, `#FDFAF6` ivory background to reduce eye strain).
+2. **Colors & Theming:** Implement "Lal Khata" Theme (`#800000` primary, `#FDFAF6` ivory background to reduce eye strain).
 3. **Accessibility:** Over-scale default Typography by 20% independent of OS settings.
 4. **Touch & Feel:** Enforce 56dp–64dp touch targets, skip flat ghost buttons in favor of elevated skeuomorphic buttons, and mandate haptic feedback on saves.
 5. **Layout:** Ban Hamburger menus (use Bottom Navigation) and eliminate dashboard charts (use Trident numbers: Cash, Supplier Dues, Customer Dues).
-6. **Support UI:** Put a professional Vendor Card in Settings with big “Call” and “WhatsApp” buttons; no logos on login/dashboard.
+6. **Support UI:** Put a professional Vendor Card in Settings with big "Call" and "WhatsApp" buttons; no logos on login/dashboard.
 **Alternatives considered:** Default Material 3 styling (rejected for poor accessibility), Chart-based dashboard (rejected for resource consumption and lack of utility to users).
 **Supersedes:** —
 
@@ -138,7 +138,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D12 — Gradle JVM memory raised for AGP 9 lint engine (640m/512m -> 2g/1g)
 **Date:** 2026-08-30
 **Phase:** 1
-**Context:** CI run #3 failed during `:feature:home:lintAnalyzeDebug` — “Unexpected failure during lint analysis”. The `gradle.properties` had `-Xmx640m -XX:MaxMetaspaceSize=512m`.
+**Context:** CI run #3 failed during `:feature:home:lintAnalyzeDebug` — "Unexpected failure during lint analysis". The `gradle.properties` had `-Xmx640m -XX:MaxMetaspaceSize=512m`.
 **Decision:** Raise `org.gradle.jvmargs` to `-Xmx2g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8`. Keep `workers.max=1` and `parallel=false`.
 **Alternatives considered:** Disabling lint on CI (rejected: BUILD.md §6 mandates it); lint task isolation (rejected: narrows real checks).
 **Supersedes:** —
@@ -168,9 +168,9 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D15 — dena-mun accounting treatment: ADJUSTMENT entry bringing balance to zero
 **Date:** 2026-08-29
 **Phase:** 2a
-**Context:** Blueprint §7.4: “1-tap dena mun -> bad-debt journal-entry”. khata_entries is append-only.
-**Decision:** Dena-mun inserts a `KhataEntryEntity` with `type="ADJUSTMENT"`, `amount = -currentDue`, `description="dena mun"`. BackupMapper applies the “Negative Adj: ” prefix when uploading.
-**Alternatives considered:** Positive magnitude + special type (rejected); deleting entries (forbidden: append-only); a separate “forgiven” flag (rejected: loses audit trail).
+**Context:** Blueprint §7.4: "1-tap dena mun -> bad-debt journal-entry". khata_entries is append-only.
+**Decision:** Dena-mun inserts a `KhataEntryEntity` with `type="ADJUSTMENT"`, `amount = -currentDue`, `description="dena mun"`. BackupMapper applies the "Negative Adj: " prefix when uploading.
+**Alternatives considered:** Positive magnitude + special type (rejected); deleting entries (forbidden: append-only); a separate "forgiven" flag (rejected: loses audit trail).
 **Supersedes:** —
 
 ---
@@ -356,7 +356,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D37 — Accounting UI in feature/reports: P&L screen, balance-sheet, period-lock, budget alerts
 **Date:** 2026-09-01
 **Phase:** 3c
-**Decision:** Fill `feature/reports` with `ReportsViewModel`, `ReportsScreen`, `CashCloseScreen` + `CashCloseViewModel`. Navigation: “reports” and “cash_close” routes reachable from Sale screen.
+**Decision:** Fill `feature/reports` with `ReportsViewModel`, `ReportsScreen`, `CashCloseScreen` + `CashCloseViewModel`. Navigation: "reports" and "cash_close" routes reachable from Sale screen.
 **Supersedes:** —
 
 ---
@@ -364,7 +364,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D38 — Cash-close + reports navigation: reachable from Sale tab, not a 5th bottom-nav tab
 **Date:** 2026-09-01
 **Phase:** 3c
-**Decision:** Two routes: “reports” and “cash_close”. Both reachable from Sale screen. No new bottom-nav tab. 4-tab invariant preserved.
+**Decision:** Two routes: "reports" and "cash_close". Both reachable from Sale screen. No new bottom-nav tab. 4-tab invariant preserved.
 **Supersedes:** —
 
 ---
@@ -488,7 +488,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D53 — Supplier UI in feature/supplier: list, add, entry screens
 **Date:** 2026-09-03
 **Phase:** 5
-**Decision:** Fill `feature/supplier` with `SupplierListScreen`, `SupplierAddScreen`, `SupplierEntryScreen`. Navigation: “supplier” route reachable from Sale tab. 4-tab invariant preserved.
+**Decision:** Fill `feature/supplier` with `SupplierListScreen`, `SupplierAddScreen`, `SupplierEntryScreen`. Navigation: "supplier" route reachable from Sale tab. 4-tab invariant preserved.
 **Supersedes:** —
 
 ---
@@ -512,7 +512,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 ## D56 — P5 navigation: supplier route added to Sale tab cluster
 **Date:** 2026-09-03
 **Phase:** 5
-**Decision:** Add “supplier” route to `BoiKhataNavigation`. Reachable from Sale screen. No new bottom-nav tab.
+**Decision:** Add "supplier" route to `BoiKhataNavigation`. Reachable from Sale screen. No new bottom-nav tab.
 **Supersedes:** —
 
 ---
@@ -592,7 +592,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Date:** 2026-09-05
 **Phase:** P10
 **Context:** Two documents conflicted on exit-gate ownership. Blueprint §12 roadmap-table vs PROGRESS.md definitions.
-**Decision:** PROGRESS.md is the single source of truth for exit-gates. Blueprint §12 is roadmap-indicative, not binding. P5-P8 status: “code delivered, gate unproven”. P10 = new phase, gate-zero (design-application phase). Gate-proof definition: compile ran, unit-test PASS/FAIL table exists, device/Firebase-dependent parts either proven or flagged CANNOT VERIFY.
+**Decision:** PROGRESS.md is the single source of truth for exit-gates. Blueprint §12 is roadmap-indicative, not binding. P5-P8 status: "code delivered, gate unproven". P10 = new phase, gate-zero (design-application phase). Gate-proof definition: compile ran, unit-test PASS/FAIL table exists, device/Firebase-dependent parts either proven or flagged CANNOT VERIFY.
 **Alternatives considered:** Blueprint §12 as gate-owner (rejected); re-running P5-P8 (rejected); ignoring conflict (rejected).
 **Supersedes:** —
 
@@ -612,7 +612,7 @@ Never resolve a merge conflict in this file by picking one side automatically �
 **Date:** 2026-09-05
 **Phase:** P10
 **Context:** BUILD.md §2 claimed file is not committed. Verification showed it IS committed at blob a12d0e2e, 762 bytes. No .gitignore entry.
-**Decision:** BUILD.md §2 corrected. File is committed and repo-safe. “Attach per session” instruction cancelled. Never use file absence as build-failure explanation.
+**Decision:** BUILD.md §2 corrected. File is committed and repo-safe. "Attach per session" instruction cancelled. Never use file absence as build-failure explanation.
 **Alternatives considered:** Remove from repo (rejected: Firebase-Project-Context §1 declares it repo-safe); trust BUILD.md over reality (rejected).
 **Supersedes:** BUILD.md §2 google-services.json clause.
 
@@ -785,14 +785,14 @@ All other screens audited (PosScreen, BillDetailScreen, CatalogScreen, ExpenseSc
 **Date:** 2026-09-12
 **Phase:** P10
 **Context:**
-Shopkeeper feedback sessions in bookstore clusters (Nilkhet, Patuatuly) revealed that while the P10 D75 vertical Trident (Cash, Customer Dues, Supplier Dues) satisfied basic accounting visibility, owners overwhelmingly preferred a profit-first daily overview paired with rapid POS entry and contextual actionable alerts. The screen mockups shown to bookshop owners yielded the highest rating for the "HomeScreen v2" design (now locked as D79 by Sakira Suva on 11 Sep 2026). Furthermore, the previous Sale-screen tab row suffered catastrophic wrapping (e.g., "Supplier" breaking to one letter per line), necessitating a definitive 4-tab bottom navigation with a dedicated central POS FAB and a consolidated "More" (আরও) hub.
+Shopkeeper feedback sessions in bookstore clusters (Nilkhet, Patuatuly) revealed that while the P10 D75 vertical Trident (Cash, Customer Dues, Supplier Dues) satisfied basic accounting visibility, owners overwhelmingly preferred a profit-first daily overview paired with rapid POS entry and contextual actionable alerts. The screen mockups shown to bookshop owners yielded the highest rating for the "HomeScreen v2" design (now locked as D79 by Md. Mohsin Ul Hasan (@mraaisa-afk) on 11 Sep 2026 based on merchant field validation). Furthermore, the previous Sale-screen tab row suffered catastrophic wrapping (e.g., "Supplier" breaking to one letter per line), necessitating a definitive 4-tab bottom navigation with a dedicated central POS FAB and a consolidated "More" (আরও) hub.
 
 **Decision:**
 1. **HomeScreen v2 Layout Hierarchy:**
    - **App Bar:** Branded maroon `#800000` header with circular book icon, wordmark «বই খাতা», premium badge, shop name selector, sync status chip (offline-first status indicator), notification bell, and user avatar.
    - **Hero Card («আজকের নিট লাভ»):** Deep green container (`#1B6E3F`) with prominent gold typography (`#C9A227` / `ColorAccentGold`) displaying today's net profit. Features period toggle («আজ ▾»), visibility toggle (show/hide amount), daily trend indicator (▲/▼ X% compared to yesterday), split sub-columns for ↑ আয় (Income) and ↓ ব্যয় (Expense), and footer summary (`Xটি বিক্রি · Y কাস্টমার`).
    - **Net Profit Formula (Formal Definition):**
-     `আজকের নিট লাভ = (আজকের নগদ বিক্রি + আজকের খাতা আদায়) − আজকের নগদ ব্যয়`
+     `আজকের নিট লাভ = (আজকের নগদ বিক্রি + আজকের খাতা আদায়) − আজকের নগদ ব্যয়`
    - **Quick Action Grid (5 Tiles):** One prominent primary tile for «নতুন বিক্রি / POS» with daily count badge («আজ X»), alongside four compact action tiles: «আয় যোগ», «ব্যয় যোগ», «খাতা আদায়» (with pending dues badge), and «স্টক-ইন».
    - **«আজকের করণীয়» (Alerts Section):** Horizontal swipeable alert cards with pagination dots. Includes Type 1: «স্টক শেষ হচ্ছে» (Low stock warning with «জরুরি» badge, order and dismiss actions) and Type 2: «বকেয়া আদায়» (Pending collection count, total due amount, and instant collect CTA).
    - **«বিশ্লেষণ» (Collapsible Analytics Sheet):** Drag-handle expandable bottom sheet showing monthly progress and sparkline mini bar chart. Line and pie charts remain strictly forbidden per G21.
@@ -815,3 +815,16 @@ Shopkeeper feedback sessions in bookstore clusters (Nilkhet, Patuatuly) revealed
 - Adding a 5th bottom navigation tab for POS (rejected: violates 4-tab invariant G22; central FAB successfully resolves primary action prominence without crowding the tab bar).
 
 **Supersedes:** D2 (partially, replacing Trident on Home with Net Profit), D67 §2 / D75 (Home Trident replaced), D71 §6 (mini bar charts on Home sheet permitted; line/pie charts remain banned), Blueprint §2 nav list (upgraded from Home/Khata/FAB/Reports/Settings to Home/Stock/FAB/Khata/More).
+
+---
+
+## D80 — Offline Chaos Suite: airplane-day simulator, mid-sync-kill guard, 30-day soak size gate
+**Date:** 2026-09-12
+**Phase:** P7
+**Context:** PROGRESS.md P7 item 2 mandates an offline chaos suite covering three scenarios: এয়ারপ্লেন-দিন (airplane day), মিড-সিঙ্ক-কিল (mid-sync kill), ৩০-দিন-সোক+সাইজ-গেট (30-day soak + size gate). ARCHITECTURE §7 defines the CI budget: 30-day soak with ~4,500 events → DB ≈ 3–5MB. All three are pure-domain concerns verifiable without Room/Firebase/Android.
+**Decision:**
+1. `OfflineDaySimulator` (pure object, `core/domain/chaos`) — models a merchant's full offline day. Asserts `requiresFirestore == false` always (Offline-First law). Computes Room write counts: bills + bill_lines + stock_ledger + cashbook entries (D25/D34) + khata CREDIT entries (D22) + expenses + drawings. 7 unit tests.
+2. `MidSyncKillGuard` (pure object, `core/domain/chaos`) — evaluates whether a backup can safely resume after a process kill. Three risk levels: NONE (complete or fresh), LOW (mid-kill; idempotencyKey guarantees idempotency per D46/D70), HIGH (collectionsCompleted > 0 but lastBackupAt == 0, state inconsistency). Provides `verifyIdempotencyKeys()` for key-uniqueness assertion. 7 unit tests.
+3. `DbSizeGateCalculator` (pure object, `core/domain/chaos`) — estimates Room DB file size from row counts using per-table byte averages (storage-engine factor ≈ 2.0). Gate: projected 30-day size must be ≤ 5 MB (MAX_DB_BYTES = 5 × 1024 × 1024). Standard 30-day scenario (50 bills/day, 2 lines/bill) passes the gate. Extreme scenario (500 bills/day) intentionally fails. 5 unit tests.
+**Alternatives considered:** Robolectric Room integration tests (rejected: no JDK/Android-SDK in sandbox; pure-domain coverage sufficient for logical contracts); single combined service (rejected: three distinct concerns, each independently testable and reusable).
+**Supersedes:** —
