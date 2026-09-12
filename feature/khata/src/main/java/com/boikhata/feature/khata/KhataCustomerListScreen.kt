@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
@@ -33,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.boikhata.core.designsystem.ColorBrandMaroon
 import com.boikhata.core.designsystem.format.DigitStyle
 import com.boikhata.core.designsystem.format.NumberFormatter
 import com.boikhata.core.domain.model.KhataCustomer
@@ -65,7 +67,12 @@ fun KhataCustomerListScreen(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddCustomer) {
+            // D71 §1: FAB must use brand palette — not M3 default primaryContainer (pink)
+            FloatingActionButton(
+                onClick = onAddCustomer,
+                containerColor = ColorBrandMaroon,
+                contentColor = Color.White,
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_customer))
             }
         }
@@ -128,6 +135,7 @@ private fun CustomerCard(customer: KhataCustomer, due: KhataCustomerDue?, onClic
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
+        shape = RoundedCornerShape(16.dp), // D71 §3: card corners ≥ 16dp
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
         Row(

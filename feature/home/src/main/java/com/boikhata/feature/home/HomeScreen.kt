@@ -159,7 +159,7 @@ private fun HomeAppBar(shopName: String, isLicensed: Boolean) {
                 Spacer(Modifier.weight(1f))
                 SyncStatusChip()
                 Spacer(Modifier.width(4.dp))
-                IconButton(onClick = { }, modifier = Modifier.size(40.dp)) {
+                IconButton(onClick = { }, modifier = Modifier.size(48.dp)) { // D71 §1: 48dp touch target
                     Icon(Icons.Filled.Notifications, contentDescription = stringResource(R.string.home_notification_cd), tint = Color.White, modifier = Modifier.size(22.dp))
                 }
                 Spacer(Modifier.width(2.dp))
@@ -216,7 +216,7 @@ private fun HeroCard(data: HomeData, amountVisible: Boolean, onAmountToggle: () 
                     }
                 }
                 Spacer(Modifier.width(4.dp))
-                IconButton(onClick = onAmountToggle, modifier = Modifier.size(32.dp)) {
+                IconButton(onClick = onAmountToggle, modifier = Modifier.size(40.dp)) { // D71 §1: 40dp secondary action
                     Icon(
                         imageVector = if (amountVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
                         contentDescription = stringResource(if (amountVisible) R.string.home_hero_hide_amount else R.string.home_hero_show_amount),
