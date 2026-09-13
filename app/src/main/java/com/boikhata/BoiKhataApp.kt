@@ -1,9 +1,8 @@
 package com.boikhata
 
 import android.app.Application
-import android.content.res.Configuration
 import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration as WorkManagerConfiguration
+import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import java.util.Locale
 import javax.inject.Inject
@@ -23,21 +22,21 @@ import javax.inject.Inject
 @HiltAndroidApp
 class BoiKhataApp : Application(), Configuration.Provider {
 
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
     override fun onCreate() {
         // D82: lock the locale to Bengali (Bangladesh) before any UI is created
         val bnBD = Locale("bn", "BD")
         Locale.setDefault(bnBD)
-        val config = Configuration(resources.configuration)
+        val config = android.content.res.Configuration(resources.configuration)
         config.setLocale(bnBD)
         resources.updateConfiguration(config, resources.displayMetrics)
         super.onCreate()
     }
 
-    @Inject
-    lateinit var workerFactory: HiltWorkerFactory
-
-    override val workManagerConfiguration: WorkManagerConfiguration
-        get() = WorkManagerConfiguration.Builder()
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
 }
