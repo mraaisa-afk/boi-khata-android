@@ -16,8 +16,8 @@ import javax.inject.Inject
  * loads values-en/strings.xml and the entire UI renders in English, which the 45-year-old
  * bookshop owner cannot read.
  *
- * The override is applied BEFORE super.onCreate() so the Application's resource Configuration
- * is seeded with Bengali from the first LayoutInflator call.
+ * IMPORTANT: The locale override is placed AFTER super.onCreate() to avoid breaking Firebase
+ * and Hilt resource initialization, which happens during the super call.
  */
 @HiltAndroidApp
 class BoiKhataApp : Application(), Configuration.Provider {
@@ -26,13 +26,13 @@ class BoiKhataApp : Application(), Configuration.Provider {
     lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
-        // D82: lock the locale to Bengali (Bangladesh) before any UI is created
+        super.onCreate()
+        // D82: lock the locale to Bengali (Bangladesh) AFTER Firebase/Hilt init
         val bnBD = Locale("bn", "BD")
         Locale.setDefault(bnBD)
         val config = android.content.res.Configuration(resources.configuration)
         config.setLocale(bnBD)
         resources.updateConfiguration(config, resources.displayMetrics)
-        super.onCreate()
     }
 
     override val workManagerConfiguration: Configuration
