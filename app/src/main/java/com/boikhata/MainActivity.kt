@@ -1,5 +1,6 @@
 package com.boikhata
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +18,7 @@ import com.boikhata.core.designsystem.theme.BoiKhataTheme
 import com.boikhata.core.domain.enums.Role
 import com.boikhata.core.domain.license.LicensePolicy
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 
 /**
  * P4a: MainActivity — routes between Login / PendingActivation / Main based on AuthState.
@@ -26,6 +28,15 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // D82: Force Bengali locale before anything else renders.
+        // Both Firebase and Hilt are initialized after super.onCreate(),
+        // so we apply the locale override at this point — before setContent()
+        // — where all Compose composables will pick up Bengali resources.
+        val bnBD = Locale("bn", "BD")
+        Locale.setDefault(bnBD)
+        val config = Configuration(resources.configuration)
+        config.setLocale(bnBD)
+        resources.updateConfiguration(config, resources.displayMetrics)
         super.onCreate(savedInstanceState)
         setContent {
             val preferences = remember { getSharedPreferences("boi_khata_display", MODE_PRIVATE) }
