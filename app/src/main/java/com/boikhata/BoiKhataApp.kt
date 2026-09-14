@@ -1,42 +1,51 @@
 package com.boikhata
 
 import android.app.Application
+import android.content.Context
+import android.content.res.Configuration
 import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
+import androidx.work.Configuration as WorkManagerConfiguration
 import dagger.hilt.android.HiltAndroidApp
 import java.util.Locale
 import javax.inject.Inject
 
 /**
- * D82: Force Bengali locale on app startup so all Bangladeshi shopkeepers see the app in
- * Bengali regardless of their device's system locale (many Samsung/Xiaomi phones ship in English
- * by default).
+ * D82: Force Bengali (Bangladesh) locale on app startup.
  *
- * Android resource resolution follows the device locale — without this override, an English device
+ * Placed in attachBaseContext() so the Application context is created with Bengali locale
+ * — Firebase and Hilt then initialize with Bengali strings from day one. No runtime
+ * updateConfiguration() call that can crash Firebase mid-initialization.
+ *
+ * Android resource resolution follows the device locale — without this, an English device
  * loads values-en/strings.xml and the entire UI renders in English, which the 45-year-old
- * bookshop owner cannot read.
+ * Bangladeshi bookshop owner cannot read.
  *
- * IMPORTANT: The locale override is placed AFTER super.onCreate() to avoid breaking Firebase
- * and Hilt resource initialization, which happens during the super call.
+ * attachBaseContext() is the official Android place for locale overrides (see
+ * https://developer.android.com/reference/android/app/Application#attachBaseContext(android.content.Context) ).
  */
 @HiltAndroidApp
-class BoiKhataApp : Application(), Configuration.Provider {
+class BoiKhataApp : Application() {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
 
-    override fun onCreate() {
-        super.onCreate()
-        // D82: lock the locale to Bengali (Bangladesh) AFTER Firebase/Hilt init
+    override fun attachBaseContext(base: Context) {
         val bnBD = Locale("bn", "BD")
         Locale.setDefault(bnBD)
-        val config = android.content.res.Configuration(resources.configuration)
+        val config = Configuration(base.resources.configuration)
         config.setLocale(bnBD)
-        resources.updateConfiguration(config, resources.displayMetrics)
+        val context = base.createConfigurationContext(config)
+        super.attachBaseContext(context)
     }
 
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
+    // WorkManager initialization — done lazily to avoid calling Hilt-injected
+    // dependencies too early in attachBaseContext.
+    private val wmConfig: WorkManagerConfiguration
+        get() = WorkManagerConfiguration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
+
+    // WorkManagerConfiguration.Provider — delegates to lazy getter
+    override val workManagerConfiguration: WorkManagerConfiguration
+        get() = wmConfig
 }
