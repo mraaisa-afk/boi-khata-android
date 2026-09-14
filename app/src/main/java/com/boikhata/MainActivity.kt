@@ -28,16 +28,19 @@ import java.util.Locale
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        // D82: Force Bengali locale before anything else renders.
-        // Both Firebase and Hilt are initialized after super.onCreate(),
-        // so we apply the locale override at this point — before setContent()
-        // — where all Compose composables will pick up Bengali resources.
+        super.onCreate(savedInstanceState)
+        
+        // D82: Force Bengali locale AFTER super.onCreate() (Firebase/Hilt already initialized)
+        // but BEFORE setContent() (so all Compose composables render in Bengali).
+        // At this point Application is fully built — Firebase/Hilt are done initializing.
+        // updateConfiguration() here only affects this Activity's resource context,
+        // not the Application's already-cached resources.
         val bnBD = Locale("bn", "BD")
         Locale.setDefault(bnBD)
         val config = Configuration(resources.configuration)
         config.setLocale(bnBD)
         resources.updateConfiguration(config, resources.displayMetrics)
-        super.onCreate(savedInstanceState)
+        
         setContent {
             val preferences = remember { getSharedPreferences("boi_khata_display", MODE_PRIVATE) }
             var liteMode by remember { mutableStateOf(preferences.getBoolean("lite_mode", false)) }
