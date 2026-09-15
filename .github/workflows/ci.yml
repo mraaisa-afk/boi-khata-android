@@ -28,17 +28,30 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android 37 SDK packages
-        run: sdkmanager --install "platform-tools" "platforms;android-37.0" "build-tools;37.0.0"
+      # ubuntu-latest runner-এ Android SDK pre-installed ($ANDROID_HOME).
+      # android-actions/setup-android@v3 বাদ — ওটাই sdkmanager PATH error ঘটাচ্ছিল।
+      - name: Install Android SDK packages
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-37" \
+            "build-tools;37.0.0"
 
       - name: Decode debug keystore
         run: echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > app/boi-khata-debug.keystore
 
       - name: Build
-        run: chmod +x gradlew && ./gradlew assembleDebug -PdebugKeystore=boi-khata-debug.keystore -PdebugKeystorePassword="${{ secrets.DEBUG_KEYSTORE_PASSWORD }}" -PdebugKeystoreAlias=boikhata-debug && ./gradlew build --stacktrace -PdebugKeystore=boi-khata-debug.keystore -PdebugKeystorePassword="${{ secrets.DEBUG_KEYSTORE_PASSWORD }}" -PdebugKeystoreAlias=boikhata-debug
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug \
+            -PdebugKeystore=boi-khata-debug.keystore \
+            -PdebugKeystorePassword="${{ secrets.DEBUG_KEYSTORE_PASSWORD }}" \
+            -PdebugKeystoreAlias=boikhata-debug
+          ./gradlew build --stacktrace \
+            -PdebugKeystore=boi-khata-debug.keystore \
+            -PdebugKeystorePassword="${{ secrets.DEBUG_KEYSTORE_PASSWORD }}" \
+            -PdebugKeystoreAlias=boikhata-debug
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
