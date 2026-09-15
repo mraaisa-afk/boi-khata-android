@@ -35,8 +35,8 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
             "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+            "platforms;android-37" \
+            "build-tools;37.0.0"
 
       - name: Decode debug keystore
         run: echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > app/boi-khata-debug.keystore
