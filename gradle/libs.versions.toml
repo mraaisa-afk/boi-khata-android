@@ -18,8 +18,8 @@ ksp = "2.3.11"                        # যাচাইকৃত: Maven metadata
 composeBom = "2026.08.00"             # বহাল — Compose 1.12-ম্যাপিং
 
 # ── Android SDK ─────────────────────────────────────────────────────────────
-compileSdk = "37"
-targetSdk = "37"
+compileSdk = "35"                     # ← 37 থেকে নামানো হয়েছে; android-37 sdkmanager-এ নেই
+targetSdk = "35"                      # ← একই কারণে
 minSdk = "26"                         # লকড — Blueprint ডিভাইস-স্পেক (Android 8)
 appVersionCode = "8"
 appVersionName = "0.8.0"

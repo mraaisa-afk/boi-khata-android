@@ -29,14 +29,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       # ubuntu-latest runner-এ Android SDK pre-installed ($ANDROID_HOME).
-      # android-actions/setup-android@v3 বাদ — ওটাই sdkmanager PATH error ঘটাচ্ছিল।
+      # compileSdk=35 (android-37 sdkmanager-এ নেই)
       - name: Install Android SDK packages
         run: |
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
             "platform-tools" \
-            "platforms;android-37" \
-            "build-tools;37.0.0"
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
       - name: Decode debug keystore
         run: echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > app/boi-khata-debug.keystore
