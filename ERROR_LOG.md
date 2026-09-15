@@ -31,7 +31,30 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
----
+## ERR-005 — 2026-09-15 — P10 — CI: platforms;android-37 not found on runner (android-37.0 only) after SDK bump
+
+**Type:** Build failure
+**Phase:** P10
+**Date:** 2026-09-15
+**Task:** Fix AAR metadata / compileSdk 37 for Compose BOM + make CI pass on GitHub runner
+**Error:**
+(Repeated from ERR-004 + new run after bump commit 6eca5c7)
+Task :app:checkDebugAarMetadata FAILED (when at 35)
+... and after bump: build still failing quickly on install or metadata (check run conclusion failure)
+**Root cause:** 
+- composeBom 2026.08.00 (1.12.0) AARs hard-require compileSdk 37 (ERR-004).
+- GitHub ubuntu-latest runner image installs Android API 37 *only* as `platforms/android-37.0` (not `android-37`). 
+- sdkmanager "platforms;android-37" either fails to find or the dir isn't created as expected. Gradle/AGP then fails to locate the platform.
+- Previous downgrade to 35 (be94bf9e) was a temporary workaround that broke the Compose requirement.
+- Repeated get_file_contents calls on the same paths happened while debugging state/SHA.
+**Fix applied:** 
+- libs.versions.toml: compileSdk/targetSdk = "37" (already done in 6eca5c7)
+- .github/workflows/ci.yml: 
+  - sdkmanager "platforms;android-37.0" + "build-tools;37.0.0"
+  - Added ln -sf symlink: android-37.0 → android-37 (workaround for runner + AGP lookup)
+- Appended this ERR-005
+- Updated PR #60 body with accurate history and verification steps
+**Lesson:** When bumping to high API levels (37+), always cross-check actions/runner-images issues for .0 suffix on the platform dir. Add explicit symlink after sdkmanager. Avoid repeated file reads for the same content — fetch SHA only when about to edit.
 
 ## ERR-004 — 2026-09-15 — P10 — PR #60 CI: AAR metadata requires compileSdk 37
 
