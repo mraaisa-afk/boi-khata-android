@@ -28,24 +28,37 @@
 
 ---
 
-## When to Write an Entry
-
-| Situation | Write entry? |
-| --- | --- |
-| `./gradlew build` fails | Yes |
-| A test fails unexpectedly | Yes |
-| The agent violated a guardrail (G1-G35) | Yes |
-| The agent misunderstood a task | Yes |
-| The agent hit a blocker (pending ruling, missing file) | Yes |
-| Trivial typo fix with no learning | No |
-| Successful task, no issues | No |
-
----
-
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
 ---
+
+## ERR-004 — 2026-09-15 — P10 — PR #60 CI: AAR metadata requires compileSdk 37
+
+**Type:** Build failure
+**Phase:** P10
+**Date:** 2026-09-15
+**Task:** Fix OTP crash CI (safe formatBengaliTaka/toBanglaDigits) + SDK alignment
+**Error:**
+```
+Task :app:checkDebugAarMetadata FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_3-1789479172645.json
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:checkDebugAarMetadata'.
+> A failure occurred while executing com.android.build.gradle.internal.tasks.CheckAarMetadataWorkAction
+   > 9 issues were found when checking AAR metadata:
+     1.  Dependency 'androidx.compose.animation:animation-core-android:1.12.0' requires compileSdk version 37 or higher.
+         This dependency is consuming the API version 37.
+     ... (and 8 identical for: animation, foundation, foundation-layout, material3, material-icons-core, runtime, ui, ui-graphics, ui-text)
+```
+**Root cause:** composeBom = "2026.08.00" (maps to Compose 1.12.0) + 9 compose-* AARs hard-require compileSdk 37. The branch was still at compileSdk="35" + CI android-35 (from earlier failed downgrade attempt be94bf9e + b62c033e). OTP safe-formatters (ecddc2c2) were pushed without the required SDK bump.
+**Fix applied:** 
+- Updated gradle/libs.versions.toml: compileSdk/targetSdk = "37"
+- Updated .github/workflows/ci.yml: sdkmanager "platforms;android-37" + "build-tools;37.0.0"
+- Appended this ERR-004 (with verbatim error)
+**Lesson:** When choosing or upgrading a Compose BOM, immediately cross-check its required compileSdk (via BOM notes or first AAR error) and update BOTH versions.toml AND the CI sdkmanager line in the same batch. Do not rely on "stable" comments.
 
 ## ERR-003 — 2026-09-12 — P10 — PR D CI Run 1: BookRepositoryImpl missing getLowStockBookSummaries
 
@@ -66,8 +79,6 @@ Task :core:database:compileDebugKotlin FAILED
 - Uses `initialStock` as a proxy for current stock; stock-ledger join deferred to PR E (noted in KDoc comment)
 - Added `import com.boikhata.core.domain.model.LowStockBookSummary` to impl file
 **Lesson:** Before adding any method to a repository interface, always fetch and read the corresponding `*RepositoryImpl.kt` file first — then write the interface method AND its implementation in the same PR commit.
-
----
 
 ## ERR-002 — 2026-09-11 — P10 — PR B CI Run 1: 4 compile errors in HomeScreen
 
@@ -97,8 +108,6 @@ e: HomeScreen.kt:203 Unresolved reference 'contentDescription'
 - Fixed `todaySalesTotal` type: `Double` (taka), not `Long` (paise) — renamed helper to `formatBengaliTaka(Double)`
 **Lesson:** Before pushing a new Composable screen to a feature module, verify: (a) all domain model imports, (b) all icon library dependencies in that module's build.gradle.kts, (c) all string keys exist in the *feature* module's strings.xml (never assume app-module strings are accessible), (d) explicit import for every semantics property extension.
 
----
-
 ## ERR-001 — 2026-09-05 — Pre-Launch — Seed entry
 
 **Type:** Blocker
@@ -112,5 +121,5 @@ e: HomeScreen.kt:203 Unresolved reference 'contentDescription'
 
 ---
 
-*Last updated: 2026-09-12 · Maintained by: Agent (append) + Builder/Sakira (review)*
+*Last updated: 2026-09-15 · Maintained by: Agent (append) + Builder/Sakira (review)*
 *Read by: the agent every session, last 10 entries mandatory*
