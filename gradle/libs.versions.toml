@@ -15,11 +15,11 @@ kotlin = "2.4.0"                      # বহাল — 2.4.20 RC, ব্যব
 ksp = "2.3.11"                        # যাচাইকৃত: Maven metadata-তে এই প্লাগইন-ভার্সন বিদ্যমান
 
 # ── Compose ─────────────────────────────────────────────────────────────────
-composeBom = "2026.08.00"             # বহাল — Compose 1.12.0 ম্যাপিং; compileSdk ≥ 35 (stable)
+composeBom = "2026.08.00"             # বহাল — Compose 1.12.0 ম্যাপিং; compileSdk ≥ 37 (AARs for 1.12.0 require 37)
 
 # ── Android SDK ─────────────────────────────────────────────────────────────
-compileSdk = "35"
-targetSdk = "35"
+compileSdk = "37"
+targetSdk = "37"
 minSdk = "26"                         # লকড — Blueprint ডিভাইস-স্পেক (Android 8)
 appVersionCode = "8"
 appVersionName = "0.8.0"
