@@ -28,11 +28,9 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android 37 SDK packages
-        run: sdkmanager --install "platform-tools" "platforms;android-37.0" "build-tools;37.0.0"
+      - name: Install Android SDK
+        run: |
+          sdkmanager --install "cmdline-tools;latest" "platform-tools" "platforms;android-37" "build-tools;37.0.0"
 
       - name: Decode debug keystore
         run: echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > app/boi-khata-debug.keystore
