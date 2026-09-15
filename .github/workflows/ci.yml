@@ -28,12 +28,15 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # ubuntu-latest runner-এ Android SDK pre-installed ($ANDROID_HOME).
-      # android-actions/setup-android@v3 বাদ — ওটাই sdkmanager PATH error ঘটাচ্ছিল।
-      - name: Install Android SDK packages
+      # Compose 1.12.0 (composeBom 2026.08.00) সর্বনিম্ন compileSdk=37 চায়।
+      # sdkmanager --update দিয়ে repository list আপডেট করতে হবে
+      # নাহলে android-37 package খুঁজে পাবে না।
+      - name: Update sdkmanager repository and install Android 37
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          $SDKMANAGER --update
+          yes | $SDKMANAGER --licenses
+          $SDKMANAGER \
             "platform-tools" \
             "platforms;android-37" \
             "build-tools;37.0.0"
