@@ -35,8 +35,11 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
             "platform-tools" \
-            "platforms;android-37" \
+            "platforms;android-37.0" \
             "build-tools;37.0.0"
+          # GitHub ubuntu-latest runner installs API 37 only as android-37.0 (see actions/runner-images#13859)
+          # Symlink so AGP/Gradle can find it as "android-37"
+          ln -sf $ANDROID_HOME/platforms/android-37.0 $ANDROID_HOME/platforms/android-37 || true
 
       - name: Decode debug keystore
         run: echo "${{ secrets.DEBUG_KEYSTORE_BASE64 }}" | base64 -d > app/boi-khata-debug.keystore

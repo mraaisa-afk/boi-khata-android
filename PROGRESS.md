@@ -1,14 +1,14 @@
 # PROGRESS.md — মিলেস্টোন ট্র্যাকিং
 
-**protocol:** প্রতিটি সেশন শুরুতে ARCHITECTURE.md, CONVENTIONS.md, DECISIONS.md, GIT_WORKFLOW.md পড়ে নিতে হবে সব কাজ শুরুর আগে নেইলে শুরু না ফিরলে শুরু না ফিরলে শুরু না ফিরলে শুরু না👍
-**PROGRESS.md প্রলোগ:** প্রতিটি সেশন শেষে পিআর মার্জ হলে ই ফাইল প্রথমে আপডেট করতে হবে রানিং ব্রান্চেर আগে লগ ਆপডেট না হলে মার্জ না করা যাবে না ফিরলে শুরু না👍
-**Exact workflow:** ein active workstream = ein branch = ein PR👍
+**protocol:** প্রতিটি সেশন শুরুতে ARCHITECTURE.md, CONVENTIONS.md, DECISIONS.md, GIT_WORKFLOW.md পড়ে নিতে হবে সব কাজ শুরুর আগে নেইলে শুরু না ফিরলে শুরু না ফিরলে শুরু না ফিরলে শুরু না✅
+**PROGRESS.md প্রলোগ:** প্রতিটি সেশন শেষে পিআর মার্জ হলে ই ফাইল প্রথমে আপডেট করতে হবে রানিং ব্রান্চের আগে লগ আপডেট না হলে মার্জ না করা যাবে না ফিরলে শুরু না✅
+**Exact workflow:** ein active workstream = ein branch = ein PR✅
 
 ---
 
 ## P0 — ফাউন্ডেশন
 - [x] Gradle-KTS নির্ভরযোগ্য বিল্ড কনফিগারেশন
-- [x] মডুলারিটি-নির্ভরযোগি
+- [x] মড্যুলারিটি-নির্ভরযোগি
 - [x] Hilt-নির্ভরযোগি + MainActivity
 - [x] Noto Sans Bengali + কাস্টম strings + NumberFormatter foundation
 - [x] CI: পূর্ণব্যাপী CI-তে ফেরত-প্রতিফল
@@ -58,7 +58,7 @@
 - [ ] **Exit-gate:** consignment-settlement E2E final verification
   - নোট: PR #50 open on `agent/p5-exit-gate`; separate phase gate, not same workstream as P10.
 
-## P6 — রিপোর্ট + ট্রাস্ট + ভয়েস
+## P6 — রিপোর্ট + ট্রাস্ট + ভয়েস
 - [x] Report depth + monthly data copy + voice setup + Lite UI mode
 - [x] Dashboard fix
 - [ ] **Exit-gate:** data-copy-flow E2E real-device verification pending
@@ -93,9 +93,10 @@
 | Branch | PR | Workstream | Status |
 | --- | --- | --- | --- |
 | `agent/p5-exit-gate` | #50 | P5 exit-gate verification | Open |
+| `agent/phase-10-fix-otp-crash-ci` | #60 | P10 OTP crash (safe formatters) + CI SDK 37 alignment | Open |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
 ---
 
-╥ নতুন কাজ শুরুর আগে সিনিয়র = "দেখে নিতে হবে সব ডকুমেন্ট পড়ে নিতে হবে"👍
+╔ নতুন কাজ শুরুর আগে সিনিয়র = "দেখে নিতে হবে সব ডকুমেন্ট পড়ে নিতে হবে"✅

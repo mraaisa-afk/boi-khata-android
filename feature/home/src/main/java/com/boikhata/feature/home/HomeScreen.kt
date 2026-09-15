@@ -436,15 +436,27 @@ private fun MiniBarSparkline(points: List<HomeAnalyticsPoint>, modifier: Modifie
     }
 }
 
-private fun banglaDigit(n: Int): String {
+private fun toBanglaDigits(input: String): String {
     val map = "০১২৩৪৫৬৭৮৯"
-    return n.toString().map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
+    return input.map { c ->
+        if (c in '0'..'9') map[c - '0'] else c
+    }.joinToString("")
+}
+
+private fun banglaDigit(n: Int): String {
+    return try {
+        toBanglaDigits(n.toString())
+    } catch (e: Exception) {
+        n.toString()
+    }
 }
 
 private fun formatBengaliTaka(taka: Double): String {
-    val rounded = taka.toLong()
-    val formatted = String.format("%,d", rounded)
-    val map = "০১২৩৪৫৬৭৮৯"
-    val bangla = formatted.map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
-    return "৳ $bangla"
+    return try {
+        val rounded = taka.toLong()
+        val formatted = String.format("%,d", rounded)
+        "৳ ${toBanglaDigits(formatted)}"
+    } catch (e: Exception) {
+        "৳ ০"
+    }
 }
