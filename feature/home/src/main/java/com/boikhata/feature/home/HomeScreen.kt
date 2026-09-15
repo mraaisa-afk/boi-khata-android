@@ -445,6 +445,15 @@ private fun formatBengaliTaka(taka: Double): String {
     val rounded = taka.toLong()
     val formatted = String.format("%,d", rounded)
     val map = "০১২৩৪৫৬৭৮৯"
-    val bangla = formatted.map { c -> if (c.isDigit()) map[c - '0'] else c }.joinToString("")
+    val bangla = buildString(formatted.length) {
+        for (i in formatted.indices) {
+            val c = formatted[i]
+            if (c.isDigit() && c in '0'..'9') {
+                append(map[c - '0'])
+            } else {
+                append(c)
+            }
+        }
+    }
     return "৳ $bangla"
 }
