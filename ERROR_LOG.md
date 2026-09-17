@@ -31,6 +31,26 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-010 — 2026-09-18 — P11 — B-003: add-book "+" crash — navigation 2.8.x deserializes literal "null" path segment into actual null
+
+**Type:** Logic error
+**Phase:** P11
+**Date:** 2026-09-18
+**Task:** Fix the real-device crash on "+" (add book) from the stock screen — corrected logcat supplied by Sakira after the ERR-009 stale-log confusion
+**Error:**
+```
+FATAL EXCEPTION: main (Process: com.boikhata)
+java.lang.IllegalArgumentException: Wrong argument type for 'bookId' in argument bundle. string expected.
+    at androidx.navigation.NavDestination.addInDefaultArgs(NavDestination.kt:619)
+    at androidx.navigation.NavController.navigate(NavController.kt:2437)
+    at androidx.navigation.NavController.navigate$default(NavController.kt:2418)
+    at com.boikhata.BoiKhataNavigationKt.BoiKhataMainScreen$lambda$2$0$0$1$0$0(BoiKhataNavigation.kt:155)
+```
+The stack lines match main exactly (155 = `onAddBook = { navController.navigate("book_add_edit/null") }`, navigate(route) overload = 2418, addInDefaultArgs call = 2437, with navigation-compose 2.8.5 sources) — this log IS the current APK, closing the ERR-009 fresh-capture item.
+**Root cause:** Navigation 2.8.0 changed `NavType.StringType.parseValue` to deserialize the literal string `"null"` into an actual null ("reversion of Kotlin standard library serializing null receivers of kotlin.toString into 'null'"). `navigate("book_add_edit/null")` therefore stored a null value in the argument bundle for `{bookId}`, and `NavArgument.verify` (NavArgument.kt:85) rejects a null value for the declared NON-nullable argument. The `"null"`-string sniffing at the destination (`if (bookIdArg == "null") null else bookIdArg`) was written for pre-2.8 semantics and can never work on 2.8.5 (`libs.versions.toml`: navigationCompose = "2.8.5").
+**Fix applied:** Branch `agent/fix-b3-bookid-nav-null-crash` — route changed to `book_add_edit?bookId={bookId}` with `nullable = true; defaultValue = null` (canonical androidx optional-argument pattern); `onAddBook` → `navigate("book_add_edit")`; `onEditBook` and the B-001 low-stock alert tap (HomeScreen.kt) → `book_add_edit?bookId=$id`; "null"-string sniffing removed. Audited the other path-arg routes (`khata_detail/{customerId}`, `bill_detail/{billId}`): all callback parameters are non-null `String` from Room entity ids — no crash-capable site. Verified: `:app:assembleDebug` BUILD SUCCESSFUL locally (Temurin 21 toolchain).
+**Lesson:** On navigation 2.8.x a literal "null" path segment is NOT a string value — it deserializes to actual null and fails argument verification for non-nullable args; optional route args must use the `route?arg={arg}` + nullable + null-default pattern (D85). Inverse of the ERR-009 lesson also holds: an exact stack-line match against main proves the APK is current.
+
 ## ERR-009 — 2026-09-18 — P11 — Stale device log: pre-#60 APK formatBengaliTaka crash misread as the current add-book crash
 
 **Type:** Misunderstanding
