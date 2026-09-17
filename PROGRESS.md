@@ -96,7 +96,7 @@
 > Owner instruction 2026-09-17: next phase opened while the P10 exit-gate (device screenshot test) stays device-pending — carried forward as P11 item 2. P9 unused (numbering skip).
 
 - [ ] Centralize NavHost route constants (single source of truth; dead routes fail fast) — ERR-006 lesson
-- [x] B-003 fix: add-book "+" crash on stock screen — navigation 2.8.x deserializes literal "null" path segment into actual null; `book_add_edit?bookId={bookId}` optional query-arg route + both call sites updated [agent/fix-b3-bookid-nav-null-crash — PR pending, local assembleDebug green]
+- [x] B-003 fix: add-book "+" crash on stock screen — navigation 2.8.x deserializes literal "null" path segment into actual null; `book_add_edit?bookId={bookId}` optional query-arg route + both call sites updated [PR #63]
 - [ ] Roborazzi screenshot tests at max font-scale (CI-verifiable P10 exit-gate; device run still required)
 - [ ] Dedicated Alerts screen — needs owner D-ruling (D84 TODO in HomeScreen)
 - [ ] Premium badge maroon chip — spec lost to base64 corruption (ERR-008); needs owner re-ruling
@@ -115,7 +115,7 @@
 | `agent/fix-b1-stock-crash-b2-khata-reload` | #61 | B-001 + B-002 device-bug fixes | Merged |
 | `agent/phase-10-fix-otp-crash-ci` | #60 | P10 OTP crash (safe formatters) + CI SDK 37 alignment | Merged |
 | `agent/log-reland-p11-start` | #62 | doc reland (D82–D84, ERR-006–008) + P11 bootstrap | Merged |
-| `agent/fix-b3-bookid-nav-null-crash` | PR pending | B-003 bookId nav "null"-segment crash fix + ERR-009/010, D85 | Open — awaiting push token |
+| `agent/fix-b3-bookid-nav-null-crash` | #63 | B-003 bookId nav "null"-segment crash fix + ERR-009/010, D85 | Open — CI running |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
