@@ -83,8 +83,24 @@
 - [x] Catalog + FAB crash fixes
 - [x] D81 formula fix: `paidAmount` + khata PAYMENT collection included in HomeScreen net-profit formula [PR #51 — merged]
 - [x] Per-screen static code audit — D71 §1 findings fixed [PR #53 — merged, CI green]
+- [x] B-001 fix: Home crash after add-book — navigate() to unregistered NavHost routes (`alerts`, `catalog/order/{id}`); alert tap → `book_add_edit/{id}`, See-all → catalog tab [PR #61 — merged, CI green]
+- [x] B-002 fix: khata customer list live-reload via Room reactive Flow (DAO Flow → repository → ViewModel) [PR #61 — merged, CI green]
+- [x] Governance doc reland: D82–D84 + ERR-006/007/008 re-landed after base64-corruption loss [agent/log-reland-p11-start — PR pending]
 - [ ] **Exit-gate:** screenshot test at max font-scale
-  - নোট: D81 merged (PR #51, squash, CI green). D71 audit fixes merged (PR #53, CI green): KhataCustomerListScreen FAB maroon + Card 16dp, BillHistoryScreen Card 16dp, HomeScreen IconButton 48dp/40dp. OD items flagged: ColorAccentGold WCAG, isLicensed hardcode. Next: Sakira device test at max font-scale.
+  - নোট: D81 merged (PR #51, squash, CI green). D71 audit fixes merged (PR #53, CI green): KhataCustomerListScreen FAB maroon + Card 16dp, BillHistoryScreen Card 16dp, HomeScreen IconButton 48dp/40dp. OD items flagged: ColorAccentGold WCAG, isLicensed hardcode. Next: Sakira device test at max font-scale. B-001/B-002 device bugs fixed (PR #61); dedicated Alerts screen deferred (D84 TODO); premium-badge spec lost to corruption — needs owner re-ruling (ERR-008).
+
+---
+
+## P11 — Crash-hardening + route-safety + device-gate automation
+
+> Owner instruction 2026-09-17: next phase opened while the P10 exit-gate (device screenshot test) stays device-pending — carried forward as P11 item 2. P9 unused (numbering skip).
+
+- [ ] Centralize NavHost route constants (single source of truth; dead routes fail fast) — ERR-006 lesson
+- [ ] Roborazzi screenshot tests at max font-scale (CI-verifiable P10 exit-gate; device run still required)
+- [ ] Dedicated Alerts screen — needs owner D-ruling (D84 TODO in HomeScreen)
+- [ ] Premium badge maroon chip — spec lost to base64 corruption (ERR-008); needs owner re-ruling
+- [ ] PR dispositions: #58 review/merge (bounds-safe formatBengaliTaka), #59 close (superseded — main at compileSdk 37 per ERR-005), #50 owner decision
+- [ ] **Exit-gate:** B-001/B-002 verified on Sakira device + screenshot tests green in CI
 
 ---
 
@@ -93,7 +109,11 @@
 | Branch | PR | Workstream | Status |
 | --- | --- | --- | --- |
 | `agent/p5-exit-gate` | #50 | P5 exit-gate verification | Open |
-| `agent/phase-10-fix-otp-crash-ci` | #60 | P10 OTP crash (safe formatters) + CI SDK 37 alignment | Open |
+| `agent/fix-d82-force-bengali-locale` | #58 | bounds-safe formatBengaliTaka (StringIndexOutOfBounds) | Open |
+| `agent/ci-sdk-fix` | #59 | compileSdk 37→35 downgrade | Open — superseded by main (compileSdk 37 + android-37.0 symlink, ERR-005); recommend close |
+| `agent/fix-b1-stock-crash-b2-khata-reload` | #61 | B-001 + B-002 device-bug fixes | Merged |
+| `agent/phase-10-fix-otp-crash-ci` | #60 | P10 OTP crash (safe formatters) + CI SDK 37 alignment | Merged |
+| `agent/log-reland-p11-start` | TBD | doc reland (D82–D84, ERR-006–008) + P11 bootstrap | Open |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
