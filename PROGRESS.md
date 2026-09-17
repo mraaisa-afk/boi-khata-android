@@ -96,12 +96,14 @@
 > Owner instruction 2026-09-17: next phase opened while the P10 exit-gate (device screenshot test) stays device-pending — carried forward as P11 item 2. P9 unused (numbering skip).
 
 - [ ] Centralize NavHost route constants (single source of truth; dead routes fail fast) — ERR-006 lesson
-- [x] B-003 fix: add-book "+" crash on stock screen — navigation 2.8.x deserializes literal "null" path segment into actual null; `book_add_edit?bookId={bookId}` optional query-arg route + both call sites updated [PR #63]
+- [x] B-003 fix: add-book "+" crash on stock screen — navigation 2.8.x deserializes literal "null" path segment into actual null; `book_add_edit?bookId={bookId}` optional query-arg route + both call sites updated [PR #63 — merged; device-confirmed fixed 2026-09-18]
+- [x] B-004 fix: khata customer appears only after app restart — add-customer destination wrote under the seed tenant "t_1" (tenantless VM write-path); explicit tenantId threading through `khata_add_customer` + blank-tenant fail-fast per D86 [branch `agent/fix-b4-khata-tenant-write`]
+- [ ] Rebind-per-launch follow-up: `MainViewModel` hardcodes `oldTenantId = "t_1"` in `needsRebind`, so the D41 rebind runs on every launch and silently rescues mis-tenant writes — make one-time-persisted (read local tenant from `cloud_sync_state`) — needs owner ruling (D86 §3)
 - [ ] Roborazzi screenshot tests at max font-scale (CI-verifiable P10 exit-gate; device run still required)
 - [ ] Dedicated Alerts screen — needs owner D-ruling (D84 TODO in HomeScreen)
 - [ ] Premium badge maroon chip — spec lost to base64 corruption (ERR-008); needs owner re-ruling
 - [ ] PR dispositions: #58 review/merge (bounds-safe formatBengaliTaka), #59 close (superseded — main at compileSdk 37 per ERR-005), #50 owner decision
-- [ ] **Exit-gate:** B-001/B-002 verified on Sakira device + screenshot tests green in CI
+- [ ] **Exit-gate:** B-001/B-003 verified on Sakira device (done 2026-09-18 for B-003 add-book); B-002 re-test pending via B-004 build (add customer → appears without restart) + screenshot tests green in CI
 
 ---
 
@@ -115,7 +117,8 @@
 | `agent/fix-b1-stock-crash-b2-khata-reload` | #61 | B-001 + B-002 device-bug fixes | Merged |
 | `agent/phase-10-fix-otp-crash-ci` | #60 | P10 OTP crash (safe formatters) + CI SDK 37 alignment | Merged |
 | `agent/log-reland-p11-start` | #62 | doc reland (D82–D84, ERR-006–008) + P11 bootstrap | Merged |
-| `agent/fix-b3-bookid-nav-null-crash` | #63 | B-003 bookId nav "null"-segment crash fix + ERR-009/010, D85 | Open — CI running |
+| `agent/fix-b3-bookid-nav-null-crash` | #63 | B-003 bookId nav "null"-segment crash fix + ERR-009/010, D85 | Merged |
+| `agent/fix-b4-khata-tenant-write` | — | B-004 write-path tenant fix (khata add-customer) + ERR-011, D86 | Open — ready to push |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
