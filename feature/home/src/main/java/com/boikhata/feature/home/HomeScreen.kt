@@ -314,11 +314,19 @@ private fun AlertsSection(data: HomeData, onNavigate: (String) -> Unit, modifier
             Text(stringResource(R.string.home_alerts_header), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
             Text(stringResource(R.string.home_alerts_count, alertCount), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.width(8.dp))
-            Text(stringResource(R.string.home_alerts_all), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = ColorBrandMaroon, modifier = Modifier.clickable { onNavigate("alerts") })
+            // B-001 fix: no "alerts" destination exists in BoiKhataNavigation's NavHost,
+            // so navigate() threw IllegalArgumentException (hard crash) on tap.
+            // Route to the stock tab, where the low-stock cards' books are managed.
+            // TODO(P10): a dedicated Alerts screen is undecided — needs a D-ruling.
+            Text(stringResource(R.string.home_alerts_all), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = ColorBrandMaroon, modifier = Modifier.clickable { onNavigate("catalog") })
         }
         LazyRow(contentPadding = PaddingValues(horizontal = ScreenPadding, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             itemsIndexed(data.lowStockAlerts) { _, alert ->
-                LowStockAlertCard(alert, { onNavigate("catalog/order/${alert.bookId}") }, { }, Modifier.width(260.dp))
+                // B-001 fix: "catalog/order/{bookId}" has no NavHost destination either —
+                // every newly added book (initialStock 0 <= lowStockThreshold) surfaces as a
+                // low-stock alert, so this tap crashed right after the add-book flow.
+                // Reuse the existing add/edit screen so the user can restock the book.
+                LowStockAlertCard(alert, { onNavigate("book_add_edit/${alert.bookId}") }, { }, Modifier.width(260.dp))
             }
             if (hasDue) {
                 item { DueCollectionAlertCard(data.dueCustomerCount, data.totalDue, { onNavigate("khata") }, Modifier.width(260.dp)) }

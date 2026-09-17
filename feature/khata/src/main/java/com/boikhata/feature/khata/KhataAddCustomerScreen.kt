@@ -1,1 +1,116 @@
-cGFja2FnZSBjb20uYm9pa2hhdGEuZmVhdHVyZS5raGF0YQoKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UuZm91bmRhdGlvbi5sYXlvdXQuQXJyYW5nZW1lbnQKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UuZm91bmRhdGlvbi5sYXlvdXQuQ29sdW1uCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24ubGF5b3V0LmZpbGxNYXhXaWR0aAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLmxheW91dC5wYWRkaW5nCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLmZvdW5kYXRpb24ucmVtZW1iZXJTY3JvbGxTdGF0ZQppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5mb3VuZGF0aW9uLnZlcnRpY2FsU2Nyb2xsCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLm1hdGVyaWFsLmljb25zLkljb25zCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLm1hdGVyaWFsLmljb25zLmZpbGxlZC5BcnJvd0JhY2sKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UubWF0ZXJpYWwzLkJ1dHRvbgppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbDMuRXhwZXJpbWVudGFsTWF0ZXJpYWwzQXBpCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLm1hdGVyaWFsMy5JY29uCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLm1hdGVyaWFsMy5JY29uQnV0dG9uCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLm1hdGVyaWFsMy5PdXRsaW5lZFRleHRGaWVsZAppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5tYXRlcmlhbDMuU2NhZmZvbGQKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UubWF0ZXJpYWwzLlRleHQKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UubWF0ZXJpYWwzLlRvcEFwcEJhcgppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5ydW50aW1lLkNvbXBvc2FibGUKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UucnVudGltZS5nZXRWYWx1ZQppbXBvcnQgYW5kcm9pZHguY29tcG9zZS5ydW50aW1lLm11dGFibGVTdGF0ZU9mCmltcG9ydCBhbmRyb2lkeC5jb21wb3NlLnJ1bnRpbWUucmVtZW1iZXIKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UucnVudGltZS5zZXRWYWx1ZQppbXBvcnQgYW5kcm9pZHguY29tcG9zZS51aS5Nb2RpZmllcgppbXBvcnQgYW5kcm9pZHguY29tcG9zZS51aS5yZXMuc3RyaW5nUmVzb3VyY2UKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UudWkudGV4dC5pbnB1dC5LZXlib2FyZFR5cGUKaW1wb3J0IGFuZHJvaWR4LmNvbXBvc2UuZm91bmRhdGlvbi50ZXh0LktleWJvYXJkT3B0aW9ucwppbXBvcnQgYW5kcm9pZHguY29tcG9zZS51aS51bml0LmRwCmltcG9ydCBhbmRyb2lkeC5oaWx0Lm5hdmlnYXRpb24uY29tcG9zZS5oaWx0Vmlld01vZGVsCmltcG9ydCBjb20uYm9pa2hhdGEuZmVhdHVyZS5raGF0YS5SCgovKioKICogUDJhOiBBZGQgY3VzdG9tZXIgc2NyZWVuIOKAlCBuYW1lK2FyZWEga2V5ZWQgKHBob25lIG9wdGlvbmFsKS4KICogQmx1ZXByaW50IMKnNy40OiDgpqjgpr7gpq4r4KaP4Kay4Ka+4KaV4Ka+LeCmleCngCAo4Kar4KeL4KaoIOCmkOCmmuCnjeCmm+Cmv+CmlSkuCiAqIENPTlZFTlRJT05TIMKnNDoga2hhdGFfY3VzdG9tZXJzID0gT1dORVItT05MWSAoZGF0YS1sYXllciBnYXRlKS4KICoKICogQi0wMDEgZml4IChENzYgcGF0dGVybik6IGZpbGxNYXhXaWR0aCgpIHJlcGxhY2VzIGZpbGxNYXhTaXplKCkuCiAqICAgZmlsbE1heFNpemUoKSArIHZlcnRpY2FsU2Nyb2xsKCkgaW5zaWRlIGEgU2NhZmZvbGQtYm91bmRlZCBDb2x1bW4KICogICBjYXVzZXMgSWxsZWdhbFN0YXRlRXhjZXB0aW9uIGF0IGxheW91dCB0aW1lIChpbmZpbml0ZSBoZWlnaHQgY29uZmxpY3QpLgogKiAgIFNhbWUgcm9vdCBjYXVzZSBmaXhlZCBpbiBCb29rQWRkRWRpdFNjcmVlbiBieSBENzYuCiAqLwpAT3B0SW4oRXhwZXJpbWVudGFsTWF0ZXJpYWwzQXBpOjpjbGFzcykKQENvbXBvc2FibGUKZnVuIEtoYXRhQWRkQ3VzdG9tZXJTY3JlZW4oCiAgICBvbkJhY2s6ICgpIC0+IFVuaXQsCiAgICB2aWV3TW9kZWw6IEtoYXRhVmlld01vZGVsID0gaGlsdFZpZXdNb2RlbCgpLAopIHsKICAgIHZhciBuYW1lQm4gYnkgcmVtZW1iZXIgeyBtdXRhYmxlU3RhdGVPZigiIikgfQogICAgdmFyIHBob25lIGJ5IHJlbWVtYmVyIHsgbXV0YWJsZVN0YXRlT2YoIiIpIH0KICAgIHZhciBhZGRyZXNzIGJ5IHJlbWVtYmVyIHsgbXV0YWJsZVN0YXRlT2YoIiIpIH0KICAgIHZhciBjcmVkaXRMaW1pdCBieSByZW1lbWJlciB7IG11dGFibGVTdGF0ZU9mKCI1MDAwIikgfQoKICAgIFNjYWZmb2xkKAogICAgICAgIHRvcEJhciA9IHsKICAgICAgICAgICAgVG9wQXBwQmFyKAogICAgICAgICAgICAgICAgdGl0bGUgPSB7IFRleHQoc3RyaW5nUmVzb3VyY2UoUi5zdHJpbmcuYWRkX2N1c3RvbWVyKSkgfSwKICAgICAgICAgICAgICAgIG5hdmlnYXRpb25JY29uID0gewogICAgICAgICAgICAgICAgICAgIEljb25CdXR0b24ob25DbGljayA9IG9uQmFjaykgewogICAgICAgICAgICAgICAgICAgICAgICBJY29uKEljb25zLkRlZmF1bHQuQXJyb3dCYWNrLCBjb250ZW50RGVzY3JpcHRpb24gPSBudWxsKQogICAgICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgKQogICAgICAgIH0KICAgICkgeyBwYWRkaW5nIC0+CiAgICAgICAgLy8gQi0wMDEgZml4OiBmaWxsTWF4V2lkdGgoKSBvbmx5IOKAlCBOT1QgZmlsbE1heFNpemUoKS4KICAgICAgICAvLyBmaWxsTWF4U2l6ZSgpICsgdmVydGljYWxTY3JvbGwgY29uZmxpY3RzIHdpdGggU2NhZmZvbGQncyBib3VuZGVkIGNvbnRlbnQKICAgICAgICAvLyBoZWlnaHQgYW5kIHRocm93cyBJbGxlZ2FsU3RhdGVFeGNlcHRpb24uIGZpbGxNYXhXaWR0aCgpIGxldHMgdGhlIENvbHVtbgogICAgICAgIC8vIGdyb3cgdG8gaXRzIGludHJpbnNpYyBjb250ZW50IGhlaWdodCwgd2hpY2ggdmVydGljYWxTY3JvbGwgZXhwZWN0cy4KICAgICAgICBDb2x1bW4oCiAgICAgICAgICAgIG1vZGlmaWVyID0gTW9kaWZpZXIKICAgICAgICAgICAgICAgIC5maWxsTWF4V2lkdGgoKQogICAgICAgICAgICAgICAgLnBhZGRpbmcocGFkZGluZykKICAgICAgICAgICAgICAgIC5wYWRkaW5nKDE2LmRwKQogICAgICAgICAgICAgICAgLnZlcnRpY2FsU2Nyb2xsKHJlbWVtYmVyU2Nyb2xsU3RhdGUoKSksCiAgICAgICAgICAgIHZlcnRpY2FsQXJyYW5nZW1lbnQgPSBBcnJhbmdlbWVudC5zcGFjZWRCeSgxMi5kcCksCiAgICAgICAgKSB7CiAgICAgICAgICAgIE91dGxpbmVkVGV4dEZpZWxkKAogICAgICAgICAgICAgICAgdmFsdWUgPSBuYW1lQm4sCiAgICAgICAgICAgICAgICBvblZhbHVlQ2hhbmdlID0geyBuYW1lQm4gPSBpdCB9LAogICAgICAgICAgICAgICAgbGFiZWwgPSB7IFRleHQoc3RyaW5nUmVzb3VyY2UoUi5zdHJpbmcuY3VzdG9tZXJfbmFtZSkpIH0sCiAgICAgICAgICAgICAgICBtb2RpZmllciA9IE1vZGlmaWVyLmZpbGxNYXhXaWR0aCgpLAogICAgICAgICAgICAgICAgc2luZ2xlTGluZSA9IHRydWUsCiAgICAgICAgICAgICkKICAgICAgICAgICAgT3V0bGluZWRUZXh0RmllbGQoCiAgICAgICAgICAgICAgICB2YWx1ZSA9IGFkZHJlc3MsCiAgICAgICAgICAgICAgICBvblZhbHVlQ2hhbmdlID0geyBhZGRyZXNzID0gaXQgfSwKICAgICAgICAgICAgICAgIGxhYmVsID0geyBUZXh0KHN0cmluZ1Jlc291cmNlKFIuc3RyaW5nLmFyZWFfYWRkcmVzcykpIH0sCiAgICAgICAgICAgICAgICBtb2RpZmllciA9IE1vZGlmaWVyLmZpbGxNYXhXaWR0aCgpLAogICAgICAgICAgICAgICAgc2luZ2xlTGluZSA9IHRydWUsCiAgICAgICAgICAgICkKICAgICAgICAgICAgT3V0bGluZWRUZXh0RmllbGQoCiAgICAgICAgICAgICAgICB2YWx1ZSA9IHBob25lLAogICAgICAgICAgICAgICAgb25WYWx1ZUNoYW5nZSA9IHsgcGhvbmUgPSBpdCB9LAogICAgICAgICAgICAgICAgbGFiZWwgPSB7IFRleHQoc3RyaW5nUmVzb3VyY2UoUi5zdHJpbmcucGhvbmVfb3B0aW9uYWwpKSB9LAogICAgICAgICAgICAgICAgbW9kaWZpZXIgPSBNb2RpZmllci5maWxsTWF4V2lkdGgoKSwKICAgICAgICAgICAgICAgIHNpbmdsZUxpbmUgPSB0cnVlLAogICAgICAgICAgICAgICAga2V5Ym9hcmRPcHRpb25zID0gS2V5Ym9hcmRPcHRpb25zKGtleWJvYXJkVHlwZSA9IEtleWJvYXJkVHlwZS5QaG9uZSksCiAgICAgICAgICAgICkKICAgICAgICAgICAgT3V0bGluZWRUZXh0RmllbGQoCiAgICAgICAgICAgICAgICB2YWx1ZSA9IGNyZWRpdExpbWl0LAogICAgICAgICAgICAgICAgb25WYWx1ZUNoYW5nZSA9IHsgY3JlZGl0TGltaXQgPSBpdC5maWx0ZXIgeyBjIC0+IGMuaXNEaWdpdCgpIHx8IGMgPT0gJy4nIH0gfSwKICAgICAgICAgICAgICAgIGxhYmVsID0geyBUZXh0KHN0cmluZ1Jlc291cmNlKFIuc3RyaW5nLmNyZWRpdF9saW1pdCkpIH0sCiAgICAgICAgICAgICAgICBtb2RpZmllciA9IE1vZGlmaWVyLmZpbGxNYXhXaWR0aCgpLAogICAgICAgICAgICAgICAgc2luZ2xlTGluZSA9IHRydWUsCiAgICAgICAgICAgICAgICBrZXlib2FyZE9wdGlvbnMgPSBLZXlib2FyZE9wdGlvbnMoa2V5Ym9hcmRUeXBlID0gS2V5Ym9hcmRUeXBlLkRlY2ltYWwpLAogICAgICAgICAgICApCiAgICAgICAgICAgIEJ1dHRvbigKICAgICAgICAgICAgICAgIG9uQ2xpY2sgPSB7CiAgICAgICAgICAgICAgICAgICAgdmlld01vZGVsLmFkZEN1c3RvbWVyKAogICAgICAgICAgICAgICAgICAgICAgICBuYW1lQm4gPSBuYW1lQm4sCiAgICAgICAgICAgICAgICAgICAgICAgIHBob25lID0gcGhvbmUuaWZCbGFuayB7IG51bGwgfSwKICAgICAgICAgICAgICAgICAgICAgICAgYWRkcmVzcyA9IGFkZHJlc3MuaWZCbGFuayB7IG51bGwgfSwKICAgICAgICAgICAgICAgICAgICAgICAgY3JlZGl0TGltaXQgPSBjcmVkaXRMaW1pdC50b0RvdWJsZU9yTnVsbCgpID86IDAuMCwKICAgICAgICAgICAgICAgICAgICAgICAgb25Eb25lID0gb25CYWNrLAogICAgICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICBtb2RpZmllciA9IE1vZGlmaWVyLmZpbGxNYXhXaWR0aCgpLAogICAgICAgICAgICAgICAgZW5hYmxlZCA9IG5hbWVCbi5pc05vdEJsYW5rKCksCiAgICAgICAgICAgICkgewogICAgICAgICAgICAgICAgVGV4dChzdHJpbmdSZXNvdXJjZShSLnN0cmluZy5zYXZlKSkKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KfQo=
+package com.boikhata.feature.khata
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.boikhata.feature.khata.R
+
+/**
+ * P2a: Add customer screen — name+area keyed (phone optional).
+ * Blueprint §7.4: নাম+এলাকা-কী (ফোন ঐচ্ছিক) — বাংলাদেশের খাতা-স্মৃতির আসল চাবি।
+ * CONVENTIONS §4: khata_customers-তৈরি = OWNER-ONLY (data-layer gate).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun KhataAddCustomerScreen(
+    onBack: () -> Unit,
+    viewModel: KhataViewModel = hiltViewModel(),
+) {
+    var nameBn by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
+    var address by remember { mutableStateOf("") }
+    var creditLimit by remember { mutableStateOf("5000") }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.add_customer)) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            OutlinedTextField(
+                value = nameBn,
+                onValueChange = { nameBn = it },
+                label = { Text(stringResource(R.string.customer_name)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            OutlinedTextField(
+                value = address,
+                onValueChange = { address = it },
+                label = { Text(stringResource(R.string.area_address)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+            )
+            OutlinedTextField(
+                value = phone,
+                onValueChange = { phone = it },
+                label = { Text(stringResource(R.string.phone_optional)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            )
+            OutlinedTextField(
+                value = creditLimit,
+                onValueChange = { creditLimit = it.filter { c -> c.isDigit() || c == '.' } },
+                label = { Text(stringResource(R.string.credit_limit)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            )
+            Button(
+                onClick = {
+                    viewModel.addCustomer(
+                        nameBn = nameBn,
+                        phone = phone.ifBlank { null },
+                        address = address.ifBlank { null },
+                        creditLimit = creditLimit.toDoubleOrNull() ?: 0.0,
+                        onDone = onBack,
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = nameBn.isNotBlank(),
+            ) {
+                Text(stringResource(R.string.save))
+            }
+        }
+    }
+}

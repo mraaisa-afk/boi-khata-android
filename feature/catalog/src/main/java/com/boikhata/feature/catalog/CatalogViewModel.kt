@@ -1,1 +1,130 @@
-cGFja2FnZSBjb20uYm9pa2hhdGEuZmVhdHVyZS5jYXRhbG9nCgppbXBvcnQgYW5kcm9pZHgubGlmZWN5Y2xlLlZpZXdNb2RlbAppbXBvcnQgYW5kcm9pZHgubGlmZWN5Y2xlLnZpZXdNb2RlbFNjb3BlCmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kb21haW4uZW51bXMuQm9va0NhdGVnb3J5CmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kb21haW4uZW51bXMuQm9va0NvbmRpdGlvbgppbXBvcnQgY29tLmJvaWtoYXRhLmNvcmUuZG9tYWluLm1vZGVsLkJvb2sKaW1wb3J0IGNvbS5ib2lraGF0YS5jb3JlLmRvbWFpbi5yZXBvc2l0b3J5LkJvb2tSZXBvc2l0b3J5CmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kb21haW4udGV4dC5CZW5nYWxpTm9ybWFsaXplcgppbXBvcnQgZGFnZ2VyLmhpbHQuYW5kcm9pZC5saWZlY3ljbGUuSGlsdFZpZXdNb2RlbAppbXBvcnQga290bGlueC5jb3JvdXRpbmVzLmZsb3cuTXV0YWJsZVN0YXRlRmxvdwppbXBvcnQga290bGlueC5jb3JvdXRpbmVzLmZsb3cuU3RhdGVGbG93CmltcG9ydCBrb3RsaW54LmNvcm91dGluZXMuZmxvdy5hc1N0YXRlRmxvdwppbXBvcnQga290bGlueC5jb3JvdXRpbmVzLmxhdW5jaAppbXBvcnQgamF2YXguaW5qZWN0LkluamVjdAoKQEhpbHRWaWV3TW9kZWwKY2xhc3MgQ2F0YWxvZ1ZpZXdNb2RlbCBASW5qZWN0IGNvbnN0cnVjdG9yKAogICAgcHJpdmF0ZSB2YWwgYm9va1JlcG9zaXRvcnk6IEJvb2tSZXBvc2l0b3J5LAopIDogVmlld01vZGVsKCkgewoKICAgIHByaXZhdGUgdmFsIF91aVN0YXRlID0gTXV0YWJsZVN0YXRlRmxvdzxDYXRhbG9nVWlTdGF0ZT4oQ2F0YWxvZ1VpU3RhdGUuTG9hZGluZykKICAgIHZhbCB1aVN0YXRlOiBTdGF0ZUZsb3c8Q2F0YWxvZ1VpU3RhdGU+ID0gX3VpU3RhdGUuYXNTdGF0ZUZsb3coKQoKICAgIHByaXZhdGUgdmFsIF9zZWFyY2hRdWVyeSA9IE11dGFibGVTdGF0ZUZsb3coIiIpCiAgICB2YWwgc2VhcmNoUXVlcnk6IFN0YXRlRmxvdzxTdHJpbmc+ID0gX3NlYXJjaFF1ZXJ5LmFzU3RhdGVGbG93KCkKCiAgICBwcml2YXRlIHZhciBjdXJyZW50VGVuYW50SWQ6IFN0cmluZyA9ICIiCiAgICBwcml2YXRlIHZhciBhbGxCb29rczogTGlzdDxCb29rPiA9IGVtcHR5TGlzdCgpCgogICAgZnVuIGxvYWRDYXRhbG9nKHRlbmFudElkOiBTdHJpbmcpIHsKICAgICAgICBjdXJyZW50VGVuYW50SWQgPSB0ZW5hbnRJZAogICAgICAgIHZpZXdNb2RlbFNjb3BlLmxhdW5jaCB7CiAgICAgICAgICAgIF91aVN0YXRlLnZhbHVlID0gQ2F0YWxvZ1VpU3RhdGUuTG9hZGluZwogICAgICAgICAgICB0cnkgewogICAgICAgICAgICAgICAgYWxsQm9va3MgPSBib29rUmVwb3NpdG9yeS5nZXRCb29rcyh0ZW5hbnRJZCkKICAgICAgICAgICAgICAgIF91aVN0YXRlLnZhbHVlID0gQ2F0YWxvZ1VpU3RhdGUuU3VjY2VzcyhhbGxCb29rcywgX3NlYXJjaFF1ZXJ5LnZhbHVlKQogICAgICAgICAgICB9IGNhdGNoIChlOiBUaHJvd2FibGUpIHsKICAgICAgICAgICAgICAgIF91aVN0YXRlLnZhbHVlID0gQ2F0YWxvZ1VpU3RhdGUuRXJyb3IoZS5tZXNzYWdlID86ICLgtra4r+C2pyIpCiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICB9CgogICAgZnVuIG9uU2VhcmNoUXVlcnlDaGFuZ2UocXVlcnk6IFN0cmluZykgewogICAgICAgIF9zZWFyY2hRdWVyeS52YWx1ZSA9IHF1ZXJ5CiAgICAgICAgaWYgKHF1ZXJ5LmlzQmxhbmsoKSkgewogICAgICAgICAgICBfdWlTdGF0ZS52YWx1ZSA9IENhdGFsb2dVaVN0YXRlLlN1Y2Nlc3MoYWxsQm9va3MsICIiKQogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgIHZhbCBub3JtYWxpemVkID0gQmVuZ2FsaU5vcm1hbGl6ZXIubm9ybWFsaXplKHF1ZXJ5KQogICAgICAgICAgICB2YWwgZmlsdGVyZWQgPSBhbGxCb29rcy5maWx0ZXIgeyBib29rIC0+CiAgICAgICAgICAgICAgICBCZW5nYWxpTm9ybWFsaXplci5ub3JtYWxpemUoYm9vay50aXRsZUJuKS5jb250YWlucyhub3JtYWxpemVkLCBpZ25vcmVDYXNlID0gdHJ1ZSkgfHwKICAgICAgICAgICAgICAgIChib29rLnRpdGxlRW4/LmNvbnRhaW5zKHF1ZXJ5LCBpZ25vcmVDYXNlID0gdHJ1ZSkgPT0gdHJ1ZSkgfHwKICAgICAgICAgICAgICAgIGJvb2suYXV0aG9yLmNvbnRhaW5zKHF1ZXJ5LCBpZ25vcmVDYXNlID0gdHJ1ZSkgfHwKICAgICAgICAgICAgICAgIChib29rLmlzYm4/LmNvbnRhaW5zKHF1ZXJ5LCBpZ25vcmVDYXNlID0gdHJ1ZSkgPT0gdHJ1ZSkKICAgICAgICAgICAgfQogICAgICAgICAgICBfdWlTdGF0ZS52YWx1ZSA9IENhdGFsb2dVaVN0YXRlLlN1Y2Nlc3MoZmlsdGVyZWQsIHF1ZXJ5KQogICAgICAgIH0KICAgIH0KCiAgICBmdW4gYWRkQm9vaygKICAgICAgICBpc2JuOiBTdHJpbmc/LAogICAgICAgIHRpdGxlQm46IFN0cmluZywKICAgICAgICB0aXRsZUVuOiBTdHJpbmc/LAogICAgICAgIGF1dGhvcjogU3RyaW5nLAogICAgICAgIHB1Ymxpc2hlcjogU3RyaW5nLAogICAgICAgIGNsYXNzTGV2ZWw6IFN0cmluZywKICAgICAgICBzdWJqZWN0OiBTdHJpbmcsCiAgICAgICAgZWRpdGlvblllYXI6IEludCwKICAgICAgICBjYXRlZ29yeTogQm9va0NhdGVnb3J5LAogICAgICAgIGNvbmRpdGlvbjogQm9va0NvbmRpdGlvbiwKICAgICAgICBwdXJjaGFzZVByaWNlOiBEb3VibGUsCiAgICAgICAgc2VsbGluZ1ByaWNlOiBEb3VibGUsCiAgICAgICAgaW5pdGlhbFN0b2NrOiBJbnQsCiAgICAgICAgbG93U3RvY2tUaHJlc2hvbGQ6IEludCwKICAgICAgICBvbkRvbmU6ICgpIC0+IFVuaXQsCiAgICApIHsKICAgICAgICB2aWV3TW9kZWxTY29wZS5sYXVuY2ggewogICAgICAgICAgICB0cnkgewogICAgICAgICAgICAgICAgYm9va1JlcG9zaXRvcnkuYWRkQm9vaygKICAgICAgICAgICAgICAgICAgICBjdXJyZW50VGVuYW50SWQsIGlzYm4sIHRpdGxlQm4sIHRpdGxlRW4sIGF1dGhvciwgcHVibGlzaGVyLAogICAgICAgICAgICAgICAgICAgIGNsYXNzTGV2ZWwsIHN1YmplY3QsIGVkaXRpb25ZZWFyLCBjYXRlZ29yeSwgY29uZGl0aW9uLAogICAgICAgICAgICAgICAgICAgIHB1cmNoYXNlUHJpY2UsIHNlbGxpbmdQcmljZSwgaW5pdGlhbFN0b2NrLCBsb3dTdG9ja1RocmVzaG9sZCwKICAgICAgICAgICAgICAgICkKICAgICAgICAgICAgICAgIGxvYWRDYXRhbG9nKGN1cnJlbnRUZW5hbnRJZCkKICAgICAgICAgICAgICAgIG9uRG9uZSgpCiAgICAgICAgICAgIH0gY2F0Y2ggKGU6IFRocm93YWJsZSkgewogICAgICAgICAgICAgICAgLy8gQi0wMDE6IHdpZGVuZWQgZnJvbSBFeGNlcHRpb24gdG8gVGhyb3dhYmxlIC0tIGNhdGNoZXMgQXNzZXJ0aW9uRXJyb3IKICAgICAgICAgICAgICAgIC8vIGZyb20gVHJpYWxQb2xpY3kgYW5kIExpa2Vuc2VXcml0ZUd1YXJkLCBwcmV2ZW50aW5nIGEgaGFyZCBjcmFzaC4KICAgICAgICAgICAgICAgIF91aVN0YXRlLnZhbHVlID0gQ2F0YWxvZ1VpU3RhdGUuRXJyb3IoZS5tZXNzYWdlID86ICLgtrTgt5LgtrTgtr/gtqfgtr/gtrYiKQogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQoKICAgIGZ1biB1cGRhdGVCb29rKAogICAgICAgIGlkOiBTdHJpbmcsCiAgICAgICAgaXNibjogU3RyaW5nPywKICAgICAgICB0aXRsZUJuOiBTdHJpbmcsCiAgICAgICAgdGl0bGVFbjogU3RyaW5nPywKICAgICAgICBhdXRob3I6IFN0cmluZywKICAgICAgICBwdWJsaXNoZXI6IFN0cmluZywKICAgICAgICBjbGFzc0xldmVsOiBTdHJpbmcsCiAgICAgICAgc3ViamVjdDogU3RyaW5nLAogICAgICAgIGVkaXRpb25ZZWFyOiBJbnQsCiAgICAgICAgY2F0ZWdvcnk6IEJvb2tDYXRlZ29yeSwKICAgICAgICBjb25kaXRpb246IEJvb2tDb25kaXRpb24sCiAgICAgICAgcHVyY2hhc2VQcmljZTogRG91YmxlLAogICAgICAgIHNlbGxpbmdQcmljZTogRG91YmxlLAogICAgICAgIGxvd1N0b2NrVGhyZXNob2xkOiBJbnQsCiAgICAgICAgaXNBY3RpdmU6IEJvb2xlYW4sCiAgICAgICAgb25Eb25lOiAoKSAtPiBVbml0LAogICAgKSB7CiAgICAgICAgdmlld01vZGVsU2NvcGUubGF1bmNoIHsKICAgICAgICAgICAgdHJ5IHsKICAgICAgICAgICAgICAgIGJvb2tSZXBvc2l0b3J5LnVwZGF0ZUJvb2soCiAgICAgICAgICAgICAgICAgICAgY3VycmVudFRlbmFudElkLCBpZCwgaXNibiwgdGl0bGVCbiwgdGl0bGVFbiwgYXV0aG9yLCBwdWJsaXNoZXIsCiAgICAgICAgICAgICAgICAgICAgY2xhc3NMZXZlbCwgc3ViamVjdCwgZWRpdGlvblllYXIsIGNhdGVnb3J5LCBjb25kaXRpb24sCiAgICAgICAgICAgICAgICAgICAgcHVyY2hhc2VQcmljZSwgc2VsbGluZ1ByaWNlLCBsb3dTdG9ja1RocmVzaG9sZCwgaXNBY3RpdmUsCiAgICAgICAgICAgICAgICApCiAgICAgICAgICAgICAgICBsb2FkQ2F0YWxvZyhjdXJyZW50VGVuYW50SWQpCiAgICAgICAgICAgICAgICBvbkRvbmUoKQogICAgICAgICAgICB9IGNhdGNoIChlOiBUaHJvd2FibGUpIHsKICAgICAgICAgICAgICAgIC8vIEItMDAxOiB3aWRlbmVkIGZyb20gRXhjZXB0aW9uIHRvIFRocm93YWJsZS4KICAgICAgICAgICAgICAgIF91aVN0YXRlLnZhbHVlID0gQ2F0YWxvZ1VpU3RhdGUuRXJyb3IoZS5tZXNzYWdlID86ICLgtrTgtrXgtqDgtrTgtr/gt5LgtqciKQogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9CgpzZWFsZWQgaW50ZXJmYWNlIENhdGFsb2dVaVN0YXRlIHsKICAgIGRhdGEgb2JqZWN0IExvYWRpbmcgOiBDYXRhbG9nVWlTdGF0ZQogICAgZGF0YSBjbGFzcyBTdWNjZXNzKHZhbCBib29rczogTGlzdDxCb29rPiwgdmFsIHNlYXJjaFF1ZXJ5OiBTdHJpbmcpIDogQ2F0YWxvZ1VpU3RhdGUKICAgIGRhdGEgY2xhc3MgRXJyb3IodmFsIG1lc3NhZ2U6IFN0cmluZykgOiBDYXRhbG9nVWlTdGF0ZQp9Cg==
+package com.boikhata.feature.catalog
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.boikhata.core.domain.enums.BookCategory
+import com.boikhata.core.domain.enums.BookCondition
+import com.boikhata.core.domain.model.Book
+import com.boikhata.core.domain.repository.BookRepository
+import com.boikhata.core.domain.text.BengaliNormalizer
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+@HiltViewModel
+class CatalogViewModel @Inject constructor(
+    private val bookRepository: BookRepository,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow<CatalogUiState>(CatalogUiState.Loading)
+    val uiState: StateFlow<CatalogUiState> = _uiState.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private var currentTenantId: String = ""
+    private var allBooks: List<Book> = emptyList()
+
+    fun loadCatalog(tenantId: String) {
+        currentTenantId = tenantId
+        viewModelScope.launch {
+            _uiState.value = CatalogUiState.Loading
+            try {
+                allBooks = bookRepository.getBooks(tenantId)
+                _uiState.value = CatalogUiState.Success(allBooks, _searchQuery.value)
+            } catch (e: Exception) {
+                _uiState.value = CatalogUiState.Error(e.message ?: "ত্রুটি")
+            }
+        }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _searchQuery.value = query
+        if (query.isBlank()) {
+            _uiState.value = CatalogUiState.Success(allBooks, "")
+        } else {
+            val normalized = BengaliNormalizer.normalize(query)
+            val filtered = allBooks.filter { book ->
+                BengaliNormalizer.normalize(book.titleBn).contains(normalized, ignoreCase = true) ||
+                (book.titleEn?.contains(query, ignoreCase = true) == true) ||
+                book.author.contains(query, ignoreCase = true) ||
+                (book.isbn?.contains(query, ignoreCase = true) == true)
+            }
+            _uiState.value = CatalogUiState.Success(filtered, query)
+        }
+    }
+
+    fun addBook(
+        isbn: String?,
+        titleBn: String,
+        titleEn: String?,
+        author: String,
+        publisher: String,
+        classLevel: String,
+        subject: String,
+        editionYear: Int,
+        category: BookCategory,
+        condition: BookCondition,
+        purchasePrice: Double,
+        sellingPrice: Double,
+        initialStock: Int,
+        lowStockThreshold: Int,
+        onDone: () -> Unit,
+    ) {
+        viewModelScope.launch {
+            try {
+                bookRepository.addBook(
+                    currentTenantId, isbn, titleBn, titleEn, author, publisher,
+                    classLevel, subject, editionYear, category, condition,
+                    purchasePrice, sellingPrice, initialStock, lowStockThreshold,
+                )
+                loadCatalog(currentTenantId)
+                onDone()
+            } catch (e: Exception) {
+                _uiState.value = CatalogUiState.Error(e.message ?: "সেভ ব্যর্থ")
+            }
+        }
+    }
+
+    fun updateBook(
+        id: String,
+        isbn: String?,
+        titleBn: String,
+        titleEn: String?,
+        author: String,
+        publisher: String,
+        classLevel: String,
+        subject: String,
+        editionYear: Int,
+        category: BookCategory,
+        condition: BookCondition,
+        purchasePrice: Double,
+        sellingPrice: Double,
+        lowStockThreshold: Int,
+        isActive: Boolean,
+        onDone: () -> Unit,
+    ) {
+        viewModelScope.launch {
+            try {
+                bookRepository.updateBook(
+                    currentTenantId, id, isbn, titleBn, titleEn, author, publisher,
+                    classLevel, subject, editionYear, category, condition,
+                    purchasePrice, sellingPrice, lowStockThreshold, isActive,
+                )
+                loadCatalog(currentTenantId)
+                onDone()
+            } catch (e: Exception) {
+                _uiState.value = CatalogUiState.Error(e.message ?: "আপডেট ব্যর্থ")
+            }
+        }
+    }
+}
+
+sealed interface CatalogUiState {
+    data object Loading : CatalogUiState
+    data class Success(val books: List<Book>, val searchQuery: String) : CatalogUiState
+    data class Error(val message: String) : CatalogUiState
+}

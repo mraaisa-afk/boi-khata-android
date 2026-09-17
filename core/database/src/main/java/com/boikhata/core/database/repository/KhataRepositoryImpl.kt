@@ -1,1 +1,246 @@
-cGFja2FnZSBjb20uYm9pa2hhdGEuY29yZS5kYXRhYmFzZS5yZXBvc2l0b3J5CgppbXBvcnQgY29tLmJvaWtoYXRhLmNvcmUuZGF0YWJhc2UuZGFvLktoYXRhQ3VzdG9tZXJEYW8KaW1wb3J0IGNvbS5ib2lraGF0YS5jb3JlLmRhdGFiYXNlLmRhby5LaGF0YUVudHJ5RGFvCmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kYXRhYmFzZS5lbnRpdHkuS2hhdGFDdXN0b21lckVudGl0eQppbXBvcnQgY29tLmJvaWtoYXRhLmNvcmUuZGF0YWJhc2UuZW50aXR5LktoYXRhRW50cnlFbnRpdHkKaW1wb3J0IGNvbS5ib2lraGF0YS5jb3JlLmRvbWFpbi5hZ2luZy5LaGF0YUVudHJ5CmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kb21haW4uZW51bXMuQ2FzaGJvb2tBY2NvdW50CmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kb21haW4uZW51bXMuS2hhdGFFbnRyeVR5cGUKaW1wb3J0IGNvbS5ib2lraGF0YS5jb3JlLmRvbWFpbi5tb2RlbC5LaGF0YUN1c3RvbWVyCmltcG9ydCBjb20uYm9pa2hhdGEuY29yZS5kb21haW4ubW9kZWwuS2hhdGFJbnN0YWxsbWVudAppbXBvcnQgY29tLmJvaWtoYXRhLmNvcmUuZG9tYWluLnJlcG9zaXRvcnkuS2hhdGFSZXBvc2l0b3J5CmltcG9ydCBrb3RsaW54LmNvcm91dGluZXMuZmxvdy5GbG93CmltcG9ydCBrb3RsaW54LmNvcm91dGluZXMuZmxvdy5tYXAKaW1wb3J0IGphdmEudXRpbC5VVUlECmltcG9ydCBqYXZheC5pbmplY3QuSW5qZWN0CgpjbGFzcyBLaGF0YVJlcG9zaXRvcnlJbXBsIEBJbmplY3QgY29uc3RydWN0b3IoCiAgICBwcml2YXRlIHZhbCBjdXN0b21lckRhbzogS2hhdGFDdXN0b21lckRhbywKICAgIHByaXZhdGUgdmFsIGVudHJ5RGFvOiBLaGF0YUVudHJ5RGFvLAopIDogS2hhdGFSZXBvc2l0b3J5IHsKCiAgICBvdmVycmlkZSBzdXNwZW5kIGZ1biBnZXRDdXN0b21lcnModGVuYW50SWQ6IFN0cmluZyk6IExpc3Q8S2hhdGFDdXN0b21lcj4gPQogICAgICAgIGN1c3RvbWVyRGFvLmdldEFjdGl2ZUJ5VGVuYW50KHRlbmFudElkKS5tYXAgeyBpdC50b0RvbWFpbigpIH0KCiAgICBvdmVycmlkZSBzdXNwZW5kIGZ1biBzZWFyY2hDdXN0b21lcnMoCiAgICAgICAgdGVuYW50SWQ6IFN0cmluZywKICAgICAgICBub3JtYWxpemVkUXVlcnk6IFN0cmluZywKICAgICk6IExpc3Q8S2hhdGFDdXN0b21lcj4gPQogICAgICAgIGN1c3RvbWVyRGFvLnNlYXJjaCh0ZW5hbnRJZCwgbm9ybWFsaXplZFF1ZXJ5KS5tYXAgeyBpdC50b0RvbWFpbigpIH0KCiAgICBvdmVycmlkZSBzdXNwZW5kIGZ1biBnZXRDdXN0b21lcih0ZW5hbnRJZDogU3RyaW5nLCBpZDogU3RyaW5nKTogS2hhdGFDdXN0b21lcj8gPQogICAgICAgIGN1c3RvbWVyRGFvLmdldEJ5SWQoaWQpPy50b0RvbWFpbigpCgogICAgb3ZlcnJpZGUgc3VzcGVuZCBmdW4gYWRkQ3VzdG9tZXIoCiAgICAgICAgdGVuYW50SWQ6IFN0cmluZywKICAgICAgICBuYW1lQm46IFN0cmluZywKICAgICAgICBwaG9uZTogU3RyaW5nPywKICAgICAgICBhZGRyZXNzOiBTdHJpbmc/LAogICAgICAgIGNyZWRpdExpbWl0OiBEb3VibGUsCiAgICApOiBTdHJpbmcgewogICAgICAgIHZhbCBpZCA9IFVVSUQucmFuZG9tVVVJRCgpLnRvU3RyaW5nKCkKICAgICAgICBjdXN0b21lckRhby5pbnNlcnQoCiAgICAgICAgICAgIEtoYXRhQ3VzdG9tZXJFbnRpdHkoCiAgICAgICAgICAgICAgICBpZCA9IGlkLAogICAgICAgICAgICAgICAgdGVuYW50SWQgPSB0ZW5hbnRJZCwKICAgICAgICAgICAgICAgIG5hbWVCbiA9IG5hbWVCbiwKICAgICAgICAgICAgICAgIG5hbWVCbk5vcm1hbGl6ZWQgPSBuYW1lQm4udHJpbSgpLmxvd2VyY2FzZSgpLAogICAgICAgICAgICAgICAgcGhvbmUgPSBwaG9uZSwKICAgICAgICAgICAgICAgIGFkZHJlc3MgPSBhZGRyZXNzLAogICAgICAgICAgICAgICAgY3JlZGl0TGltaXQgPSBjcmVkaXRMaW1pdCwKICAgICAgICAgICAgICAgIGlzQWN0aXZlID0gdHJ1ZSwKICAgICAgICAgICAgKQogICAgICAgICkKICAgICAgICByZXR1cm4gaWQKICAgIH0KCiAgICAvKioKICAgICAqIEItMDAyIGZpeCAoRDgzKTogUm9vbSByZWFjdGl2ZSBGbG93LgogICAgICogTm9uLXN1c3BlbmQsIHJldHVybnMgYSBjb2xkIEZsb3cgdGhhdCBSb29tIGtlZXBzIGFsaXZlLgogICAgICogUm9vbSdzIEludmFsaWRhdGlvblRyYWNrZXIgZW1pdHMgYSBuZXcgdmFsdWUgd2hlbmV2ZXIga2hhdGFfY3VzdG9tZXJzIGNoYW5nZXMsCiAgICAgKiBpbmNsdWRpbmcgaW5zZXJ0cyBmcm9tIG90aGVyIFZpZXdNb2RlbCBpbnN0YW5jZXMgb24gdGhlIHNhbWUgcHJvY2Vzcy4KICAgICAqLwogICAgb3ZlcnJpZGUgZnVuIGdldEN1c3RvbWVyc0Zsb3codGVuYW50SWQ6IFN0cmluZyk6IEZsb3c8TGlzdDxLaGF0YUN1c3RvbWVyPj4gPQogICAgICAgIGN1c3RvbWVyRGFvLmdldEFjdGl2ZUJ5VGVuYW50Rmxvdyh0ZW5hbnRJZCkubWFwIHsgbGlzdCAtPiBsaXN0Lm1hcCB7IGl0LnRvRG9tYWluKCkgfSB9CgogICAgb3ZlcnJpZGUgc3VzcGVuZCBmdW4gZ2V0RW50cmllcygKICAgICAgICB0ZW5hbnRJZDogU3RyaW5nLAogICAgICAgIGN1c3RvbWVySWQ6IFN0cmluZywKICAgICk6IExpc3Q8S2hhdGFFbnRyeT4gPQogICAgICAgIGVudHJ5RGFvLmdldEJ5Q3VzdG9tZXIodGVuYW50SWQsIGN1c3RvbWVySWQpLm1hcCB7IGl0LnRvRG9tYWluKCkgfQoKICAgIG92ZXJyaWRlIHN1c3BlbmQgZnVuIGFkZEVudHJ5KAogICAgICAgIHRlbmFudElkOiBTdHJpbmcsCiAgICAgICAgY3VzdG9tZXJJZDogU3RyaW5nLAogICAgICAgIGFtb3VudDogRG91YmxlLAogICAgICAgIHR5cGU6IEtoYXRhRW50cnlUeXBlLAogICAgICAgIGRlc2NyaXB0aW9uOiBTdHJpbmcsCiAgICAgICAgcmVmZXJlbmNlQmlsbElkOiBTdHJpbmc/LAogICAgICAgIGNvbGxlY3RlZEJ5VXNlcklkOiBTdHJpbmcsCiAgICAgICAgY2FzaGJvb2tBY2NvdW50OiBDYXNoYm9va0FjY291bnQ/LAogICAgKTogU3RyaW5nIHsKICAgICAgICB2YWwgaWQgPSBVVUlELnJhbmRvbVVVSUQoKS50b1N0cmluZygpCiAgICAgICAgZW50cnlEYW8uaW5zZXJ0KAogICAgICAgICAgICBLaGF0YUVudHJ5RW50aXR5KAogICAgICAgICAgICAgICAgaWQgPSBpZCwKICAgICAgICAgICAgICAgIHRlbmFudElkID0gdGVuYW50SWQsCiAgICAgICAgICAgICAgICBjdXN0b21lcklkID0gY3VzdG9tZXJJZCwKICAgICAgICAgICAgICAgIGFtb3VudCA9IGFtb3VudCwKICAgICAgICAgICAgICAgIHR5cGUgPSB0eXBlLm5hbWUsCiAgICAgICAgICAgICAgICBkZXNjcmlwdGlvbiA9IGRlc2NyaXB0aW9uLAogICAgICAgICAgICAgICAgcmVmZXJlbmNlQmlsbElkID0gcmVmZXJlbmNlQmlsbElkLAogICAgICAgICAgICAgICAgY29sbGVjdGVkQnlVc2VySWQgPSBjb2xsZWN0ZWRCeVVzZXJJZCwKICAgICAgICAgICAgICAgIGNhc2hib29rQWNjb3VudCA9IGNhc2hib29rQWNjb3VudD8ubmFtZSwKICAgICAgICAgICAgICAgIGRhdGUgPSBTeXN0ZW0uY3VycmVudFRpbWVNaWxsaXMoKSwKICAgICAgICAgICAgKQogICAgICAgICkKICAgICAgICByZXR1cm4gaWQKICAgIH0KCiAgICBvdmVycmlkZSBzdXNwZW5kIGZ1biBmb3JnaXZlRGVidCgKICAgICAgICB0ZW5hbnRJZDogU3RyaW5nLAogICAgICAgIGN1c3RvbWVySWQ6IFN0cmluZywKICAgICAgICBjb2xsZWN0ZWRCeVVzZXJJZDogU3RyaW5nLAogICAgKTogU3RyaW5nID0gYWRkRW50cnkoCiAgICAgICAgdGVuYW50SWQgPSB0ZW5hbnRJZCwKICAgICAgICBjdXN0b21lcklkID0gY3VzdG9tZXJJZCwKICAgICAgICBhbW91bnQgPSAwLjAsCiAgICAgICAgdHlwZSA9IEtoYXRhRW50cnlUeXBlLkFESlVTVE1FTlQsCiAgICAgICAgZGVzY3JpcHRpb24gPSAi4K6u4K6p4K6j4K6/4K6q4K+N4K6q4K+BIiwKICAgICAgICByZWZlcmVuY2VCaWxsSWQgPSBudWxsLAogICAgICAgIGNvbGxlY3RlZEJ5VXNlcklkID0gY29sbGVjdGVkQnlVc2VySWQsCiAgICAgICAgY2FzaGJvb2tBY2NvdW50ID0gbnVsbCwKICAgICkKCiAgICBvdmVycmlkZSBzdXNwZW5kIGZ1biBnZXRJbnN0YWxsbWVudHMoCiAgICAgICAgdGVuYW50SWQ6IFN0cmluZywKICAgICAgICBjdXN0b21lcklkOiBTdHJpbmcsCiAgICApOiBMaXN0PEtoYXRhSW5zdGFsbG1lbnQ+ID0gZW1wdHlMaXN0KCkKCiAgICBvdmVycmlkZSBzdXNwZW5kIGZ1biBhZGRJbnN0YWxsbWVudCgKICAgICAgICB0ZW5hbnRJZDogU3RyaW5nLAogICAgICAgIGN1c3RvbWVySWQ6IFN0cmluZywKICAgICAgICBraGF0YUVudHJ5SWQ6IFN0cmluZywKICAgICAgICBkdWVEYXRlOiBMb25nLAogICAgICAgIGFtb3VudDogRG91YmxlLAogICAgKTogU3RyaW5nID0gVVVJRC5yYW5kb21VVUlEKCkudG9TdHJpbmcoKQoKICAgIG92ZXJyaWRlIHN1c3BlbmQgZnVuIG1hcmtJbnN0YWxsbWVudFBhaWQoaWQ6IFN0cmluZykgPSBVbml0CgogICAgb3ZlcnJpZGUgc3VzcGVuZCBmdW4gZ2V0S2hhdGFDb2xsZWN0aW9uQnlEYXRlUmFuZ2UoCiAgICAgICAgdGVuYW50SWQ6IFN0cmluZywKICAgICAgICBzdGFydDogTG9uZywKICAgICAgICBlbmQ6IExvbmcsCiAgICApOiBEb3VibGUgPSBlbnRyeURhby5nZXRQYXltZW50U3VtQnlEYXRlUmFuZ2UodGVuYW50SWQsIHN0YXJ0LCBlbmQpCgogICAgLy8gLS0tLSBtYXBwZXJzIC0tLS0KCiAgICBwcml2YXRlIGZ1biBLaGF0YUN1c3RvbWVyRW50aXR5LnRvRG9tYWluKCkgPSBLaGF0YUN1c3RvbWVyKAogICAgICAgIGlkID0gaWQsCiAgICAgICAgdGVuYW50SWQgPSB0ZW5hbnRJZCwKICAgICAgICBuYW1lQm4gPSBuYW1lQm4sCiAgICAgICAgcGhvbmUgPSBwaG9uZSwKICAgICAgICBhZGRyZXNzID0gYWRkcmVzcywKICAgICAgICBjcmVkaXRMaW1pdCA9IGNyZWRpdExpbWl0LAogICAgICAgIGlzQWN0aXZlID0gaXNBY3RpdmUsCiAgICApCgogICAgcHJpdmF0ZSBmdW4gS2hhdGFFbnRyeUVudGl0eS50b0RvbWFpbigpID0gS2hhdGFFbnRyeSgKICAgICAgICBpZCA9IGlkLAogICAgICAgIHRlbmFudElkID0gdGVuYW50SWQsCiAgICAgICAgY3VzdG9tZXJJZCA9IGN1c3RvbWVySWQsCiAgICAgICAgYW1vdW50ID0gYW1vdW50LAogICAgICAgIHR5cGUgPSBLaGF0YUVudHJ5VHlwZS52YWx1ZU9mKHR5cGUpLAogICAgICAgIGRlc2NyaXB0aW9uID0gZGVzY3JpcHRpb24sCiAgICAgICAgcmVmZXJlbmNlQmlsbElkID0gcmVmZXJlbmNlQmlsbElkLAogICAgICAgIGNvbGxlY3RlZEJ5VXNlcklkID0gY29sbGVjdGVkQnlVc2VySWQsCiAgICAgICAgZGF0ZSA9IGRhdGUsCiAgICApCn0K
+package com.boikhata.core.database.repository
+
+import com.boikhata.core.database.dao.CashbookDao
+import com.boikhata.core.database.dao.KhataCustomerDao
+import com.boikhata.core.database.dao.KhataEntryDao
+import com.boikhata.core.database.dao.KhataInstallmentDao
+import com.boikhata.core.database.entity.CashbookEntryEntity
+import com.boikhata.core.database.entity.KhataCustomerEntity
+import com.boikhata.core.database.entity.KhataEntryEntity
+import com.boikhata.core.database.entity.KhataInstallmentEntity
+import com.boikhata.core.domain.accounting.PeriodLockChecker
+import com.boikhata.core.domain.aging.AgingCalculator
+import com.boikhata.core.domain.aging.KhataEntry
+import com.boikhata.core.domain.enums.CashbookAccount
+import com.boikhata.core.domain.enums.KhataEntryType
+import com.boikhata.core.domain.license.LicenseWriteGuard
+import com.boikhata.core.domain.model.KhataCustomer
+import com.boikhata.core.domain.model.KhataInstallment
+import com.boikhata.core.domain.repository.KhataRepository
+import com.boikhata.core.domain.text.BengaliNormalizer
+import java.util.UUID
+import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+/**
+ * P2a: KhataRepository implementation — extended with customer CRUD,
+ * installment tracking, দেনা-মুন, and search (all offline Room-only).
+ * D32: Period-lock check before write.
+ * D34: Cashbook auto-populate from khata collections (PAYMENT → INCOME).
+ * D81: getKhataCollectionByDateRange — delegates to KhataEntryDao aggregate query.
+ */
+class KhataRepositoryImpl @Inject constructor(
+    private val khataCustomerDao: KhataCustomerDao,
+    private val khataEntryDao: KhataEntryDao,
+    private val khataInstallmentDao: KhataInstallmentDao,
+    private val cashbookDao: CashbookDao,
+    private val writeGuard: LicenseWriteGuard,
+    private val periodLockChecker: PeriodLockChecker,
+) : KhataRepository {
+
+    override suspend fun getCustomers(tenantId: String): List<KhataCustomer> {
+        return khataCustomerDao.getActiveByTenant(tenantId).map { it.toDomain() }
+    }
+
+    /**
+     * B-002: Room-driven reactive list. Room re-emits whenever khata_customers
+     * changes, so the khata list screen updates instantly even when the insert
+     * comes from a different ViewModel instance (KhataAddCustomerScreen).
+     */
+    override fun getCustomersFlow(tenantId: String): Flow<List<KhataCustomer>> {
+        return khataCustomerDao.getActiveByTenantFlow(tenantId).map { customers ->
+            customers.map { it.toDomain() }
+        }
+    }
+
+    override suspend fun searchCustomers(tenantId: String, normalizedQuery: String): List<KhataCustomer> {
+        if (normalizedQuery.isBlank()) return getCustomers(tenantId)
+        return khataCustomerDao.search(tenantId, normalizedQuery).map { it.toDomain() }
+    }
+
+    override suspend fun getCustomer(tenantId: String, id: String): KhataCustomer? {
+        return khataCustomerDao.getById(id)?.toDomain()
+    }
+
+    override suspend fun addCustomer(
+        tenantId: String,
+        nameBn: String,
+        phone: String?,
+        address: String?,
+        creditLimit: Double,
+    ): String {
+        writeGuard.assertWriteAllowed()
+        val id = UUID.randomUUID().toString()
+        val now = System.currentTimeMillis()
+        khataCustomerDao.insert(
+            KhataCustomerEntity(
+                id = id,
+                tenantId = tenantId,
+                nameBn = nameBn,
+                phone = phone,
+                address = address,
+                creditLimit = creditLimit,
+                isActive = true,
+                nameBnNormalized = BengaliNormalizer.normalize(nameBn),
+                createdAt = now,
+                updatedAt = now,
+            )
+        )
+        return id
+    }
+
+    override suspend fun getEntries(tenantId: String, customerId: String): List<KhataEntry> {
+        return khataEntryDao.getByCustomer(tenantId, customerId).map { it.toDomain() }
+    }
+
+    override suspend fun addEntry(
+        tenantId: String,
+        customerId: String,
+        amount: Double,
+        type: KhataEntryType,
+        description: String,
+        referenceBillId: String?,
+        collectedByUserId: String,
+        cashbookAccount: CashbookAccount?,
+    ): String {
+        writeGuard.assertWriteAllowed()
+        // D32: Period-lock check
+        val now = System.currentTimeMillis()
+        periodLockChecker.assertNotLocked(tenantId, now)
+
+        val id = UUID.randomUUID().toString()
+        khataEntryDao.insert(
+            KhataEntryEntity(
+                id = id,
+                tenantId = tenantId,
+                customerId = customerId,
+                amount = amount,
+                type = type.name,
+                description = description,
+                referenceBillId = referenceBillId,
+                collectedByUserId = collectedByUserId,
+                date = now,
+                idempotencyKey = UUID.randomUUID().toString(),
+            )
+        )
+        // D34: Cashbook auto-populate — khata collection (PAYMENT) creates INCOME entry.
+        // Only for PAYMENT type with amount > 0 (money flowing in). CREDIT/ADJUSTMENT/OPENING
+        // do not create cashbook entries (CREDIT is a receivable, not a cash flow).
+        if (type == KhataEntryType.PAYMENT && amount > 0.01 && cashbookAccount != null) {
+            cashbookDao.insert(
+                CashbookEntryEntity(
+                    id = UUID.randomUUID().toString(),
+                    tenantId = tenantId,
+                    account = cashbookAccount.name,
+                    type = "INCOME",
+                    amount = amount,
+                    description = "খাতা আদায় ($description)",
+                    referenceId = id,
+                    date = now,
+                    userId = collectedByUserId,
+                    idempotencyKey = UUID.randomUUID().toString(),
+                )
+            )
+        }
+        return id
+    }
+
+    /**
+     * D15: দেনা-মুন — inserts an ADJUSTMENT entry with amount = -currentDue
+     * to bring the customer's balance to zero. Append-only (no delete).
+     */
+    override suspend fun forgiveDebt(
+        tenantId: String,
+        customerId: String,
+        collectedByUserId: String,
+    ): String {
+        writeGuard.assertWriteAllowed()
+        val entries = getEntries(tenantId, customerId)
+        val aging = AgingCalculator.calculate(entries, System.currentTimeMillis())
+        val currentDue = aging.totalDue
+        if (currentDue <= 0.01) return "" // nothing to forgive
+
+        return addEntry(
+            tenantId = tenantId,
+            customerId = customerId,
+            amount = -currentDue, // D15: negative ADJUSTMENT reduces balance
+            type = KhataEntryType.ADJUSTMENT,
+            description = "দেনা মুন",
+            referenceBillId = null,
+            collectedByUserId = collectedByUserId,
+        )
+    }
+
+    override suspend fun getInstallments(tenantId: String, customerId: String): List<KhataInstallment> {
+        return khataInstallmentDao.getByCustomer(tenantId, customerId).map {
+            KhataInstallment(
+                id = it.id,
+                customerId = it.customerId,
+                khataEntryId = it.khataEntryId,
+                dueDate = it.dueDate,
+                amount = it.amount,
+                isPaid = it.isPaid,
+            )
+        }
+    }
+
+    override suspend fun addInstallment(
+        tenantId: String,
+        customerId: String,
+        khataEntryId: String,
+        dueDate: Long,
+        amount: Double,
+    ): String {
+        writeGuard.assertWriteAllowed()
+        val id = UUID.randomUUID().toString()
+        khataInstallmentDao.insert(
+            KhataInstallmentEntity(
+                id = id,
+                tenantId = tenantId,
+                customerId = customerId,
+                khataEntryId = khataEntryId,
+                dueDate = dueDate,
+                amount = amount,
+                isPaid = false,
+            )
+        )
+        return id
+    }
+
+    override suspend fun markInstallmentPaid(id: String) {
+        writeGuard.assertWriteAllowed()
+        khataInstallmentDao.markPaid(id)
+    }
+
+    /**
+     * D81: Returns the sum of PAYMENT-type khata entries within [start, end].
+     * This is the «খাতা আদায়» component of the D79 net-profit formula.
+     * Delegates to the DAO-level COALESCE(SUM(amount), 0.0) aggregate.
+     */
+    override suspend fun getKhataCollectionByDateRange(
+        tenantId: String,
+        start: Long,
+        end: Long,
+    ): Double {
+        return khataEntryDao.getPaymentSumByDateRange(tenantId, start, end)
+    }
+
+    private fun KhataCustomerEntity.toDomain() = KhataCustomer(
+        id = id,
+        nameBn = nameBn,
+        phone = phone,
+        address = address,
+        creditLimit = creditLimit,
+        isActive = isActive,
+    )
+
+    private fun KhataEntryEntity.toDomain() = KhataEntry(
+        id = id,
+        type = KhataEntryType.valueOf(type),
+        amount = amount,
+        date = date,
+        description = description,
+        referenceBillId = referenceBillId,
+    )
+}
