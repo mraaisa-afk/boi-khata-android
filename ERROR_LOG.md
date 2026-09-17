@@ -31,6 +31,38 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-010 — 2026-09-18 — P11 — B-003: add-book "+" crash — navigation 2.8.x deserializes literal "null" path segment into actual null
+
+**Type:** Logic error
+**Phase:** P11
+**Date:** 2026-09-18
+**Task:** Fix the real-device crash on "+" (add book) from the stock screen — corrected logcat supplied by Sakira after the ERR-009 stale-log confusion
+**Error:**
+```
+FATAL EXCEPTION: main (Process: com.boikhata)
+java.lang.IllegalArgumentException: Wrong argument type for 'bookId' in argument bundle. string expected.
+    at androidx.navigation.NavDestination.addInDefaultArgs(NavDestination.kt:619)
+    at androidx.navigation.NavController.navigate(NavController.kt:2437)
+    at androidx.navigation.NavController.navigate$default(NavController.kt:2418)
+    at com.boikhata.BoiKhataNavigationKt.BoiKhataMainScreen$lambda$2$0$0$1$0$0(BoiKhataNavigation.kt:155)
+```
+The stack lines match main exactly (155 = `onAddBook = { navController.navigate("book_add_edit/null") }`, navigate(route) overload = 2418, addInDefaultArgs call = 2437, with navigation-compose 2.8.5 sources) — this log IS the current APK, closing the ERR-009 fresh-capture item.
+**Root cause:** Navigation 2.8.0 changed `NavType.StringType.parseValue` to deserialize the literal string `"null"` into an actual null ("reversion of Kotlin standard library serializing null receivers of kotlin.toString into 'null'"). `navigate("book_add_edit/null")` therefore stored a null value in the argument bundle for `{bookId}`, and `NavArgument.verify` (NavArgument.kt:85) rejects a null value for the declared NON-nullable argument. The `"null"`-string sniffing at the destination (`if (bookIdArg == "null") null else bookIdArg`) was written for pre-2.8 semantics and can never work on 2.8.5 (`libs.versions.toml`: navigationCompose = "2.8.5").
+**Fix applied:** Branch `agent/fix-b3-bookid-nav-null-crash` — route changed to `book_add_edit?bookId={bookId}` with `nullable = true; defaultValue = null` (canonical androidx optional-argument pattern); `onAddBook` → `navigate("book_add_edit")`; `onEditBook` and the B-001 low-stock alert tap (HomeScreen.kt) → `book_add_edit?bookId=$id`; "null"-string sniffing removed. Audited the other path-arg routes (`khata_detail/{customerId}`, `bill_detail/{billId}`): all callback parameters are non-null `String` from Room entity ids — no crash-capable site. Verified: `:app:assembleDebug` BUILD SUCCESSFUL locally (Temurin 21 toolchain).
+**Lesson:** On navigation 2.8.x a literal "null" path segment is NOT a string value — it deserializes to actual null and fails argument verification for non-nullable args; optional route args must use the `route?arg={arg}` + nullable + null-default pattern (D85). Inverse of the ERR-009 lesson also holds: an exact stack-line match against main proves the APK is current.
+
+## ERR-009 — 2026-09-18 — P11 — Stale device log: pre-#60 APK formatBengaliTaka crash misread as the current add-book crash
+
+**Type:** Misunderstanding
+**Phase:** P11
+**Date:** 2026-09-18
+**Task:** Diagnose device-reported crash on "+" (add book) from stock screen after the PR #62 install
+**Error:** Logcat pasted for the current repro instead showed the OLD crash: `java.lang.StringIndexOutOfBoundsException: length=10; index=2486` at `formatBengaliTaka(HomeScreen.kt:448)` via `HeroCard`, timestamped 09-15 06:46.
+**Root cause (of the LOGGED crash, now fully identified):** `String.format("%,d", rounded)` uses the DEFAULT locale — which D82 forces to bn-BD — so the formatted string ALREADY contains Bengali digits (value 0 → "০"). The legacy `if (c.isDigit()) map[c - '0']` re-converted them because `Char.isDigit()` is true for all Unicode Nd digits → `map[0x09E6 - 48] = map[2486]` on the 10-char digit map. index=2486 = '০' − '0' exactly; HomeScreen.kt:448 matches the pre-PR-#60 source line-for-line.
+**Root cause (of the confusion):** the pasted logcat was captured from the OLD APK, not the current build. Current main's formatters are range-guarded (`in '0'..'9'`) and try/catch-wrapped; a full static audit of the add-book path (nav route args → form parsing → CatalogViewModel → BookRepositoryImpl → core NumberFormatter → all format-resource specifiers %1$s/%1$d) found no crash-capable site. The current "+" crash therefore has no known stack yet — it must be captured fresh before any code change.
+**Fix applied:** No speculative code change. ERR-009 logged; PR #58 confirmed superseded (same hardening, older base — main already guarded via PR #60) — recommend close. Fresh-capture procedure handed to Sakira: `adb logcat -c` → reproduce → `adb logcat AndroidRuntime:E *:S -d`; verify APK freshness first via `adb shell dumpsys package com.boikhata | findstr -i "lastUpdateTime versionName"`.
+**Lesson:** A stack trace whose line numbers do not exist in main is evidence about an OLD APK, not the current build — cross-check line numbers before debugging. Durable rule: with D82 forcing bn-BD, `String.format` emits Bengali digits — NEVER pair locale-formatted output with `isDigit()`-based re-conversion; keep the `in '0'..'9'` range guard everywhere (`NumberFormatter.applyDigitStyle` depends on the same invariant).
+
 ## ERR-008 — 2026-09-17 — P10 — branch commits replaced whole files with base64 blobs (DECISIONS/ERROR_LOG/code)
 
 **Type:** Guardrail violation
@@ -182,5 +214,5 @@ e: HomeScreen.kt:203 Unresolved reference 'contentDescription'
 
 ---
 
-*Last updated: 2026-09-17 · Maintained by: Agent (append) + Builder/Sakira (review)*
+*Last updated: 2026-09-18 · Maintained by: Agent (append) + Builder/Sakira (review)*
 *Read by: the agent every session, last 10 entries mandatory*

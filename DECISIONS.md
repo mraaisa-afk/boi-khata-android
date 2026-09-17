@@ -886,3 +886,17 @@ Shopkeeper feedback sessions in bookstore clusters (Nilkhet, Patuatuly) revealed
 4. Do NOT add `catch(Throwable)` in `CatalogViewModel` for this bug — verified non-root-cause: `LicenseBlockedException : Exception` and `CapExceededException : IllegalStateException` are both already caught by `catch(Exception)`.
 **Alternatives considered:** registering the missing `catalog/order/{id}` and `alerts` destinations (rejected: no spec for an order flow; scope-creep); global unknown-route fallback destination (rejected: masks the bug instead of fixing the route).
 **Supersedes:** —
+
+---
+
+## D85 — Optional navigation arguments use the query-param route pattern; literal "null" path segments forbidden (fixes B-003)
+**Date:** 2026-09-18
+**Phase:** P11
+**Context:** Real-device bug B-003: tapping "+" (add book) on the stock screen crashed with `IllegalArgumentException: Wrong argument type for 'bookId' in argument bundle. string expected.` at `NavDestination.addInDefaultArgs` (BoiKhataNavigation.kt:155 in the stack). Navigation 2.8.0 changed `NavType.StringType.parseValue` to deserialize the literal path segment `"null"` into an actual null (round-trip of `null.toString()`), so the legacy add-mode call `navigate("book_add_edit/null")` + non-nullable `{bookId}` argument + `"null"`-string sniffing at the destination crashed on navigation-compose 2.8.5. The corrected logcat's stack matched main line-for-line, confirming the current APK (closes the ERR-009 fresh-capture item).
+**Decision:**
+1. Optional navigation arguments use the documented query-param pattern: `route?arg={arg}` with `navArgument { type = NavType.StringType; nullable = true; defaultValue = null }`; callers either omit the query (add mode) or pass `?arg=$id` (edit mode). Applied to `book_add_edit?bookId={bookId}` and both call sites (CatalogScreen add/edit, HomeScreen low-stock alert restock tap).
+2. NEVER navigate with a literal `"null"` path or query segment on navigation 2.8.x — it deserializes to actual null and fails NavArgument verification for non-nullable arguments.
+3. Destination-side string sniffing (`if (arg == "null")`) is forbidden — the argument bundle already carries real nulls under 2.8.x.
+4. Required-id path routes (`khata_detail/{customerId}`, `bill_detail/{billId}`) stay unchanged — audited: all call-site callbacks are non-null `String` sourced from Room entity ids; the P11 route-constants item owns centralizing route strings so dead/malformed routes fail fast (ERR-006 lesson).
+**Alternatives considered:** sentinel id "0" for add mode (rejected: string-magic identical to the "null" sniff it replaces, collides with future id schemes); downgrading navigation-compose to 2.7.x (rejected: hides the semantic change and forgoes 2.8 fixes; the `# ⚠ VERIFY` bump in libs.versions.toml was deliberate); nullable path argument with null default (rejected: still requires a "null" literal in the route — same deserialization trap).
+**Supersedes:** —

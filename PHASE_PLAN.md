@@ -150,9 +150,9 @@
 
 **Gate note:** Opened by owner instruction 2026-09-17 while the P10 exit-gate remains device-pending; the device test is carried into P11. P9 unused (numbering skip).
 
-**Scope:** NavHost route constants (dead-route fail-fast), Roborazzi max-font-scale screenshot tests, Alerts screen (pending D-ruling), premium-badge re-ruling (ERR-008), open-PR dispositions (#58/#59/#50).
+**Scope:** Device-bug fixes (B-003: add-book "+" crash — navigation 2.8.x "null" path-segment deserialization, fixed via optional query-arg route per D85), NavHost route constants (dead-route fail-fast), Roborazzi max-font-scale screenshot tests, Alerts screen (pending D-ruling), premium-badge re-ruling (ERR-008), open-PR dispositions (#58/#59/#50).
 
-**D-decisions:** D82–D84 (basis)
+**D-decisions:** D82–D84 (basis); D85 (B-003 optional-arg navigation ruling)
 
 ---
 
@@ -167,5 +167,5 @@ Before starting any phase:
 
 ---
 
-*Last updated: 2026-09-17 · Maintained by: Builder + Sakira Suva*
+*Last updated: 2026-09-18 · Maintained by: Builder + Sakira Suva*
 *Gate authority: PROGRESS.md (D66) · Phase numbering: P0 to P11 (P9 unused)*
