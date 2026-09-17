@@ -28,6 +28,8 @@
 | **P6** | রিপোর্ট + ট্রাস্ট + ভয়েস | Open | D37-D38 + TBD | Yes (Analytics Img 8) |
 | **P7** | পাইলট-হার্ডেনিং | Open | TBD | No |
 | **P8** | GA | Exit-gate open | TBD | No |
+| **P10** | Design rebuild + D79/D81 | Items done; exit-gate open (device) | D71–D84 | Yes (Design v2) |
+| **P11** | Crash-hardening + route-safety + device-gate automation | Open | D82–D84 (basis) | No |
 | **Post-GA** | Speculative | Not in PROGRESS.md yet | TBD | Yes (Design v2) |
 
 ---
@@ -132,6 +134,28 @@
 
 ---
 
+## P10 — Design rebuild + D79/D81
+
+**Status:** Items complete through PR #61 (B-001/B-002 device-bug fixes). Exit-gate open — screenshot test at max font-scale is device-only (Sakira).
+
+**Built:** D71 design tokens + BoiKhataTheme, BengaliFontFamily wiring, D79/D81 HomeScreen net-profit formula, D82 forced bn-BD locale (backfill), D83 khata reactive Flow, D84 NavHost routing rule.
+
+**D-decisions:** D71–D84 (subset)
+
+**Open blocker:** Max font-scale device test; dedicated Alerts screen needs D-ruling (D84 TODO); premium-badge spec lost to corruption needs re-ruling (ERR-008).
+
+---
+
+## P11 — Crash-hardening + route-safety + device-gate automation
+
+**Gate note:** Opened by owner instruction 2026-09-17 while the P10 exit-gate remains device-pending; the device test is carried into P11. P9 unused (numbering skip).
+
+**Scope:** NavHost route constants (dead-route fail-fast), Roborazzi max-font-scale screenshot tests, Alerts screen (pending D-ruling), premium-badge re-ruling (ERR-008), open-PR dispositions (#58/#59/#50).
+
+**D-decisions:** D82–D84 (basis)
+
+---
+
 ## Next-Phase Eligibility Check
 
 Before starting any phase:
@@ -143,5 +167,5 @@ Before starting any phase:
 
 ---
 
-*Last updated: 2026-09-05 · Maintained by: Builder + Sakira Suva*
-*Gate authority: PROGRESS.md (D66) · Phase numbering: P0 to P8*
+*Last updated: 2026-09-17 · Maintained by: Builder + Sakira Suva*
+*Gate authority: PROGRESS.md (D66) · Phase numbering: P0 to P11 (P9 unused)*

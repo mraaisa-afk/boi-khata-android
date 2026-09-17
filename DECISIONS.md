@@ -846,3 +846,43 @@ Shopkeeper feedback sessions in bookstore clusters (Nilkhet, Patuatuly) revealed
 6. `HomeScreen.HeroCard`: `val todayIncome = data.todaySalesTotal + data.todayKhataCollection`; `netProfit = todayIncome - data.todayExpenseTotal`; ↑ আয় sub-column now shows `todayIncome` (combined cash sales + khata collections).
 **Alternatives considered:** Derive khata collections from cashbook INCOME entries filtered by description (rejected: fragile string-matching, breaks if description format changes per D34); keep `totalAmount` for sales (rejected: structurally incorrect — includes unbilled credit that has not been received as cash); add a separate “Khata” sub-column in HeroCard (rejected: formula must consolidate into one ↑ আয় column per D79 §1 locked spec).
 **Supersedes:** HomeData model comment “সরল নগদ বিয়োগ, বাকি বাদ” from D79 implementation PR — that was an acknowledged simplification now replaced by the full D79 formula.
+
+---
+
+## D82 — Force Bengali locale in MainActivity.onCreate (backfill; closes shipped-code reference gap)
+**Date:** 2026-09-17
+**Phase:** P10
+**Context:** `MainActivity.kt` (merged via PR #57, branch `agent/fix-d82-force-bengali-locale`) has carried a `// D82:` comment since it landed, but the DECISIONS entry was never written — first flagged in the governance audit, then lost again when the PR #61 doc appends were wiped by the base64 corruption (ERR-008). Backfilled here so the shipped code reference resolves. Provenance note: lost commit `ca89d0e` earmarked D82 for the B-001 catch(Throwable) ruling; that theory was disproven during repair (see D84) — D82 stays bound to the locale decision its shipped code comment declares.
+**Decision:**
+1. In `MainActivity.onCreate`, AFTER `super.onCreate()` (Firebase/Hilt fully initialized) and BEFORE `setContent()`, force `Locale("bn","BD")`: `Locale.setDefault(bnBD)` + `Configuration` update via `resources.updateConfiguration(...)`.
+2. `updateConfiguration()` at this point affects only this Activity's resource context — not the Application's already-cached resources — avoiding mid-init resource mutation.
+3. All Compose composables render in Bengali regardless of device locale.
+**Alternatives considered:** `AppCompatDelegate.setApplicationLocales` (rejected: requires AppCompatActivity migration + per-context handling); AndroidX per-app language preferences (API 33+, rejected: minSdk 26); setting locale at Application level (rejected: mutates already-cached Application resources mid-init).
+**Supersedes:** —
+
+---
+
+## D83 — Khata customer list live-reload via Room reactive Flow (fixes B-002)
+**Date:** 2026-09-17
+**Phase:** P10
+**Context:** Real-device bug B-002: a newly added khata customer never appeared in the customer list until manual reload/app restart. `KhataCustomerDao.getActiveByTenant` was a suspend one-shot snapshot, and `KhataAddCustomerScreen` runs on its own `hiltViewModel()` instance — so the list screen's ViewModel never re-queried after the add-screen inserted.
+**Decision:**
+1. `KhataCustomerDao.getActiveByTenantFlow(tenantId): Flow<List<KhataCustomer>>` — non-suspend; Room invalidation-tracked, auto-emits on any `khata_customers` write. Located in `KhataDaos.kt`.
+2. `KhataRepository.getCustomersFlow(tenantId)` — interface method added to the domain contract; `KhataRepositoryImpl` delegates to the DAO.
+3. `KhataViewModel.loadCustomers` collects the Flow into `StateFlow<KhataListUiState>` with proper `CancellationException` rethrow.
+**Alternatives considered:** manual reload event between ViewModels (rejected: `hiltViewModel()` isolation is exactly what broke it — fragile lifecycle coupling); re-query in `onResume` (rejected: misses process-restores, imperatively couples UI lifecycle to data); collecting the DAO Flow directly in Compose (rejected: data orchestration must stay in the ViewModel contract).
+**Supersedes:** —
+
+---
+
+## D84 — NavHost routing rule: navigate() only to registered destinations; Alerts screen deferred (fixes B-001)
+**Date:** 2026-09-17
+**Phase:** P10
+**Context:** Real-device bug B-001: the app crashed right after adding a new book. `HomeScreen` called `navigate("catalog/order/{bookId}")` and `navigate("alerts")` — neither destination exists in `BoiKhataNavigation`'s NavHost — producing an uncaught `IllegalArgumentException` from `NavController.navigate` on tap. Every newly added book (initialStock 0 ≤ lowStockThreshold 5) immediately surfaces as a low-stock alert, so the crash fired inside the add-book flow. Provenance note: D84 was briefly earmarked in lost commit `ca89d0e` for a "premium badge maroon chip" spec whose text was unrecoverable after the base64 corruption (ERR-008) — the premium-badge ruling needs a fresh owner decision; this number is re-ruled here for B-001 routing.
+**Decision:**
+1. Every `navigate()` target must be a route registered in `BoiKhataNavigation`'s NavHost — no dead route strings.
+2. Low-stock alert card tap → existing `book_add_edit/{bookId}` (restock path); "See all" alerts → `catalog` tab (stock management).
+3. A dedicated Alerts screen remains undecided — `TODO(P10)` in `HomeScreen` requires a future owner D-ruling.
+4. Do NOT add `catch(Throwable)` in `CatalogViewModel` for this bug — verified non-root-cause: `LicenseBlockedException : Exception` and `CapExceededException : IllegalStateException` are both already caught by `catch(Exception)`.
+**Alternatives considered:** registering the missing `catalog/order/{id}` and `alerts` destinations (rejected: no spec for an order flow; scope-creep); global unknown-route fallback destination (rejected: masks the bug instead of fixing the route).
+**Supersedes:** —

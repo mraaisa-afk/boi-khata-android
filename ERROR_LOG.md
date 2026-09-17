@@ -31,6 +31,44 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-008 — 2026-09-17 — P10 — branch commits replaced whole files with base64 blobs (DECISIONS/ERROR_LOG/code)
+
+**Type:** Guardrail violation
+**Phase:** P10
+**Date:** 2026-09-17
+**Task:** PR #61 — doc appends (D82–D84, ERR-006/007) + B-001/B-002 fixes
+**Error:** CI run 35193682336: `:core:domain:compileDebugKotlin` syntax errors at `1:1`; `DECISIONS.md` shrank ~848 → 1 line, `ERROR_LOG.md` ~148 → 1 line.
+**Root cause:** Several branch commits (incl. `ca89d0e`, `5d246ad`) wrote base64-encoded blobs REPLACING entire file contents instead of appending; code files (`Repositories.kt`, `CatalogViewModel.kt`, `KhataAddCustomerScreen.kt`, …) were corrupted the same way by earlier commits.
+**Fix applied:** `b4c4e64` restored code files from main and applied the real fixes; `06d122f` restored both governance files to main state. Side effect: the intended D82–D84 + ERR-006/007 appends were lost — re-landed via `agent/log-reland-p11-start` (D82 re-designated to the locale ruling its shipped code reference declares; B-001 routing ruling recorded as D84; premium-badge ruling needs owner re-ruling).
+**Lesson:** Never rewrite a governance file wholesale — append with targeted edits and verify line-count after every write; CI "syntax error at 1:1" on a previously-green module is the whole-file-corruption signature — check file size first.
+
+## ERR-007 — 2026-09-17 — P10 — B-002: khata list stale after add — one-shot DAO + hiltViewModel isolation
+
+**Type:** Logic error
+**Phase:** P10
+**Date:** 2026-09-17
+**Task:** Fix real-device Bug B (B-002) — newly added customer not reflected in the list without restart
+**Error:** Customer saved successfully from `KhataAddCustomerScreen`, but the khata customer list did not update until manual reload/app restart.
+**Root cause:** `KhataCustomerDao.getActiveByTenant` was a suspend one-shot snapshot, and `KhataAddCustomerScreen` runs on its own `hiltViewModel()` instance — the list screen's ViewModel never re-queried after the insert.
+**Fix applied:** PR #61 (merged `a1d6316`): non-suspend `KhataCustomerDao.getActiveByTenantFlow` (Room invalidation-tracked) → `KhataRepository.getCustomersFlow` → collected by `KhataViewModel` with `CancellationException` rethrow. Ruled in D83.
+**Lesson:** Room-backed list screens must be Flow-driven; one-shot suspend reads are only for snapshots that are explicitly re-fetched.
+
+## ERR-006 — 2026-09-17 — P10 — B-001: Home crash after add-book — navigate() to unregistered NavHost routes
+
+**Type:** Logic error
+**Phase:** P10
+**Date:** 2026-09-17
+**Task:** Fix real-device Bug A (B-001) — hard crash right after adding a new book
+**Error:**
+```
+Unhandled exception: java.lang.IllegalArgumentException
+Navigation destination that matches request ... cannot be found from the current destination
+```
+(from `NavController.navigate` on tap; reported on device — invisible to unit tests)
+**Root cause:** `HomeScreen` called `navigate("catalog/order/{bookId}")` and `navigate("alerts")`, but neither route exists in `BoiKhataNavigation`'s NavHost. Every newly added book (initialStock 0 ≤ lowStockThreshold 5) immediately surfaces as a low-stock alert, so the crash fired inside the add-book flow. The earlier catch(Throwable) theory was disproven: `LicenseBlockedException : Exception` and `CapExceededException : IllegalStateException` are both already caught by `catch(Exception)` in `CatalogViewModel`.
+**Fix applied:** PR #61 (merged `a1d6316`): alert-card tap → `book_add_edit/{bookId}`; "See all" → `catalog` tab. Routing rule recorded in D84; dedicated Alerts screen left as `TODO(P10)` for a future owner ruling.
+**Lesson:** Check every `navigate()` string against the NavHost destination set before shipping; centralize route constants so dead routes fail fast (P11 item).
+
 ## ERR-005 — 2026-09-15 — P10 — CI: platforms;android-37 not found on runner (android-37.0 only) after SDK bump
 
 **Type:** Build failure
@@ -144,5 +182,5 @@ e: HomeScreen.kt:203 Unresolved reference 'contentDescription'
 
 ---
 
-*Last updated: 2026-09-15 · Maintained by: Agent (append) + Builder/Sakira (review)*
+*Last updated: 2026-09-17 · Maintained by: Agent (append) + Builder/Sakira (review)*
 *Read by: the agent every session, last 10 entries mandatory*
