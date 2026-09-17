@@ -192,6 +192,9 @@ fun BoiKhataMainScreen(
             }
             composable("khata_add_customer") {
                 KhataAddCustomerScreen(
+                    // B-004: thread the claims tenant through navigation — the add
+                    // screen's own VM instance has no tenant until told explicitly.
+                    tenantId = tenantId,
                     onBack = { navController.popBackStack() },
                 )
             }
