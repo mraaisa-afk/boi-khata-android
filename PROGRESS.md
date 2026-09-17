@@ -120,7 +120,7 @@
 | `agent/log-reland-p11-start` | #62 | doc reland (D82–D84, ERR-006–008) + P11 bootstrap | Merged |
 | `agent/fix-b3-bookid-nav-null-crash` | #63 | B-003 bookId nav "null"-segment crash fix + ERR-009/010, D85 | Merged |
 | `agent/fix-b4-khata-tenant-write` | #64 | B-004 write-path tenant fix (khata add-customer) + ERR-011, D86 | Merged |
-| `agent/p11-u1-pos-picker-lists` | — | U-001 POS picker auto-load (search-as-filter) + D87 | Open — ready to push |
+| `agent/p11-u1-pos-picker-lists` | #65 | U-001 POS picker auto-load (search-as-filter) + D87 | Open — CI running |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
