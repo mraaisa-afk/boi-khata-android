@@ -31,6 +31,18 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-009 — 2026-09-18 — P11 — Stale device log: pre-#60 APK formatBengaliTaka crash misread as the current add-book crash
+
+**Type:** Misunderstanding
+**Phase:** P11
+**Date:** 2026-09-18
+**Task:** Diagnose device-reported crash on "+" (add book) from stock screen after the PR #62 install
+**Error:** Logcat pasted for the current repro instead showed the OLD crash: `java.lang.StringIndexOutOfBoundsException: length=10; index=2486` at `formatBengaliTaka(HomeScreen.kt:448)` via `HeroCard`, timestamped 09-15 06:46.
+**Root cause (of the LOGGED crash, now fully identified):** `String.format("%,d", rounded)` uses the DEFAULT locale — which D82 forces to bn-BD — so the formatted string ALREADY contains Bengali digits (value 0 → "০"). The legacy `if (c.isDigit()) map[c - '0']` re-converted them because `Char.isDigit()` is true for all Unicode Nd digits → `map[0x09E6 - 48] = map[2486]` on the 10-char digit map. index=2486 = '০' − '0' exactly; HomeScreen.kt:448 matches the pre-PR-#60 source line-for-line.
+**Root cause (of the confusion):** the pasted logcat was captured from the OLD APK, not the current build. Current main's formatters are range-guarded (`in '0'..'9'`) and try/catch-wrapped; a full static audit of the add-book path (nav route args → form parsing → CatalogViewModel → BookRepositoryImpl → core NumberFormatter → all format-resource specifiers %1$s/%1$d) found no crash-capable site. The current "+" crash therefore has no known stack yet — it must be captured fresh before any code change.
+**Fix applied:** No speculative code change. ERR-009 logged; PR #58 confirmed superseded (same hardening, older base — main already guarded via PR #60) — recommend close. Fresh-capture procedure handed to Sakira: `adb logcat -c` → reproduce → `adb logcat AndroidRuntime:E *:S -d`; verify APK freshness first via `adb shell dumpsys package com.boikhata | findstr -i "lastUpdateTime versionName"`.
+**Lesson:** A stack trace whose line numbers do not exist in main is evidence about an OLD APK, not the current build — cross-check line numbers before debugging. Durable rule: with D82 forcing bn-BD, `String.format` emits Bengali digits — NEVER pair locale-formatted output with `isDigit()`-based re-conversion; keep the `in '0'..'9'` range guard everywhere (`NumberFormatter.applyDigitStyle` depends on the same invariant).
+
 ## ERR-008 — 2026-09-17 — P10 — branch commits replaced whole files with base64 blobs (DECISIONS/ERROR_LOG/code)
 
 **Type:** Guardrail violation
@@ -182,5 +194,5 @@ e: HomeScreen.kt:203 Unresolved reference 'contentDescription'
 
 ---
 
-*Last updated: 2026-09-17 · Maintained by: Agent (append) + Builder/Sakira (review)*
+*Last updated: 2026-09-18 · Maintained by: Agent (append) + Builder/Sakira (review)*
 *Read by: the agent every session, last 10 entries mandatory*

@@ -109,11 +109,11 @@
 | Branch | PR | Workstream | Status |
 | --- | --- | --- | --- |
 | `agent/p5-exit-gate` | #50 | P5 exit-gate verification | Open |
-| `agent/fix-d82-force-bengali-locale` | #58 | bounds-safe formatBengaliTaka (StringIndexOutOfBounds) | Open |
+| `agent/fix-d82-force-bengali-locale` | #58 | bounds-safe formatBengaliTaka | Open — superseded by PR #60 safe formatters (main guarded + try/catch, ERR-009 forensics); recommend close |
 | `agent/ci-sdk-fix` | #59 | compileSdk 37→35 downgrade | Open — superseded by main (compileSdk 37 + android-37.0 symlink, ERR-005); recommend close |
 | `agent/fix-b1-stock-crash-b2-khata-reload` | #61 | B-001 + B-002 device-bug fixes | Merged |
 | `agent/phase-10-fix-otp-crash-ci` | #60 | P10 OTP crash (safe formatters) + CI SDK 37 alignment | Merged |
-| `agent/log-reland-p11-start` | TBD | doc reland (D82–D84, ERR-006–008) + P11 bootstrap | Open |
+| `agent/log-reland-p11-start` | #62 | doc reland (D82–D84, ERR-006–008) + P11 bootstrap | Merged |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
