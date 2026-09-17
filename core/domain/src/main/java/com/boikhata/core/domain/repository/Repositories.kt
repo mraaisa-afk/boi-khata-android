@@ -20,6 +20,7 @@ import com.boikhata.core.domain.model.KhataCustomer
 import com.boikhata.core.domain.model.KhataInstallment
 import com.boikhata.core.domain.model.LowStockBookSummary
 import com.boikhata.core.domain.model.OwnerDrawing
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Repository interfaces — core/domain owns the contracts; core/database + core/cloud
@@ -95,6 +96,14 @@ interface KhataRepository {
         address: String?,
         creditLimit: Double,
     ): String
+
+    /**
+     * B-002: reactive stream over active khata customers (Room invalidation-tracked).
+     * Non-suspend by contract — Flow-returning reads must not be suspend, so
+     * collectors observe inserts from any screen/ViewModel instance without
+     * a manual reload call (Room re-emits whenever khata_customers changes).
+     */
+    fun getCustomersFlow(tenantId: String): Flow<List<KhataCustomer>>
 
     suspend fun getEntries(tenantId: String, customerId: String): List<KhataEntry>
     suspend fun addEntry(

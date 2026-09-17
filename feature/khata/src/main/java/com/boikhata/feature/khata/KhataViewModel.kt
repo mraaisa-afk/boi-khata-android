@@ -17,6 +17,8 @@ import com.boikhata.core.domain.repository.LicenseRepository
 import com.boikhata.core.domain.text.BengaliNormalizer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,37 +46,63 @@ class KhataViewModel @Inject constructor(
 
     private var currentTenantId: String = "t_1"
 
+    // B-002: active collector over the Room-driven customer Flow.
+    private var customersJob: Job? = null
+
     // ── Customer list ──────────────────────────────────────────────────────
 
+    /**
+     * B-002: observe khata_customers reactively. Room re-emits on every table
+     * write (from any screen or ViewModel instance), so a customer added from
+     * KhataAddCustomerScreen appears here immediately — no manual reload,
+     * no app restart, and no N-second one-shot snapshot race.
+     */
     fun loadCustomers(tenantId: String) {
         currentTenantId = tenantId
-        viewModelScope.launch {
+        customersJob?.cancel()
+        customersJob = viewModelScope.launch {
             _listState.value = KhataListUiState.Loading
             try {
-                val customers = khataRepository.getCustomers(tenantId)
-                val dueList = mutableListOf<KhataCustomerDue>()
-                val now = System.currentTimeMillis()
-                for (customer in customers) {
-                    val entries = khataRepository.getEntries(tenantId, customer.id)
-                    if (entries.isNotEmpty()) {
-                        val aging = AgingCalculator.calculate(entries, now)
-                        if (aging.totalDue > 0.01) {
-                            dueList.add(
-                                KhataCustomerDue(
-                                    customer = customer,
-                                    dueAmount = aging.totalDue,
-                                    ageDays = aging.ageDays,
-                                    agingBucket = aging.bucket.name,
-                                )
-                            )
-                        }
-                    }
+                khataRepository.getCustomersFlow(tenantId).collect { customers ->
+                    val dueList = buildDueList(tenantId, customers)
+                    _listState.value = KhataListUiState.Success(customers, dueList, _searchQuery.value)
                 }
-                _listState.value = KhataListUiState.Success(customers, dueList, _searchQuery.value)
+            } catch (e: CancellationException) {
+                // Structured-concurrency contract: never swallow cancellation.
+                throw e
             } catch (e: Exception) {
                 _listState.value = KhataListUiState.Error(e.message ?: "ত্রুটি")
             }
         }
+    }
+
+    /**
+     * D77 aging buckets per customer with outstanding due (> 0.01).
+     * Kept as-is from the one-shot version; recomputed per Room emission.
+     */
+    private suspend fun buildDueList(
+        tenantId: String,
+        customers: List<KhataCustomer>,
+    ): List<KhataCustomerDue> {
+        val dueList = mutableListOf<KhataCustomerDue>()
+        val now = System.currentTimeMillis()
+        for (customer in customers) {
+            val entries = khataRepository.getEntries(tenantId, customer.id)
+            if (entries.isNotEmpty()) {
+                val aging = AgingCalculator.calculate(entries, now)
+                if (aging.totalDue > 0.01) {
+                    dueList.add(
+                        KhataCustomerDue(
+                            customer = customer,
+                            dueAmount = aging.totalDue,
+                            ageDays = aging.ageDays,
+                            agingBucket = aging.bucket.name,
+                        )
+                    )
+                }
+            }
+        }
+        return dueList
     }
 
     fun onSearchQueryChange(query: String) {
@@ -105,8 +133,10 @@ class KhataViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 khataRepository.addCustomer(currentTenantId, nameBn, phone, address, creditLimit)
-                loadCustomers(currentTenantId)
+                // B-002: no manual reload — the Room Flow re-emits to every collector.
                 onDone()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _listState.value = KhataListUiState.Error(e.message ?: "সেভ ব্যর্থ")
             }

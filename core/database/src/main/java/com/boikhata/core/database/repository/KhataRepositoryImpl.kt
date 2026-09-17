@@ -20,6 +20,8 @@ import com.boikhata.core.domain.repository.KhataRepository
 import com.boikhata.core.domain.text.BengaliNormalizer
 import java.util.UUID
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * P2a: KhataRepository implementation — extended with customer CRUD,
@@ -39,6 +41,17 @@ class KhataRepositoryImpl @Inject constructor(
 
     override suspend fun getCustomers(tenantId: String): List<KhataCustomer> {
         return khataCustomerDao.getActiveByTenant(tenantId).map { it.toDomain() }
+    }
+
+    /**
+     * B-002: Room-driven reactive list. Room re-emits whenever khata_customers
+     * changes, so the khata list screen updates instantly even when the insert
+     * comes from a different ViewModel instance (KhataAddCustomerScreen).
+     */
+    override fun getCustomersFlow(tenantId: String): Flow<List<KhataCustomer>> {
+        return khataCustomerDao.getActiveByTenantFlow(tenantId).map { customers ->
+            customers.map { it.toDomain() }
+        }
     }
 
     override suspend fun searchCustomers(tenantId: String, normalizedQuery: String): List<KhataCustomer> {

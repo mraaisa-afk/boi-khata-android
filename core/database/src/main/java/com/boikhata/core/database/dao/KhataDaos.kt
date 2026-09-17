@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.boikhata.core.database.entity.KhataCustomerEntity
 import com.boikhata.core.database.entity.KhataEntryEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface KhataCustomerDao {
@@ -18,6 +19,16 @@ interface KhataCustomerDao {
 
     @Query("SELECT * FROM khata_customers WHERE tenantId = :tenantId AND isActive = 1 ORDER BY nameBn")
     suspend fun getActiveByTenant(tenantId: String): List<KhataCustomerEntity>
+
+    /**
+     * B-002: Room-reactive Flow over active customers for a tenant.
+     * MUST stay non-suspend: Room drives it from its invalidation tracker and
+     * re-emits on every khata_customers write — including inserts made from
+     * other ViewModel instances (e.g., KhataAddCustomerScreen's own hiltViewModel()).
+     * This is what makes a newly added customer appear without a manual reload.
+     */
+    @Query("SELECT * FROM khata_customers WHERE tenantId = :tenantId AND isActive = 1 ORDER BY nameBn")
+    fun getActiveByTenantFlow(tenantId: String): Flow<List<KhataCustomerEntity>>
 
     @Query("SELECT * FROM khata_customers WHERE id = :id")
     suspend fun getById(id: String): KhataCustomerEntity?
