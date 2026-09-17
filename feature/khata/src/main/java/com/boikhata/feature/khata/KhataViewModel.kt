@@ -44,7 +44,11 @@ class KhataViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private var currentTenantId: String = "t_1"
+    // B-004: blank sentinel — never fall back to the seed tenant "t_1".
+    // A write attempted before a tenant-setting call now fails loudly instead of
+    // silently inserting rows under the seed tenant (invisible to the tenant-scoped
+    // Flow list and to every other claims-tenant query until the next rebind).
+    private var currentTenantId: String = ""
 
     // B-002: active collector over the Room-driven customer Flow.
     private var customersJob: Job? = null
@@ -123,16 +127,32 @@ class KhataViewModel @Inject constructor(
         }
     }
 
+    /**
+     * B-004: tenantId is now an explicit parameter. The add-customer destination
+     * scopes its OWN KhataViewModel instance (hiltViewModel per back-stack entry),
+     * and that instance never runs loadCustomers — so the old implementation wrote
+     * every new customer under the hardcoded fallback tenant "t_1". The list Flow
+     * (correctly scoped to the claims tenant) re-emitted without the new row, and
+     * the D41 rebind on next launch silently migrated the stray row, producing the
+     * «appears only after restart» symptom.
+     */
     fun addCustomer(
+        tenantId: String,
         nameBn: String,
         phone: String?,
         address: String?,
         creditLimit: Double,
         onDone: () -> Unit,
     ) {
+        if (tenantId.isBlank()) {
+            // B-004 fail-fast: refuse to guess a tenant for a write.
+            _listState.value = KhataListUiState.Error("টেনান্ট শনাক্ত করা যায়নি — অ্যাপ রিস্টার্ট করুন")
+            return
+        }
+        currentTenantId = tenantId
         viewModelScope.launch {
             try {
-                khataRepository.addCustomer(currentTenantId, nameBn, phone, address, creditLimit)
+                khataRepository.addCustomer(tenantId, nameBn, phone, address, creditLimit)
                 // B-002: no manual reload — the Room Flow re-emits to every collector.
                 onDone()
             } catch (e: CancellationException) {

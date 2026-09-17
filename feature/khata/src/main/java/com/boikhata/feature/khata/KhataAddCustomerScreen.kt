@@ -34,10 +34,14 @@ import com.boikhata.feature.khata.R
  * P2a: Add customer screen — name+area keyed (phone optional).
  * Blueprint §7.4: নাম+এলাকা-কী (ফোন ঐচ্ছিক) — বাংলাদেশের খাতা-স্মৃতির আসল চাবি।
  * CONVENTIONS §4: khata_customers-তৈরি = OWNER-ONLY (data-layer gate).
+ * B-004: receives tenantId explicitly — this destination scopes its own
+ * KhataViewModel instance which never runs loadCustomers, so the write
+ * tenant must be threaded through navigation, not read from VM state.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KhataAddCustomerScreen(
+    tenantId: String,
     onBack: () -> Unit,
     viewModel: KhataViewModel = hiltViewModel(),
 ) {
@@ -99,6 +103,7 @@ fun KhataAddCustomerScreen(
             Button(
                 onClick = {
                     viewModel.addCustomer(
+                        tenantId = tenantId, // B-004: explicit — never the VM fallback
                         nameBn = nameBn,
                         phone = phone.ifBlank { null },
                         address = address.ifBlank { null },
