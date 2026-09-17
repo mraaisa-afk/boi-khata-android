@@ -20,6 +20,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -32,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +71,7 @@ fun PosScreen(
 ) {
     val cartState by viewModel.cartState.collectAsState()
     val bookSearchState by viewModel.bookSearchState.collectAsState()
+    val customerSearchState by viewModel.customerSearchState.collectAsState()
 
     var showBookSearch by remember { mutableStateOf(false) }
     var showCustomerPicker by remember { mutableStateOf(false) }
@@ -279,8 +282,8 @@ fun PosScreen(
         val sheetState = rememberModalBottomSheetState()
         ModalBottomSheet(onDismissRequest = { showCustomerPicker = false }, sheetState = sheetState) {
             CustomerPickerSheet(
+                state = customerSearchState,
                 onSearch = { query -> viewModel.searchCustomers(tenantId, query) },
-                results = cartState.customerSearchResults,
                 onCustomerSelected = { customer ->
                     viewModel.selectCustomer(customer)
                     showCustomerPicker = false
@@ -307,6 +310,7 @@ fun PosScreen(
                 TextButton(onClick = {
                     showCheckoutConfirm = false
                     viewModel.checkout(
+                        tenantId = tenantId, // D86: explicit write tenant
                         onDone = { billId -> onCheckoutComplete(billId) },
                         onError = { msg -> errorMessage = msg },
                     )
@@ -381,6 +385,9 @@ private fun BookSearchSheet(
     onBookSelected: (Book) -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
+    // U-001/D87: search-as-filter — the full book list loads on open (blank query
+    // = getBooks per repo contract); typing narrows it. The sheet is never blank.
+    LaunchedEffect(Unit) { onSearch("") }
     Column(modifier = Modifier.padding(16.dp)) {
         OutlinedTextField(
             value = query,
@@ -391,41 +398,71 @@ private fun BookSearchSheet(
             singleLine = true,
         )
         Spacer(Modifier.height(12.dp))
-        when (state) {
+        when (val s = state) {
+            is BookSearchState.Loading -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(400.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) { CircularProgressIndicator() }
+            }
+            is BookSearchState.Error -> {
+                Text(
+                    s.message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(8.dp),
+                )
+            }
             is BookSearchState.Success -> {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.height(400.dp)) {
-                    items(state.books) { book ->
-                        Card(onClick = { onBookSelected(book) }, modifier = Modifier.fillMaxWidth()) {
-                            Row(
-                                modifier = Modifier.padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                            ) {
-                                Column {
-                                    Text(book.titleBn, fontWeight = FontWeight.Bold)
-                                    Text(book.author, style = MaterialTheme.typography.bodySmall)
+                if (s.books.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.no_books_found),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                } else {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.height(400.dp)) {
+                        items(s.books) { book ->
+                            Card(onClick = { onBookSelected(book) }, modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Column {
+                                        Text(book.titleBn, fontWeight = FontWeight.Bold)
+                                        val subtitle = buildString {
+                                            append(book.author)
+                                            if (book.classLevel.isNotBlank()) append(" · ${book.classLevel}")
+                                        }
+                                        Text(subtitle, style = MaterialTheme.typography.bodySmall)
+                                    }
+                                    Text(
+                                        NumberFormatter.formatMoney(book.sellingPrice, DigitStyle.BANGLA),
+                                        fontWeight = FontWeight.Bold,
+                                    )
                                 }
-                                Text(
-                                    NumberFormatter.formatMoney(book.sellingPrice, DigitStyle.BANGLA),
-                                    fontWeight = FontWeight.Bold,
-                                )
                             }
                         }
                     }
                 }
             }
-            else -> {}
+            BookSearchState.Idle -> {} // unreachable: LaunchedEffect fires onSearch("") on open
         }
     }
 }
 
 @Composable
 private fun CustomerPickerSheet(
+    state: CustomerSearchState,
     onSearch: (String) -> Unit,
-    results: List<KhataCustomer>,
     onCustomerSelected: (KhataCustomer) -> Unit,
     onWalkInSelected: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
+    // U-001/D87: search-as-filter — the full active-customer list loads on open
+    // (blank query = getCustomers per repo contract); typing narrows it.
+    LaunchedEffect(Unit) { onSearch("") }
     Column(modifier = Modifier.padding(16.dp)) {
         Text(stringResource(R.string.select_customer), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(8.dp))
@@ -443,15 +480,44 @@ private fun CustomerPickerSheet(
             Spacer(Modifier.height(4.dp))
             Text(stringResource(R.string.walk_in_customer))
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.height(300.dp)) {
-            items(results) { customer ->
-                Card(onClick = { onCustomerSelected(customer) }, modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(customer.nameBn, fontWeight = FontWeight.Bold)
-                        customer.address?.let { if (it.isNotBlank()) Text(it, style = MaterialTheme.typography.bodySmall) }
+        when (val s = state) {
+            is CustomerSearchState.Loading -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(300.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) { CircularProgressIndicator() }
+            }
+            is CustomerSearchState.Error -> {
+                Text(
+                    s.message,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(8.dp),
+                )
+            }
+            is CustomerSearchState.Success -> {
+                if (s.customers.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.no_customers_found),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                } else {
+                    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.height(300.dp)) {
+                        items(s.customers) { customer ->
+                            Card(onClick = { onCustomerSelected(customer) }, modifier = Modifier.fillMaxWidth()) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Text(customer.nameBn, fontWeight = FontWeight.Bold)
+                                    customer.address?.let { if (it.isNotBlank()) Text(it, style = MaterialTheme.typography.bodySmall) }
+                                    customer.phone?.let { if (it.isNotBlank()) Text(it, style = MaterialTheme.typography.bodySmall) }
+                                }
+                            }
+                        }
                     }
                 }
             }
+            CustomerSearchState.Idle -> {} // unreachable: LaunchedEffect fires onSearch("") on open
         }
     }
 }
