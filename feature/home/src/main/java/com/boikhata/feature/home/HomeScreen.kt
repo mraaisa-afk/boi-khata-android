@@ -326,7 +326,9 @@ private fun AlertsSection(data: HomeData, onNavigate: (String) -> Unit, modifier
                 // every newly added book (initialStock 0 <= lowStockThreshold) surfaces as a
                 // low-stock alert, so this tap crashed right after the add-book flow.
                 // Reuse the existing add/edit screen so the user can restock the book.
-                LowStockAlertCard(alert, { onNavigate("book_add_edit/${alert.bookId}") }, { }, Modifier.width(260.dp))
+                // D85: bookId is an optional query arg on the route — never "book_add_edit/null"
+                // (navigation 2.8.x parses a literal "null" segment into actual null → B-003).
+                LowStockAlertCard(alert, { onNavigate("book_add_edit?bookId=${alert.bookId}") }, { }, Modifier.width(260.dp))
             }
             if (hasDue) {
                 item { DueCollectionAlertCard(data.dueCustomerCount, data.totalDue, { onNavigate("khata") }, Modifier.width(260.dp)) }

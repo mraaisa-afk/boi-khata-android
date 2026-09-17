@@ -152,16 +152,31 @@ fun BoiKhataMainScreen(
             composable("catalog") {
                 CatalogScreen(
                     tenantId = tenantId,
-                    onAddBook = { navController.navigate("book_add_edit/null") },
-                    onEditBook = { bookId -> navController.navigate("book_add_edit/$bookId") },
+                    // D85 (fixes B-003): never put a literal "null" path segment in a route —
+                    // navigation 2.8.x NavType.StringType.parseValue deserializes "null" into an
+                    // actual null, which then fails NavArgument verification for the declared
+                    // argument ("Wrong argument type for 'bookId' ... string expected").
+                    // Optional route args use the query-param form; absent arg → add mode.
+                    onAddBook = { navController.navigate("book_add_edit") },
+                    onEditBook = { bookId -> navController.navigate("book_add_edit?bookId=$bookId") },
                 )
             }
+            // D85 (fixes B-003): bookId is an OPTIONAL query argument with a null default.
+            // The previous path route "book_add_edit/{bookId}" + navigate("book_add_edit/null")
+            // crashed on navigation 2.8.5: parseValue("null") → actual null in the argument
+            // bundle → NavArgument.verify rejects null for the non-nullable declared argument
+            // at NavDestination.addInDefaultArgs → IllegalArgumentException on the "+" tap.
             composable(
-                route = "book_add_edit/{bookId}",
-                arguments = listOf(navArgument("bookId") { type = NavType.StringType }),
+                route = "book_add_edit?bookId={bookId}",
+                arguments = listOf(
+                    navArgument("bookId") {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                ),
             ) { entry ->
-                val bookIdArg = entry.arguments?.getString("bookId")
-                val bookId = if (bookIdArg == "null") null else bookIdArg
+                val bookId = entry.arguments?.getString("bookId")
                 BookAddEditScreen(
                     tenantId = tenantId,
                     bookId = bookId,
