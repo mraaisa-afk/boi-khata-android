@@ -111,10 +111,14 @@ class SaleViewModelTest {
         viewModel.setDiscount("8", isPercentage = true) // total 1794
         coEvery { billRepository.createBill(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns "bill-1"
         var doneBill: String? = null
+        // pre-launch math: discount applied → paid = discounted total, due 0
+        val pre = viewModel.cartState.value
+        assertThat(pre.paidAmount).isEqualTo(1794.0)
+        assertThat(pre.dueAmount).isEqualTo(0.0)
         viewModel.checkout(tenantId = "t_1", onDone = { doneBill = it }, onError = {})
-        val s = viewModel.cartState.value
-        assertThat(s.paidAmount).isEqualTo(1794.0)
-        assertThat(s.dueAmount).isEqualTo(0.0)
+        dispatcher.scheduler.advanceUntilIdle() // checkout runs on viewModelScope (Main = test dispatcher)
+        assertThat(doneBill).isEqualTo("bill-1")
+        assertThat(viewModel.cartState.value.items).isEmpty() // cart reset on success
     }
 
     @Test
@@ -134,6 +138,7 @@ class SaleViewModelTest {
         coEvery { billRepository.createBill(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns "bill-2"
         var doneBill: String? = null
         viewModel.checkout(tenantId = "t_1", onDone = { doneBill = it }, onError = {})
+        dispatcher.scheduler.advanceUntilIdle() // let the launched checkout coroutine run
         assertThat(doneBill).isEqualTo("bill-2")
     }
 }
