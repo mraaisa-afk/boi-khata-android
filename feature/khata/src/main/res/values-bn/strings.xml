@@ -18,6 +18,7 @@
     <string name="add_installment">কিস্তি যোগ</string>
     <string name="forgive_debt">দেনা মুন</string>
     <string name="forgive_debt_confirm">মোট %1$s বাকি মাফ করবেন? এটি হিসাবে দেনা-মুন হিসেবে লেখা হবে।</string>
+    <string name="previous_due_optional">পূর্বের বাকি (ঐচ্ছিক, ৳)</string>
     <string name="amount">পরিমাণ</string>
     <string name="description">বিবরণ</string>
     <string name="entry_history">লেনদেনের ইতিহাস</string>
