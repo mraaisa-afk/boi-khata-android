@@ -37,4 +37,5 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.truth)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk) // B-005/B-006: mock Room withTransaction for createBill tests
 }

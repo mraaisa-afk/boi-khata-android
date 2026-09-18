@@ -22,7 +22,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -104,13 +103,6 @@ fun PosScreen(
                 },
             )
         },
-        floatingActionButton = {
-            if (cartState.items.isNotEmpty()) {
-                FloatingActionButton(onClick = { showCheckoutConfirm = true }) {
-                    Text(stringResource(R.string.checkout))
-                }
-            }
-        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -185,7 +177,11 @@ fun PosScreen(
                 ) {
                     OutlinedTextField(
                         value = cartState.discountInput,
-                        onValueChange = { viewModel.setDiscount(it, cartState.isPercentageDiscount) },
+                        onValueChange = { input ->
+                            // B-007: accept ASCII + Bengali digits (Bangla keyboards emit ০-৯)
+                            val filtered = input.filter { it.isDigit() || it in '০'..'৯' || it == '.' }
+                            viewModel.setDiscount(filtered, cartState.isPercentageDiscount)
+                        },
                         label = { Text(stringResource(R.string.discount)) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
@@ -217,7 +213,10 @@ fun PosScreen(
                 if (cartState.paymentMethod != PaymentMethod.CREDIT) {
                     OutlinedTextField(
                         value = cartState.paidAmountInput,
-                        onValueChange = { viewModel.setPaidAmount(it.filter { c -> c.isDigit() || c == '.' }) },
+                        onValueChange = { input ->
+                            // B-007: ASCII + Bengali digits both parse in the VM now.
+                            viewModel.setPaidAmount(input.filter { it.isDigit() || it in '০'..'৯' || it == '.' })
+                        },
                         label = { Text(stringResource(R.string.paid_amount)) },
                         placeholder = { Text(NumberFormatter.formatMoney(cartState.totalAmount, DigitStyle.BANGLA)) },
                         modifier = Modifier.fillMaxWidth(),
@@ -252,7 +251,16 @@ fun PosScreen(
                     }
                 }
 
-                Spacer(Modifier.height(80.dp)) // FAB space
+                // B-008: standard full-width primary button (maroon/white via theme
+                // primary) — replaces the old FloatingActionButton whose M3 default
+                // primaryContainer token (#FFD7D7) rendered as a pink pill that
+                // matched neither the brand nor the app's established button style.
+                Button(
+                    onClick = { showCheckoutConfirm = true },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.checkout))
+                }
             }
 
             // Error message

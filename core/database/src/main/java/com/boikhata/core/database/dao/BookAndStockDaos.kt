@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.boikhata.core.database.entity.BookEntity
+import com.boikhata.core.database.entity.BookStockDelta
 import com.boikhata.core.database.entity.StockLedgerEntity
 
 @Dao
@@ -51,4 +52,13 @@ interface StockLedgerDao {
     /** D31: Current stock quantity for a book = SUM of all changeQuantity entries. */
     @Query("SELECT COALESCE(SUM(changeQuantity), 0) FROM stock_ledger WHERE bookId = :bookId")
     suspend fun getStockQuantityForBook(bookId: String): Int
+
+    /**
+     * B-005: per-book ledger deltas for a whole tenant in one query.
+     * Current stock of a book = books.initialStock + delta (D79 note; the D22
+     * sale flow appends negative SALE rows here, so the delta must be applied
+     * on top of the opening stock everywhere stock is displayed or valued).
+     */
+    @Query("SELECT bookId, COALESCE(SUM(changeQuantity), 0) AS delta FROM stock_ledger WHERE tenantId = :tenantId GROUP BY bookId")
+    suspend fun getDeltasByTenant(tenantId: String): List<BookStockDelta>
 }

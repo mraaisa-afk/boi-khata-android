@@ -74,4 +74,27 @@ class BengaliNormalizerTest {
         val result = BengaliNormalizer.normalize("  hello  ")
         assertThat(result).isEqualTo("hello")
     }
+
+    // ── B-007: numeric-input digit conversion (toAsciiDigits) ──────────────
+
+    @Test
+    fun `toAsciiDigits converts bangla digits`() {
+        assertThat(BengaliNormalizer.toAsciiDigits("৮")).isEqualTo("8")
+        assertThat(BengaliNormalizer.toAsciiDigits("৪")).isEqualTo("4")
+        assertThat(BengaliNormalizer.toAsciiDigits("৫০০")).isEqualTo("500")
+    }
+
+    @Test
+    fun `toAsciiDigits keeps ascii and separators`() {
+        assertThat(BengaliNormalizer.toAsciiDigits("8")).isEqualTo("8")
+        assertThat(BengaliNormalizer.toAsciiDigits("12.5")).isEqualTo("12.5")
+        assertThat(BengaliNormalizer.toAsciiDigits("")).isEmpty()
+    }
+
+    @Test
+    fun `toAsciiDigits parses after conversion`() {
+        // The B-007 bug: "৪".toDoubleOrNull() == null → silent 0 discount
+        assertThat("৪".toDoubleOrNull()).isNull()
+        assertThat(BengaliNormalizer.toAsciiDigits("৪").toDoubleOrNull()).isEqualTo(4.0)
+    }
 }

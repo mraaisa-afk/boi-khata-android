@@ -54,6 +54,11 @@ class SaleRepositoryImpl @Inject constructor(
         return billDao.getByTenant(tenantId).map { it.toSummary() }
     }
 
+    /** B-006: sales history for the khata customer detail screen. */
+    override suspend fun getBillsByCustomer(tenantId: String, customerId: String): List<BillSummary> {
+        return billDao.getByCustomer(tenantId, customerId).map { it.toSummary() }
+    }
+
     override suspend fun getBill(tenantId: String, billId: String): Bill? {
         val entity = billDao.getById(billId) ?: return null
         return entity.toDomain()

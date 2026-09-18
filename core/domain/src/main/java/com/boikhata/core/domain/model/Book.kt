@@ -24,4 +24,10 @@ data class Book(
     val initialStock: Int,
     val lowStockThreshold: Int,
     val isActive: Boolean,
+    /**
+     * B-005: live stock quantity = initialStock + stock_ledger delta (SALE rows are
+     * negative). Derived by BookRepositoryImpl from the append-only ledger (D22/D31);
+     * the UI must display this — NOT the static initialStock opening value.
+     */
+    val currentStock: Int = 0,
 )

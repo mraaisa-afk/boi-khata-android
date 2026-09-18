@@ -26,4 +26,8 @@
     <string name="paid">Paid</string>
     <string name="mark_paid">Mark Paid</string>
     <string name="due_after_days">Due after (days)</string>
+    <string name="sales_history">Sales History</string>
+    <string name="sales_total">Total: %1$s</string>
+    <string name="sales_paid">Paid: %1$s</string>
+    <string name="sales_due">Due: %1$s</string>
 </resources>

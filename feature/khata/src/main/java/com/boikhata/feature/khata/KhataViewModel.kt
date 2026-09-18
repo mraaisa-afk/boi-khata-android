@@ -12,6 +12,7 @@ import com.boikhata.core.domain.model.KhataCustomer
 import com.boikhata.core.domain.model.KhataCustomerDue
 import com.boikhata.core.domain.model.KhataInstallment
 import com.boikhata.core.domain.model.KhataStatement
+import com.boikhata.core.domain.repository.BillRepository
 import com.boikhata.core.domain.repository.KhataRepository
 import com.boikhata.core.domain.repository.LicenseRepository
 import com.boikhata.core.domain.text.BengaliNormalizer
@@ -31,6 +32,7 @@ import javax.inject.Inject
 @HiltViewModel
 class KhataViewModel @Inject constructor(
     private val khataRepository: KhataRepository,
+    private val billRepository: BillRepository, // B-006: sales history on the detail screen
     private val licenseRepository: LicenseRepository,
     @ApplicationContext private val appContext: Context,
 ) : ViewModel() {
@@ -177,6 +179,9 @@ class KhataViewModel @Inject constructor(
                 }
                 val entries = khataRepository.getEntries(tenantId, customerId)
                 val installments = khataRepository.getInstallments(tenantId, customerId)
+                // B-006: customer-linked bills. A fully-paid cash sale writes NO khata
+                // entry (due == 0), so without the bills the history shows nothing.
+                val bills = billRepository.getBillsByCustomer(tenantId, customerId)
                 val now = System.currentTimeMillis()
                 val statement = KhataStatementBuilder.buildStatement(customer, entries, now)
                 _detailState.value = KhataDetailUiState.Success(
@@ -184,6 +189,7 @@ class KhataViewModel @Inject constructor(
                     entries = entries,
                     installments = installments,
                     statement = statement,
+                    bills = bills,
                 )
             } catch (e: Exception) {
                 _detailState.value = KhataDetailUiState.Error(e.message ?: "ত্রুটি")
@@ -321,6 +327,7 @@ sealed interface KhataDetailUiState {
         val entries: List<KhataEntry>,
         val installments: List<KhataInstallment>,
         val statement: KhataStatement,
+        val bills: List<com.boikhata.core.domain.model.BillSummary> = emptyList(), // B-006
     ) : KhataDetailUiState
     data class Error(val message: String) : KhataDetailUiState
 }

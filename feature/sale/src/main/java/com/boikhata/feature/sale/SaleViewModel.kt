@@ -159,10 +159,12 @@ class SaleViewModel @Inject constructor(
         val vatAmount = items.sumOf { VatCalculator.calculateLineVat(it.unitPrice, it.quantity, it.category) }
 
         val discountAmount = if (state.isPercentageDiscount) {
-            val pct = state.discountInput.toDoubleOrNull() ?: 0.0
+            // B-007: Bangla keyboards emit Bengali digits (০-৯); toDoubleOrNull
+            // accepts ASCII only — normalize before parsing so "৪" parses as 4.
+            val pct = BengaliNormalizer.toAsciiDigits(state.discountInput).toDoubleOrNull() ?: 0.0
             (subtotal + vatAmount) * (pct / 100.0)
         } else {
-            state.discountInput.toDoubleOrNull() ?: 0.0
+            BengaliNormalizer.toAsciiDigits(state.discountInput).toDoubleOrNull() ?: 0.0
         }.coerceAtLeast(0.0)
 
         val totalAmount = (subtotal + vatAmount - discountAmount).coerceAtLeast(0.0)
@@ -170,7 +172,8 @@ class SaleViewModel @Inject constructor(
         val paidAmount = when (state.paymentMethod) {
             PaymentMethod.CREDIT -> 0.0
             else -> {
-                val inputPaid = state.paidAmountInput.toDoubleOrNull() ?: totalAmount
+                // B-007: Bengali-digit tolerance (same as the discount field).
+                val inputPaid = BengaliNormalizer.toAsciiDigits(state.paidAmountInput).toDoubleOrNull() ?: totalAmount
                 inputPaid.coerceAtMost(totalAmount)
             }
         }

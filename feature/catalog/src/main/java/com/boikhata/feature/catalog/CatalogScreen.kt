@@ -156,7 +156,9 @@ private fun BookCard(book: Book, onEdit: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                 )
                 Text(
-                    text = stringResource(R.string.stock_count, book.initialStock),
+                    // B-005: live stock (initialStock + ledger delta) — sales must be
+                    // reflected here; initialStock is the static opening value only.
+                    text = stringResource(R.string.stock_count, book.currentStock),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 IconButton(onClick = onEdit) {
