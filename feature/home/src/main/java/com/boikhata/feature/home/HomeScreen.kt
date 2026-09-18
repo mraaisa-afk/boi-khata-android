@@ -142,38 +142,44 @@ private fun HomeContent(
 
 @Composable
 private fun HomeAppBar(shopName: String, isLicensed: Boolean) {
-    Surface(modifier = Modifier.fillMaxWidth(), color = ColorBrandMaroon, tonalElevation = 0.dp) {
+    // D88 (owner ruling — supersedes D71 §1 "app bar = maroon" pending the owner's
+    // DECISIONS.md commit): header surface ivory #FDFAF6, all header content maroon
+    // #800000 = 10.52:1 (WCAG AAA). The previous white-on-maroon tokens already
+    // passed their thresholds (white #FFFFFF 10.95:1; white-80% #E6E6E6 7.23:1;
+    // white-60% #CCCCCC 4.48:1 — dropdown ICON, ≥3:1 graphics) — this remap removes
+    // the large-area maroon saturation reported as eye strain; not a contrast failure.
+    Surface(modifier = Modifier.fillMaxWidth(), color = ColorSurfaceIvory, tonalElevation = 0.dp) {
         Column(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp),
         ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier.size(32.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.18f)),
+                    modifier = Modifier.size(32.dp).clip(CircleShape).background(ColorBrandMaroon.copy(alpha = 0.12f)),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(Icons.Filled.Book, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    Icon(Icons.Filled.Book, contentDescription = null, tint = ColorBrandMaroon, modifier = Modifier.size(18.dp))
                 }
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.home_wordmark), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(stringResource(R.string.home_wordmark), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = ColorBrandMaroon)
                 if (isLicensed) { Spacer(Modifier.width(6.dp)); PremiumBadge() }
                 Spacer(Modifier.weight(1f))
                 SyncStatusChip()
                 Spacer(Modifier.width(4.dp))
                 IconButton(onClick = { }, modifier = Modifier.size(48.dp)) { // D71 §1: 48dp touch target
-                    Icon(Icons.Filled.Notifications, contentDescription = stringResource(R.string.home_notification_cd), tint = Color.White, modifier = Modifier.size(22.dp))
+                    Icon(Icons.Filled.Notifications, contentDescription = stringResource(R.string.home_notification_cd), tint = ColorBrandMaroon, modifier = Modifier.size(22.dp))
                 }
                 Spacer(Modifier.width(2.dp))
                 Box(
-                    modifier = Modifier.size(36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.2f)).semantics { contentDescription = shopName },
+                    modifier = Modifier.size(36.dp).clip(CircleShape).background(ColorBrandMaroon.copy(alpha = 0.12f)).semantics { contentDescription = shopName },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(shopName.firstOrNull()?.toString() ?: stringResource(R.string.home_avatar_fallback), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(shopName.firstOrNull()?.toString() ?: stringResource(R.string.home_avatar_fallback), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = ColorBrandMaroon)
                 }
             }
             Spacer(Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { }) {
-                Text(shopName, style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.80f), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(16.dp))
+                Text(shopName, style = MaterialTheme.typography.bodySmall, color = ColorBrandMaroon, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
+                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = ColorBrandMaroon, modifier = Modifier.size(16.dp))
             }
         }
     }
@@ -188,11 +194,14 @@ private fun PremiumBadge() {
 
 @Composable
 private fun SyncStatusChip() {
-    Surface(shape = RoundedCornerShape(12.dp), color = Color.White.copy(alpha = 0.15f)) {
+    // D88: chip follows the header remap — maroon-on-ivory tint instead of
+    // white-on-maroon; the sync-state dot keeps the D71 positive-green token
+    // (#1B6E3F on #FDFAF6 = 6.03:1).
+    Surface(shape = RoundedCornerShape(12.dp), color = ColorBrandMaroon.copy(alpha = 0.12f)) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(ColorSemanticPositive))
             Spacer(Modifier.width(4.dp))
-            Text(stringResource(R.string.home_sync_label), style = MaterialTheme.typography.labelSmall, color = Color.White)
+            Text(stringResource(R.string.home_sync_label), style = MaterialTheme.typography.labelSmall, color = ColorBrandMaroon)
         }
     }
 }
