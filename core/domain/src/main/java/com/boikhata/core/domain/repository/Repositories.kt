@@ -98,6 +98,25 @@ interface KhataRepository {
     ): String
 
     /**
+     * U-002: add a customer and (optionally) their PREVIOUS due from the paper
+     * khata in ONE atomic Room transaction (D22 pattern). The opening amount is
+     * written as a [com.boikhata.core.domain.enums.KhataEntryType.OPENING] entry
+     * — AgingCalculator treats OPENING as an initial credit, KhataStatementBuilder
+     * labels it «পূর্ববর্তী», and per D34 OPENING creates NO cashbook mirror
+     * (pre-app money never moved inside the app — it is a receivable, not a
+     * cash flow). openingDue <= 0.01 writes no entry at all.
+     */
+    suspend fun addCustomerWithOpeningDue(
+        tenantId: String,
+        nameBn: String,
+        phone: String?,
+        address: String?,
+        creditLimit: Double,
+        openingDue: Double,
+        collectedByUserId: String,
+    ): String
+
+    /**
      * B-002: reactive stream over active khata customers (Room invalidation-tracked).
      * Non-suspend by contract — Flow-returning reads must not be suspend, so
      * collectors observe inserts from any screen/ViewModel instance without

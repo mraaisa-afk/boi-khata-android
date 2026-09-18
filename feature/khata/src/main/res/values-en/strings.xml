@@ -6,6 +6,7 @@
     <string name="area_address">Area / Address</string>
     <string name="phone_optional">Phone (optional)</string>
     <string name="credit_limit">Credit Limit (৳)</string>
+    <string name="previous_due_optional">Previous due (optional, ৳)</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>

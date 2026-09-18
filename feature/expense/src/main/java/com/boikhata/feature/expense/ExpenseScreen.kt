@@ -2,6 +2,8 @@ package com.boikhata.feature.expense
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +21,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -40,25 +41,34 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.boikhata.core.designsystem.ColorBrandMaroon
 import com.boikhata.core.designsystem.format.DigitStyle
 import com.boikhata.core.designsystem.format.NumberFormatter
 import com.boikhata.core.domain.enums.CashbookAccount
 import com.boikhata.core.domain.enums.CashbookEntryType
 import com.boikhata.core.domain.model.ExpenseCategory
+import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.feature.expense.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 /**
- * P3a: Expense screen with 3 tabs — খরচ (expense), ক্যাশবক (cashbook), মালিকের তোলা (owner drawing).
+ * P3a: Expense screen with 3 tabs — খরচ (expense), ক্যাশবুক (cashbook), মালিকের তোলা (owner drawing).
+ * B-010/B-012: the add sheets were un-usable on Bangla keyboards — the category
+ * dropdown could never open (dead state) and every amount parse was ASCII-only
+ * (B-007 class). Sheets now use always-visible category chips (D87 §1: bounded
+ * local dataset renders the FULL list) and BengaliNormalizer-normalized parsing.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,14 +96,28 @@ fun ExpenseScreen(
 
     Scaffold(
         floatingActionButton = {
+            // D71 §1 (B-008 precedent): FABs use the brand palette, never the M3
+            // default primaryContainer (pink) — same fix as the khata add FAB.
             when (selectedTab) {
-                0 -> FloatingActionButton(onClick = { showAddExpense = true }) {
+                0 -> FloatingActionButton(
+                    onClick = { showAddExpense = true },
+                    containerColor = ColorBrandMaroon,
+                    contentColor = Color.White,
+                ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_expense))
                 }
-                1 -> FloatingActionButton(onClick = { showAddCashbookEntry = true }) {
+                1 -> FloatingActionButton(
+                    onClick = { showAddCashbookEntry = true },
+                    containerColor = ColorBrandMaroon,
+                    contentColor = Color.White,
+                ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_entry))
                 }
-                2 -> FloatingActionButton(onClick = { showAddDrawing = true }) {
+                2 -> FloatingActionButton(
+                    onClick = { showAddDrawing = true },
+                    containerColor = ColorBrandMaroon,
+                    contentColor = Color.White,
+                ) {
                     Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_drawing))
                 }
             }
@@ -375,8 +399,17 @@ private fun DrawingTab(viewModel: ExpenseViewModel) {
     }
 }
 
+/**
+ * B-007/B-010: the single parse every amount field in this file uses —
+ * Bangla-keyboard digits (০-৯) are normalized to ASCII before toDoubleOrNull;
+ * a raw parse silently returned null and permanently disabled সেভ.
+ */
+internal fun parseAmountInput(raw: String): Double? =
+    BengaliNormalizer.toAsciiDigits(raw).toDoubleOrNull()
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun AddExpenseSheet(
+internal fun AddExpenseSheet(
     categories: List<ExpenseCategory>,
     onConfirm: (categoryId: String, amount: Double, description: String, account: CashbookAccount) -> Unit,
     onCancel: () -> Unit,
@@ -385,24 +418,32 @@ private fun AddExpenseSheet(
     var amount by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedAccount by remember { mutableStateOf(CashbookAccount.CASH) }
-    var dropdownExpanded by remember { mutableStateOf(false) }
 
+    // B-010: Save required a category that was UNREACHABLE — the old readOnly
+    // text field fronted a DropdownMenu whose expanded state was never set true,
+    // so nothing could ever be selected and সেভ stayed gray forever. Replaced
+    // with always-visible chips (D87 §1: bounded local dataset = full list
+    // rendered; §3: explicit empty state when the list is empty).
     Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
         Text(stringResource(R.string.add_expense), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(12.dp))
 
-        // Category dropdown
-        OutlinedTextField(
-            value = selectedCategory?.nameBn ?: "",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(stringResource(R.string.category)) },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        if (categories.isNotEmpty()) {
-            androidx.compose.material3.DropdownMenu(expanded = dropdownExpanded, onDismissRequest = { dropdownExpanded = false }) {
+        Text(stringResource(R.string.category), style = MaterialTheme.typography.labelMedium)
+        Spacer(Modifier.height(4.dp))
+        if (categories.isEmpty()) {
+            Text(
+                stringResource(R.string.no_categories),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        } else {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 categories.forEach { cat ->
-                    DropdownMenuItem(text = { Text(cat.nameBn) }, onClick = { selectedCategory = cat; dropdownExpanded = false })
+                    androidx.compose.material3.FilterChip(
+                        selected = selectedCategory == cat,
+                        onClick = { selectedCategory = if (selectedCategory == cat) null else cat },
+                        label = { Text(cat.nameBn) },
+                    )
                 }
             }
         }
@@ -413,6 +454,7 @@ private fun AddExpenseSheet(
             label = { Text(stringResource(R.string.amount)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
@@ -423,7 +465,7 @@ private fun AddExpenseSheet(
             singleLine = true,
         )
         Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             CashbookAccount.entries.forEach { account ->
                 androidx.compose.material3.FilterChip(
                     selected = selectedAccount == account,
@@ -443,12 +485,12 @@ private fun AddExpenseSheet(
             Button(
                 onClick = {
                     val cat = selectedCategory
-                    val amt = amount.toDoubleOrNull() ?: 0.0
+                    val amt = parseAmountInput(amount) ?: 0.0
                     if (cat != null && amt > 0) {
                         onConfirm(cat.id, amt, description, selectedAccount)
                     }
                 },
-                enabled = selectedCategory != null && (amount.toDoubleOrNull() ?: 0.0) > 0,
+                enabled = selectedCategory != null && (parseAmountInput(amount) ?: 0.0) > 0,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.save)) }
         }
@@ -456,7 +498,7 @@ private fun AddExpenseSheet(
 }
 
 @Composable
-private fun AddCashbookEntrySheet(
+internal fun AddCashbookEntrySheet(
     onConfirm: (account: CashbookAccount, type: CashbookEntryType, amount: Double, description: String) -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -494,6 +536,7 @@ private fun AddCashbookEntrySheet(
             label = { Text(stringResource(R.string.amount)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
@@ -508,10 +551,10 @@ private fun AddCashbookEntrySheet(
             TextButton(onClick = onCancel, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.cancel)) }
             Button(
                 onClick = {
-                    val amt = amount.toDoubleOrNull() ?: 0.0
+                    val amt = parseAmountInput(amount) ?: 0.0
                     if (amt > 0) onConfirm(selectedAccount, selectedType, amt, description)
                 },
-                enabled = (amount.toDoubleOrNull() ?: 0.0) > 0,
+                enabled = (parseAmountInput(amount) ?: 0.0) > 0,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.save)) }
         }
@@ -519,7 +562,7 @@ private fun AddCashbookEntrySheet(
 }
 
 @Composable
-private fun AddDrawingSheet(
+internal fun AddDrawingSheet(
     onConfirm: (amount: Double, description: String) -> Unit,
     onCancel: () -> Unit,
 ) {
@@ -535,6 +578,7 @@ private fun AddDrawingSheet(
             label = { Text(stringResource(R.string.amount)) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         )
         Spacer(Modifier.height(8.dp))
         OutlinedTextField(
@@ -549,10 +593,10 @@ private fun AddDrawingSheet(
             TextButton(onClick = onCancel, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.cancel)) }
             Button(
                 onClick = {
-                    val amt = amount.toDoubleOrNull() ?: 0.0
+                    val amt = parseAmountInput(amount) ?: 0.0
                     if (amt > 0) onConfirm(amt, description)
                 },
-                enabled = (amount.toDoubleOrNull() ?: 0.0) > 0,
+                enabled = (parseAmountInput(amount) ?: 0.0) > 0,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.save)) }
         }

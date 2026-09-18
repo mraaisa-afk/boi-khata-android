@@ -11,6 +11,7 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
+    <string name="no_categories">No expense categories.</string>
     <string name="no_expenses">No expenses yet.</string>
     <string name="no_drawings">No drawings yet.</string>
     <string name="expense_history">Expense History</string>

@@ -1,5 +1,7 @@
 package com.boikhata.core.database.repository
 
+import androidx.room.withTransaction
+import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.KhataCustomerDao
 import com.boikhata.core.database.dao.KhataEntryDao
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.map
  * D81: getKhataCollectionByDateRange — delegates to KhataEntryDao aggregate query.
  */
 class KhataRepositoryImpl @Inject constructor(
+    private val db: BoiKhataDatabase,
     private val khataCustomerDao: KhataCustomerDao,
     private val khataEntryDao: KhataEntryDao,
     private val khataInstallmentDao: KhataInstallmentDao,
@@ -88,6 +91,43 @@ class KhataRepositoryImpl @Inject constructor(
             )
         )
         return id
+    }
+
+    /**
+     * U-002: customer + OPENING entry in ONE atomic transaction (D22 pattern —
+     * mirrors SaleRepositoryImpl.createBill). A crash between the two inserts
+     * must never leave a "customer exists but their recorded previous due is
+     * silently lost" half-state. Reuses the guarded addCustomer/addEntry paths
+     * (write-guard, D32 period-lock, D34 cashbook rule) — the OPENING entry
+     * mirrors nothing to the cashbook because cashbookAccount stays null AND
+     * type != PAYMENT (KhataRepositoryImpl.addEntry D34 branch).
+     */
+    override suspend fun addCustomerWithOpeningDue(
+        tenantId: String,
+        nameBn: String,
+        phone: String?,
+        address: String?,
+        creditLimit: Double,
+        openingDue: Double,
+        collectedByUserId: String,
+    ): String {
+        writeGuard.assertWriteAllowed()
+        return db.withTransaction {
+            val customerId = addCustomer(tenantId, nameBn, phone, address, creditLimit)
+            if (openingDue > 0.01) {
+                addEntry(
+                    tenantId = tenantId,
+                    customerId = customerId,
+                    amount = openingDue,
+                    type = KhataEntryType.OPENING,
+                    description = "পূর্বের বাকি",
+                    referenceBillId = null,
+                    collectedByUserId = collectedByUserId,
+                    cashbookAccount = null, // D34: OPENING is a receivable, not a cash flow
+                )
+            }
+            customerId
+        }
     }
 
     override suspend fun getEntries(tenantId: String, customerId: String): List<KhataEntry> {
