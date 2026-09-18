@@ -31,6 +31,17 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-013 — 2026-09-18 — P11 — B-009: আরও bottom tab rendered the last-open child screen instead of its own menu after cross-tab navigation
+
+**Type:** Logic error (+ a self-caught false-green test run)
+**Phase:** P11
+**Date:** 2026-09-18
+**Task:** Owner device report after PR #66: tapping the আরও bottom-nav tab rendered something other than the আরও menu when POS had been visited and an in-screen POS action (e.g. রিপোর্ট) was open; the first আরও tap of a session was always correct.
+**Error:** No crash — wrong screen. With restoreState enabled, the tab tap landed on the stale child (Truth captured pre-fix output: `expected: more but was: reports`).
+**Root cause:** `navigateToTab` (was BoiKhataNavigation.kt:311–319) used the standard bottom-bar options `popUpTo(start){saveState=true} + launchSingleTop + restoreState=true` over a FLAT graph. Child destinations (রিপোর্ট/খরচ/ক্যাশ ক্লোজ/সাবস্ক্রিপশন/সাপ্লায়ার/মেলা/সেটিংস/বিল ইতিহাস) are pushed by plain `navigate()` from THREE entry points — the আরও menu rows (MoreScreen), the POS top-bar action row (PosScreen.kt:82–104), and HomeScreen quick links — so a child sits on whatever tab root was active when it opened. Switching tabs saves that polluted stack (e.g. `[more, reports]` or `[sale, reports]`) as the tab's restorable unit; the next tap of that tab restores the unit and lands on the CHILD, not the root. Empirically reproduced under Robolectric with a real NavHostController in `TabNavigationTest.moreTab_alwaysLandsOnMenuRoot_evenAfterChildWasSavedIntoItsUnit` — failed exactly as predicted pre-fix, passed post-fix. First-time taps were always clean (no saved unit → fresh push), which is why the owner saw it only after POS/sub-tab interleaving.
+**Fix applied:** Tab machine extracted verbatim to `app/src/main/java/com/boikhata/TabNavigation.kt` (`NavTab` + `LEADING_TABS`/`TRAILING_TABS` + `navigateToTab(route, restoreState)`), and the আরও tab is the single tab with `restoresState = false` — every আরও tap pops children, saves, and pushes a fresh menu root. খাতা keeps `restoresState = true` (list→detail restore across tab switches is intended; pinned by `khataTab_keepsRestoreState_detailSurvivesTabSwitch`). Regression suite: `app/src/test/java/com/boikhata/TabNavigationTest.kt` (5 tests) driving the REAL tab table under Robolectric (SDK 34); wiring uses only pre-declared version-catalog aliases (compose-test bundle + robolectric + test-ext-junit — no new dependency coordinates, catalog untouched).
+**Lesson:** (1) `restoreState=true` restores the WHOLE saved stack of a tab, children included — any flat route pushed from multiple entry points pollutes every tab root it was opened under; hub-style tabs need root-only restore. (2) A regression test must drive the PRODUCTION decision point (the real tab table), not restate the expected behavior with hand-set arguments — my first test draft hardcoded `restoreState = false`, went green against the buggy code, and would have "verified" nothing; the false green was caught before commit by running the test against deliberately pre-fix semantics.
+
 ## ERR-012 — 2026-09-18 — P11 — Owner device test after PR #65: stock display never moved after sale, khata history blind to cash sales, discount parser ASCII-only, pink checkout FAB
 
 **Type:** Logic error (3×) + styling regression (1×)
