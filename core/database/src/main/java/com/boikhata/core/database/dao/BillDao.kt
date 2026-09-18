@@ -21,6 +21,10 @@ interface BillDao {
     @Query("SELECT * FROM bills WHERE tenantId = :tenantId ORDER BY billDate DESC")
     suspend fun getByTenant(tenantId: String): List<BillEntity>
 
+    /** B-006: customer-linked bills — the khata detail screen's sales history source. */
+    @Query("SELECT * FROM bills WHERE tenantId = :tenantId AND customerId = :customerId ORDER BY billDate DESC")
+    suspend fun getByCustomer(tenantId: String, customerId: String): List<BillEntity>
+
     @Query("SELECT * FROM bills WHERE id = :billId")
     suspend fun getById(billId: String): BillEntity?
 

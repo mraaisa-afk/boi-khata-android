@@ -26,4 +26,8 @@
     <string name="paid">পরিশোধিত</string>
     <string name="mark_paid">পরিশোধ চিহ্নিত করুন</string>
     <string name="due_after_days">কত দিন পর মেয়াদ</string>
+    <string name="sales_history">বিক্রির ইতিহাস</string>
+    <string name="sales_total">মোট: %1$s</string>
+    <string name="sales_paid">জমা: %1$s</string>
+    <string name="sales_due">বাকি: %1$s</string>
 </resources>

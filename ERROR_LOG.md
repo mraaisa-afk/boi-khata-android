@@ -31,6 +31,24 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-012 — 2026-09-18 — P11 — Owner device test after PR #65: stock display never moved after sale, khata history blind to cash sales, discount parser ASCII-only, pink checkout FAB
+
+**Type:** Logic error (3×) + styling regression (1×)
+**Phase:** P11
+**Date:** 2026-09-18
+**Task:** Owner device-testing of the PR #65 build found 4 defects: (1) opening stock মিসির আলী=40 / হিমু=30 unchanged after a 3+3-unit sale; (2) the customer's khata page still showed «কোনো লেনদেন নেই» after a sale to করিম; (3) the ছাড় discount field appeared cosmetic; (4) the «বিক্রি সম্পন্ন» checkout control rendered as a small pink pill unlike every standard button.
+
+**Error / Root cause (per issue, verified line-level):**
+1. **Stock (B-005) — read-side display gap, NOT a missing decrement.** `SaleRepositoryImpl.createBill` (core/database/.../SaleRepositoryImpl.kt, D22 transaction step 3) correctly appends `stock_ledger` rows with `changeQuantity = -qty`. But `CatalogScreen.kt:159` displayed `book.initialStock` — the static opening column — and the domain `Book` model had no current-stock field at all. `BookRepositoryImpl.kt` D79 note explicitly deferred the "stock-ledger join" to a "PR E" that never landed. The decrement was recorded; nothing read it. Secondary inconsistency: `AccountingRepositoryImpl.getBalanceSheet` valued inventory at bare `SUM(ledger)` WITHOUT initialStock — a book with opening stock 40 and no movement was valued at zero.
+2. **Khata history (B-006) — write is conditional, display never looked at bills.** `SaleRepositoryImpl.createBill` step 4 writes a khata entry ONLY when `dueAmount > 0.01 && customerId != null`. A fully-paid নগদ sale → due = 0 → no khata entry → `KhataViewModel.loadDetail` (which reads only `khataRepository.getEntries`) shows «কোনো লেনদেন নেই». The bill IS written with `customerId` (explains home «১টি বিক্রি, আয় ৳১,৯৫০») but `BillDao` had no `getByCustomer` query anywhere.
+3. **Discount (B-007) — parser, not wiring.** The field IS wired (`PosScreen` → `setDiscount` → `recalculateTotals` computes discount and total correctly for ASCII input — proven by new `SaleViewModelTest`). But parsing used `toDoubleOrNull()`, which accepts ASCII [0-9] only; the app's output digits are Bangla (DigitStyle.BANGLA) and Bangla keyboards emit ০-৯, so a Bengali digit silently parses to null → 0 discount → "the total never moved". Glyph forensics on the screenshot were inconclusive (৪ renders nearly identical to ASCII 8 in Noto Sans Bengali), so BOTH robustness paths were fixed: Bengali-digit-tolerant parsing (`BengaliNormalizer.toAsciiDigits`) on discount + paid-amount inputs, and digit-only input filters on both fields.
+4. **Checkout button (B-008) — unmapped M3 token.** The checkout control was a default `FloatingActionButton`, whose M3 default container is `primaryContainer = Color(0xFFFFD7D7)` (BoiKhataTheme.kt:22) — the pink pill. The D71/D75 design-enforcement passes never touched the POS screen's FAB.
+
+**Fix applied:** B-005 — `StockLedgerDao.getDeltasByTenant` (one grouped query), `Book.currentStock` derived as `initialStock + delta` in every `BookRepositoryImpl` read path, Catalog tab + low-stock alerts + balance-sheet inventory all switched to live stock. B-006 — `BillDao.getByCustomer` + `BillRepository.getBillsByCustomer` + «বিক্রির ইতিহাস» section in `KhataCustomerDetailScreen` (display-only; money ledger untouched). B-007 — Bengali-digit-tolerant parsing + input filters. B-008 — full-width standard primary `Button` (theme primary #800000 / onPrimary white). Regression tests: `SaleRepositoryImplTest` (table-level before/after evidence), `BookRepositoryImplTest` (40 → 37), `SaleViewModelTest` (discount/partial/tenant math), `BengaliNormalizerTest` additions.
+
+**Lesson:** An append-only ledger without a read-side derivation is a silent no-op for the user; and any numeric input field in a Bangla-locale app must parse ০-৯ or it will randomly do nothing. UI default tokens (FAB primaryContainer) are design decisions by omission — enforce the palette on every new screen, not just the ones an audit covers.
+
+
 ## ERR-011 — 2026-09-18 — P11 — B-004: khata customer appears only after app restart — add-customer writes under the seed tenant "t_1"
 
 **Type:** Logic error

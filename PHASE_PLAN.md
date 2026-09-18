@@ -142,7 +142,7 @@
 
 **D-decisions:** D71–D84 (subset)
 
-**Open blocker:** Max font-scale device test; U-001 device re-test (buyer/book pickers show lists on open); dedicated Alerts screen needs D-ruling (D84 TODO); premium-badge spec lost to corruption needs re-ruling (ERR-008); rebind-per-launch one-time-persisted needs owner ruling (D86 §3).
+**Open blocker:** Max font-scale device test; U-001 + B-005/B-006 device re-test (stock changes after sale; khata shows বিক্রির ইতিহাস); dedicated Alerts screen needs D-ruling (D84 TODO); premium-badge re-ruling (ERR-008); rebind one-time-persist (D86 §3); home-header ivory remap + partial-payment UX need owner rulings (D88/D89 proposals, PROGRESS).
 
 ---
 
@@ -150,9 +150,9 @@
 
 **Gate note:** Opened by owner instruction 2026-09-17 while the P10 exit-gate remains device-pending; the device test is carried into P11. P9 unused (numbering skip).
 
-**Scope:** Device-bug fixes (B-003 add-book "+" crash per D85, PR #63, device-confirmed; B-004 khata customer only-after-restart per D86, PR #64, device-confirmed; U-001 POS buyer/book pickers blank-on-open per D87 — search-as-filter), NavHost route constants (dead-route fail-fast), Roborazzi max-font-scale screenshot tests, Alerts screen (pending D-ruling), premium-badge re-ruling (ERR-008), open-PR dispositions (#58/#59/#50), rebind-per-launch follow-up (D86 §3 — needs owner ruling).
+**Scope:** Device-bug fixes (B-003 add-book "+" crash per D85, PR #63, device-confirmed; B-004 khata customer only-after-restart per D86, PR #64, device-confirmed; U-001 POS pickers blank-on-open per D87, PR #65, merged; B-005 stock display never moved after sale (read-side ledger derivation), B-006 khata history blind to cash sales (getBillsByCustomer + বিক্রির ইতিহাস), B-007 discount Bangla-digit parsing, B-008 checkout button pink FAB → standard primary button — ERR-012), NavHost route constants (dead-route fail-fast), Roborazzi max-font-scale screenshot tests, Alerts screen (pending D-ruling), premium-badge re-ruling (ERR-008), open-PR dispositions (#58/#59/#50), rebind-per-launch follow-up (D86 §3 — needs owner ruling).
 
-**D-decisions:** D82–D84 (basis); D85 (B-003 optional-arg navigation ruling); D86 (write-path tenant threading, fixes B-004); D87 (search-as-filter pickers + U-register, fixes U-001)
+**D-decisions:** D82–D84 (basis); D85 (B-003 optional-arg navigation ruling); D86 (write-path tenant threading, fixes B-004); D87 (search-as-filter pickers + U-register, fixes U-001); D88/D89 — proposals pending owner ruling (header color remap; partial-payment UX formalization)
 
 ---
 

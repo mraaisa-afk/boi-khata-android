@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.boikhata.core.designsystem.format.DigitStyle
 import com.boikhata.core.designsystem.format.NumberFormatter
 import com.boikhata.core.domain.enums.KhataEntryType
+import com.boikhata.core.domain.model.BillSummary
 import com.boikhata.core.domain.model.KhataInstallment
 import com.boikhata.core.domain.model.KhataStatementLine
 import com.boikhata.feature.khata.R
@@ -290,6 +291,23 @@ private fun DetailContent(
             }
         }
 
+        // B-006: sales history — customer-linked bills. A fully-paid cash sale
+        // writes no khata entry (due == 0), so the bill itself must be listed here
+        // or the sale is invisible on the khata screen.
+        if (state.bills.isNotEmpty()) {
+            item {
+                Text(
+                    text = stringResource(R.string.sales_history),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+            items(state.bills) { bill ->
+                SalesHistoryCard(bill, dateFormat)
+            }
+        }
+
         // Installments
         if (state.installments.isNotEmpty()) {
             item {
@@ -329,6 +347,46 @@ private fun StatementLineCard(line: KhataStatementLine, dateFormat: SimpleDateFo
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
             )
+        }
+    }
+}
+
+/**
+ * B-006: one customer-linked bill in the khata detail's sales-history section.
+ * Read-only display — the money ledger (khata_entries / aging / মোট বাকি) is untouched.
+ */
+@Composable
+private fun SalesHistoryCard(bill: BillSummary, dateFormat: SimpleDateFormat) {
+    Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(1.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column {
+                Text(
+                    "${dateFormat.format(Date(bill.billDate))}  #${bill.billNumber}",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Text(
+                    stringResource(R.string.sales_total, NumberFormatter.formatMoney(bill.totalAmount, DigitStyle.BANGLA)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    stringResource(R.string.sales_paid, NumberFormatter.formatMoney(bill.paidAmount, DigitStyle.BANGLA)),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                if (bill.dueAmount > 0.01) {
+                    Text(
+                        stringResource(R.string.sales_due, NumberFormatter.formatMoney(bill.dueAmount, DigitStyle.BANGLA)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
         }
     }
 }

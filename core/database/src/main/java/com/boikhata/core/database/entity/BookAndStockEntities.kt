@@ -30,6 +30,12 @@ data class BookEntity(
     val updatedAt: Long,
 )
 
+/** B-005: projection POJO — per-book stock-ledger delta for one tenant (not a table). */
+data class BookStockDelta(
+    val bookId: String,
+    val delta: Int,
+)
+
 /** CONVENTIONS §3 🔒: stock_ledger(id PK, tenantId, bookId, changeQuantity, reason, referenceId?,
  *  userId, timestamp, idempotencyKey) — append-only money table */
 @Entity(tableName = "stock_ledger")

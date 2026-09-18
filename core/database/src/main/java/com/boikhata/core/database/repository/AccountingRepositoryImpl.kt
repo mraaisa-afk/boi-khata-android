@@ -109,10 +109,13 @@ class AccountingRepositoryImpl @Inject constructor(
         val balances = com.boikhata.core.domain.accounting.CashbookBalanceCalculator
             .calculateAllBalances(cashEntries)
 
-        // Inventory: current stock per book × purchasePrice
+        // Inventory: (initialStock + stock_ledger delta) × purchasePrice
+        // B-005: bare SUM(ledger) missed the opening stock entirely — a book with
+        // initialStock=40 and no ledger movement was valued at zero inventory.
         val books = bookDao.getActiveByTenant(tenantId)
+        val stockDeltas = stockLedgerDao.getDeltasByTenant(tenantId).associate { it.bookId to it.delta }
         val inventory = books.map { book ->
-            val stockQty = stockLedgerDao.getStockQuantityForBook(book.id)
+            val stockQty = book.initialStock + (stockDeltas[book.id] ?: 0)
             BalanceSheetCalculator.BookInventory(
                 bookId = book.id,
                 purchasePrice = book.purchasePrice,

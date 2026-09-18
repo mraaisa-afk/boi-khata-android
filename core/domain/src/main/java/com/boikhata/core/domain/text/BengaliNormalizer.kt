@@ -43,6 +43,22 @@ object BengaliNormalizer {
     private val banglaDigits = charArrayOf('০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯')
 
     /**
+     * B-007: Bengali-digit → ASCII-digit conversion for NUMERIC INPUT parsing.
+     * The app renders amounts in Bangla digits (DigitStyle.BANGLA) and Bangla
+     * keyboards emit ০-৯, but Double.parseDouble only accepts ASCII [0-9] —
+     * so an unparsed "৪" silently became a 0 discount. Use before toDoubleOrNull
+     * on any user-typed amount. Leaves non-digit characters untouched.
+     */
+    fun toAsciiDigits(input: String): String {
+        if (input.isEmpty()) return input
+        return buildString(input.length) {
+            for (ch in input) {
+                if (ch in banglaDigits) append(ch - '\u09E6') else append(ch)
+            }
+        }
+    }
+
+    /**
      * Normalize a Bengali string to its consonant-skeleton form.
      * Returns lowercase Latin for mixed scripts.
      */

@@ -149,6 +149,14 @@ interface BillRepository {
     suspend fun getBillsByDate(tenantId: String, startOfDay: Long, endOfDay: Long): List<com.boikhata.core.domain.model.BillSummary>
     suspend fun getTopBills(tenantId: String, limit: Int): List<com.boikhata.core.domain.model.BillSummary>
     suspend fun getAllBills(tenantId: String): List<com.boikhata.core.domain.model.BillSummary>
+
+    /**
+     * B-006: bills linked to a khata customer (bills.customerId), newest first.
+     * Read-side companion to the khata entry ledger: a fully-paid cash sale writes
+     * NO khata entry (due == 0), so the customer's history must surface the bill
+     * itself or the sale is invisible on the khata screen.
+     */
+    suspend fun getBillsByCustomer(tenantId: String, customerId: String): List<com.boikhata.core.domain.model.BillSummary>
     suspend fun getBill(tenantId: String, billId: String): Bill?
     suspend fun getBillLines(billId: String): List<BillLine>
     suspend fun createBill(
