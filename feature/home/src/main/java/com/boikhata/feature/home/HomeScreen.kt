@@ -145,8 +145,9 @@ private fun HomeAppBar(shopName: String, isLicensed: Boolean) {
     // D88 (owner ruling — supersedes D71 §1 "app bar = maroon" pending the owner's
     // DECISIONS.md commit): header surface ivory #FDFAF6, all header content maroon
     // #800000 = 10.52:1 (WCAG AAA). The previous white-on-maroon tokens already
-    // passed AA (10.95 / 5.7 / 4.2:1) — this remap removes the large-area maroon
-    // saturation reported as eye strain; it was never a contrast failure.
+    // passed their thresholds (white #FFFFFF 10.95:1; white-80% #E6E6E6 7.23:1;
+    // white-60% #CCCCCC 4.48:1 — dropdown ICON, ≥3:1 graphics) — this remap removes
+    // the large-area maroon saturation reported as eye strain; not a contrast failure.
     Surface(modifier = Modifier.fillMaxWidth(), color = ColorSurfaceIvory, tonalElevation = 0.dp) {
         Column(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp),
