@@ -127,7 +127,7 @@
 | `agent/fix-b3-bookid-nav-null-crash` | #63 | B-003 bookId nav "null"-segment crash fix + ERR-009/010, D85 | Merged |
 | `agent/fix-b4-khata-tenant-write` | #64 | B-004 write-path tenant fix (khata add-customer) + ERR-011, D86 | Merged |
 | `agent/p11-u1-pos-picker-lists` | #65 | U-001 POS picker auto-load (search-as-filter) + D87 | Merged |
-| `agent/p11-b5-checkout-stock-ledger-fixes` | — | B-005 live stock + B-006 khata sales history + B-007 Bangla-digit parsing + B-008 checkout button; ERR-012 | Open — ready to push |
+| `agent/p11-b5-checkout-stock-ledger-fixes` | #66 | B-005 live stock + B-006 khata sales history + B-007 Bangla-digit parsing + B-008 checkout button; ERR-012 | Open — CI running |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
