@@ -9,6 +9,8 @@
     <string name="add_books">বই যোগ করুন</string>
     <string name="add_more_books">আরও বই যোগ করুন</string>
     <string name="search_books">বই খুঁজুন…</string>
+    <string name="no_books_found">কোনো বই পাওয়া যায়নি</string>
+    <string name="no_customers_found">কোনো ক্রেতা পাওয়া যায়নি</string>
     <string name="search_customers">ক্রেতা খুঁজুন…</string>
     <string name="discount">ছাড়</string>
     <string name="payment_method">পেমেন্ট মাধ্যম</string>

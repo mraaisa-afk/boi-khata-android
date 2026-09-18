@@ -19,6 +19,8 @@ import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.shared.receipt.ReceiptBuilder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,21 +44,35 @@ class SaleViewModel @Inject constructor(
     private val _bookSearchState = MutableStateFlow<BookSearchState>(BookSearchState.Idle)
     val bookSearchState: StateFlow<BookSearchState> = _bookSearchState.asStateFlow()
 
+    // U-001/D87: dedicated state for the POS customer picker — the sheet auto-loads
+    // the full customer list on open (blank query = full list per repo contract),
+    // so the buyer sheet is never blank before the first keystroke.
+    private val _customerSearchState = MutableStateFlow<CustomerSearchState>(CustomerSearchState.Idle)
+    val customerSearchState: StateFlow<CustomerSearchState> = _customerSearchState.asStateFlow()
+
     private val _historyState = MutableStateFlow<HistoryUiState>(HistoryUiState.Loading)
     val historyState: StateFlow<HistoryUiState> = _historyState.asStateFlow()
 
     private var currentTenantId: String = "t_1"
 
+    // U-001/D87: cancel the previous query when a new keystroke fires — prevents a
+    // slow older search from overwriting newer results (out-of-order emission).
+    private var bookSearchJob: Job? = null
+    private var customerSearchJob: Job? = null
+
     // ── Book search for cart ───────────────────────────────────────────────
 
     fun searchBooks(tenantId: String, query: String) {
         currentTenantId = tenantId
-        viewModelScope.launch {
+        bookSearchJob?.cancel()
+        bookSearchJob = viewModelScope.launch {
             _bookSearchState.value = BookSearchState.Loading
             try {
                 val normalized = BengaliNormalizer.normalize(query)
                 val books = bookRepository.searchBooks(tenantId, normalized)
                 _bookSearchState.value = BookSearchState.Success(books)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _bookSearchState.value = BookSearchState.Error(e.message ?: "ত্রুটি")
             }
@@ -115,13 +131,24 @@ class SaleViewModel @Inject constructor(
         _cartState.value = _cartState.value.copy(selectedCustomer = customer)
     }
 
+    /**
+     * U-001/D87: blank query returns the FULL active customer list (repo contract:
+     * searchCustomers with blank → getCustomers). The picker sheet fires this on
+     * open so existing customers are visible before any keystroke; typing filters.
+     */
     fun searchCustomers(tenantId: String, query: String) {
-        viewModelScope.launch {
+        customerSearchJob?.cancel()
+        customerSearchJob = viewModelScope.launch {
+            _customerSearchState.value = CustomerSearchState.Loading
             try {
                 val normalized = BengaliNormalizer.normalize(query)
                 val customers = khataRepository.searchCustomers(tenantId, normalized)
-                _cartState.value = _cartState.value.copy(customerSearchResults = customers)
-            } catch (_: Exception) { }
+                _customerSearchState.value = CustomerSearchState.Success(customers)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _customerSearchState.value = CustomerSearchState.Error(e.message ?: "ত্রুটি")
+            }
         }
     }
 
@@ -159,7 +186,11 @@ class SaleViewModel @Inject constructor(
         )
     }
 
-    fun checkout(onDone: (String) -> Unit, onError: (String) -> Unit) {
+    /**
+     * D86 rule 1: the write tenant is threaded explicitly from the PosScreen
+     * destination — never read from VM-side mutable state at write time.
+     */
+    fun checkout(tenantId: String, onDone: (String) -> Unit, onError: (String) -> Unit) {
         val state = _cartState.value
         if (state.items.isEmpty()) {
             onError("কার্ট খালি")
@@ -170,6 +201,12 @@ class SaleViewModel @Inject constructor(
             onError("বাকি থাকলে ক্রেতা নির্বাচন করুন")
             return
         }
+        if (tenantId.isBlank()) {
+            // D86 fail-fast: refuse to guess a tenant for a write.
+            onError("টেনান্ট শনাক্ত করা যায়নি — অ্যাপ রিস্টার্ট করুন")
+            return
+        }
+        currentTenantId = tenantId
 
         viewModelScope.launch {
             try {
@@ -277,7 +314,6 @@ data class CartItem(
 data class CartState(
     val items: List<CartItem> = emptyList(),
     val selectedCustomer: KhataCustomer? = null,
-    val customerSearchResults: List<KhataCustomer> = emptyList(),
     val discountInput: String = "",
     val isPercentageDiscount: Boolean = true,
     val paymentMethod: PaymentMethod = PaymentMethod.CASH,
@@ -295,6 +331,14 @@ sealed interface BookSearchState {
     data object Loading : BookSearchState
     data class Success(val books: List<Book>) : BookSearchState
     data class Error(val message: String) : BookSearchState
+}
+
+/** U-001/D87: mirrors BookSearchState for the POS buyer picker sheet. */
+sealed interface CustomerSearchState {
+    data object Idle : CustomerSearchState
+    data object Loading : CustomerSearchState
+    data class Success(val customers: List<KhataCustomer>) : CustomerSearchState
+    data class Error(val message: String) : CustomerSearchState
 }
 
 sealed interface HistoryUiState {

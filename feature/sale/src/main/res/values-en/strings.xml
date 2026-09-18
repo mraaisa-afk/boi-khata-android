@@ -9,6 +9,8 @@
     <string name="add_books">Add Books</string>
     <string name="add_more_books">Add More Books</string>
     <string name="search_books">Search books…</string>
+    <string name="no_books_found">No books found</string>
+    <string name="no_customers_found">No customers found</string>
     <string name="search_customers">Search customers…</string>
     <string name="discount">Discount</string>
     <string name="payment_method">Payment Method</string>
