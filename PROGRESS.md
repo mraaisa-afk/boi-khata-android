@@ -130,7 +130,7 @@
 | `agent/fix-b4-khata-tenant-write` | #64 | B-004 write-path tenant fix (khata add-customer) + ERR-011, D86 | Merged |
 | `agent/p11-u1-pos-picker-lists` | #65 | U-001 POS picker auto-load (search-as-filter) + D87 | Merged |
 | `agent/p11-b5-checkout-stock-ledger-fixes` | #66 | B-005 live stock + B-006 khata sales history + B-007 Bangla-digit parsing + B-008 checkout button; ERR-012 | Merged (CI green) |
-| `agent/p11-b9-d88-header-more-nav` | — | B-009 আরও-tab state restoration + TabNavigationTest; D88 HomeAppBar ivory remap (owner ruling); D89 deferred-untouched; ERR-013 | Open — awaiting push token |
+| `agent/p11-b9-d88-header-more-nav` | #67 | B-009 আরও-tab state restoration + TabNavigationTest; D88 HomeAppBar ivory remap (owner ruling); D89 deferred-untouched; ERR-013 | Open — CI running |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
