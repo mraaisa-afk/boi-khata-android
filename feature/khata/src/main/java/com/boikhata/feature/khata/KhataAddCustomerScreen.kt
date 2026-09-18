@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.feature.khata.R
 
 /**
@@ -49,6 +50,9 @@ fun KhataAddCustomerScreen(
     var phone by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
     var creditLimit by remember { mutableStateOf("5000") }
+    // U-002: optional previous due from the paper khata — recorded as an
+    // OPENING entry (পূর্বের বাকি) in the same transaction as the customer row.
+    var openingDue by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -100,6 +104,14 @@ fun KhataAddCustomerScreen(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             )
+            OutlinedTextField(
+                value = openingDue,
+                onValueChange = { openingDue = it.filter { c -> c.isDigit() || c == '.' } },
+                label = { Text(stringResource(R.string.previous_due_optional)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            )
             Button(
                 onClick = {
                     viewModel.addCustomer(
@@ -107,7 +119,8 @@ fun KhataAddCustomerScreen(
                         nameBn = nameBn,
                         phone = phone.ifBlank { null },
                         address = address.ifBlank { null },
-                        creditLimit = creditLimit.toDoubleOrNull() ?: 0.0,
+                        creditLimit = BengaliNormalizer.toAsciiDigits(creditLimit).toDoubleOrNull() ?: 0.0,
+                        openingDue = BengaliNormalizer.toAsciiDigits(openingDue).toDoubleOrNull() ?: 0.0,
                         onDone = onBack,
                     )
                 },

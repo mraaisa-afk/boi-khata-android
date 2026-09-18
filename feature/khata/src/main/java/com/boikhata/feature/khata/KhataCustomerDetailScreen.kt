@@ -50,6 +50,7 @@ import com.boikhata.core.designsystem.format.NumberFormatter
 import com.boikhata.core.domain.enums.KhataEntryType
 import com.boikhata.core.domain.model.BillSummary
 import com.boikhata.core.domain.model.KhataInstallment
+import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.core.domain.model.KhataStatementLine
 import com.boikhata.feature.khata.R
 import java.text.SimpleDateFormat
@@ -450,8 +451,8 @@ private fun AmountDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(amount.toDoubleOrNull() ?: 0.0, description) },
-                enabled = amount.isNotBlank() && (amount.toDoubleOrNull() ?: 0.0) > 0,
+                onClick = { onConfirm(BengaliNormalizer.toAsciiDigits(amount).toDoubleOrNull() ?: 0.0, description) },
+                enabled = amount.isNotBlank() && (BengaliNormalizer.toAsciiDigits(amount).toDoubleOrNull() ?: 0.0) > 0,
             ) { Text(stringResource(R.string.save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }
@@ -490,11 +491,11 @@ private fun InstallmentDialog(
         confirmButton = {
             TextButton(
                 onClick = {
-                    val amt = amount.toDoubleOrNull() ?: 0.0
-                    val days = daysFromNow.toLongOrNull() ?: 30
+                    val amt = BengaliNormalizer.toAsciiDigits(amount).toDoubleOrNull() ?: 0.0
+                    val days = BengaliNormalizer.toAsciiDigits(daysFromNow).toLongOrNull() ?: 30
                     if (amt > 0) onConfirm(System.currentTimeMillis() + days * 24 * 60 * 60 * 1000, amt)
                 },
-                enabled = amount.isNotBlank() && (amount.toDoubleOrNull() ?: 0.0) > 0,
+                enabled = amount.isNotBlank() && (BengaliNormalizer.toAsciiDigits(amount).toDoubleOrNull() ?: 0.0) > 0,
             ) { Text(stringResource(R.string.save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } }

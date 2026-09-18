@@ -58,4 +58,13 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    // B-010/B-012: ExpenseSheetsTest — JVM (Robolectric) Compose-UI test driving
+    // the real add-sheets. Aliases pre-declared in gradle/libs.versions.toml
+    // (same block as the app module's TabNavigationTest); no new coordinates.
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.robolectric)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

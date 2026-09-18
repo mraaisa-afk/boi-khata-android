@@ -1,6 +1,6 @@
 <resources>
     <string name="tab_expense">খরচ</string>
-    <string name="tab_cashbook">ক্যাশবক</string>
+    <string name="tab_cashbook">ক্যাশবুক</string>
     <string name="tab_drawing">মালিকের তোলা</string>
     <string name="add_expense">খরচ যোগ করুন</string>
     <string name="add_entry">এন্ট্রি যোগ করুন</string>
@@ -11,6 +11,7 @@
     <string name="save">সেভ</string>
     <string name="cancel">বাতিল</string>
     <string name="ok">ঠিক আছে</string>
+    <string name="no_categories">কোনো খরচের খাত নেই।</string>
     <string name="no_expenses">কোনো খরচ নেই।</string>
     <string name="no_drawings">কোনো তোলা নেই।</string>
     <string name="expense_history">খরচের ইতিহাস</string>

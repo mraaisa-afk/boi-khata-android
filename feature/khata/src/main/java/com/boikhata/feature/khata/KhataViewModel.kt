@@ -137,6 +137,9 @@ class KhataViewModel @Inject constructor(
      * (correctly scoped to the claims tenant) re-emitted without the new row, and
      * the D41 rebind on next launch silently migrated the stray row, producing the
      * «appears only after restart» symptom.
+     * U-002: openingDue > 0 additionally records the customer's PREVIOUS due from
+     * the paper khata as an OPENING entry in the same atomic transaction —
+     * see KhataRepository.addCustomerWithOpeningDue.
      */
     fun addCustomer(
         tenantId: String,
@@ -144,6 +147,7 @@ class KhataViewModel @Inject constructor(
         phone: String?,
         address: String?,
         creditLimit: Double,
+        openingDue: Double = 0.0,
         onDone: () -> Unit,
     ) {
         if (tenantId.isBlank()) {
@@ -154,7 +158,15 @@ class KhataViewModel @Inject constructor(
         currentTenantId = tenantId
         viewModelScope.launch {
             try {
-                khataRepository.addCustomer(tenantId, nameBn, phone, address, creditLimit)
+                khataRepository.addCustomerWithOpeningDue(
+                    tenantId = tenantId,
+                    nameBn = nameBn,
+                    phone = phone,
+                    address = address,
+                    creditLimit = creditLimit,
+                    openingDue = openingDue,
+                    collectedByUserId = "u_1", // seed owner
+                )
                 // B-002: no manual reload — the Room Flow re-emits to every collector.
                 onDone()
             } catch (e: CancellationException) {
