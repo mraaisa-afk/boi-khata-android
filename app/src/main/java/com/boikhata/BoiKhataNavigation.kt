@@ -8,11 +8,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,13 +20,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -88,14 +81,9 @@ fun BoiKhataMainScreen(
     val newSaleLabel = stringResource(R.string.fab_new_sale)
 
     // D79: POS left the tab row and became the central FAB, so "sale" is not in this list.
-    val leadingTabs = listOf(
-        NavTab("home", R.string.nav_home, Icons.Default.Home),
-        NavTab("catalog", R.string.nav_stock, Icons.Default.Book),
-    )
-    val trailingTabs = listOf(
-        NavTab("khata", R.string.nav_khata, Icons.Default.People),
-        NavTab("more", R.string.nav_more, Icons.Default.List),
-    )
+    // Tab table + B-009 restore semantics live in TabNavigation.kt (test-shared).
+    val leadingTabs = LEADING_TABS
+    val trailingTabs = TRAILING_TABS
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -294,7 +282,7 @@ private fun androidx.compose.foundation.layout.RowScope.NavBarTab(
     val label = stringResource(tab.labelRes)
     NavigationBarItem(
         selected = selected,
-        onClick = { navController.navigateToTab(tab.route) },
+        onClick = { navController.navigateToTab(tab.route, restoreState = tab.restoresState) },
         icon = { Icon(tab.icon, contentDescription = label) },
         label = { Text(label) },
         alwaysShowLabel = true,
@@ -307,15 +295,3 @@ private fun androidx.compose.foundation.layout.RowScope.NavBarTab(
         ),
     )
 }
-
-private fun NavHostController.navigateToTab(route: String) {
-    navigate(route) {
-        popUpTo(graph.findStartDestination().id) {
-            saveState = true
-        }
-        launchSingleTop = true
-        restoreState = true
-    }
-}
-
-private data class NavTab(val route: String, val labelRes: Int, val icon: ImageVector)
