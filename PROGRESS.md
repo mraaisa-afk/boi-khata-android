@@ -140,7 +140,7 @@
 | `agent/p11-b5-checkout-stock-ledger-fixes` | #66 | B-005 live stock + B-006 khata sales history + B-007 Bangla-digit parsing + B-008 checkout button; ERR-012 | Merged (CI green) |
 | `agent/p11-b9-d88-header-more-nav` | #67 | B-009 আরও-tab state restoration + TabNavigationTest; D88 HomeAppBar ivory remap (owner ruling); D89 deferred-untouched; ERR-013 | Merged (CI green; device-confirmed 2026-09-19) |
 | `agent/p11-b10-expense-khata-fixes` | #68 | B-010 expense sheet dead category/parse + B-011 ক্যাশবুক spelling + B-012 তোলা/cashbook/khata-dialog Bangla-digit parse + U-002 opening-due write path; FAB Option-1 logged; ERR-014 | Merged (CI green; device round 2026-09-19 → B-013/B-014 found) |
-| `agent/p11-b13-expense-seed-book-gate` | — | B-013 session-bootstrap category seeding + B-014 add-book gate visibility/parse; ERR-015; FAB Option-1 CONFIRMED; Part D audit inventory | Open — pending push/PR (no token this session) |
+| `agent/p11-b13-expense-seed-book-gate` | #69 | B-013 session-bootstrap category seeding + B-014 add-book gate visibility/parse; ERR-015; FAB Option-1 CONFIRMED; Part D audit inventory | Open — PR #69 (https://github.com/mraaisa-afk/boi-khata-android/pull/69), CI pending at stamp time |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
