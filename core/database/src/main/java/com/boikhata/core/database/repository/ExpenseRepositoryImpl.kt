@@ -16,6 +16,7 @@ import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.model.Expense
 import com.boikhata.core.domain.model.ExpenseCategory
 import com.boikhata.core.domain.repository.ExpenseRepository
+import com.boikhata.core.database.seed.DefaultExpenseCategories
 import java.util.UUID
 import javax.inject.Inject
 
@@ -39,6 +40,31 @@ class ExpenseRepositoryImpl @Inject constructor(
         return expenseCategoryDao.getActiveByTenant(tenantId).map {
             ExpenseCategory(it.id, it.nameBn, it.icon, it.isActive)
         }
+    }
+
+    /**
+     * B-013 root cause: the ONLY `seedIfEmpty()` call site in the entire app is
+     * DemoResetter (owner-confirmed destructive demo reset — Settings). No
+     * startup path (Application, MainActivity, Room callback — DatabaseModule
+     * has no addCallback) ever seeds, so `expense_categories` was empty on
+     * EVERY install: the B-010 chips correctly rendered «কোনো খরচের খাত নেই»
+     * and the Save gate (selectedCategory != null) was unreachable by design.
+     * This is the session-bootstrap half of the fix: the ACTIVE tenant's
+     * default categories are created on first authenticated load (MainViewModel
+     * calls this after the D41 rebind, so rows land on the claims tenantId —
+     * not the seed "t_1" — and no rebind migration is ever needed for them).
+     * Idempotent contract: any existing active category for the tenant means
+     * the tenant was seeded (or has custom rows) → no-op. Deterministic
+     * "<tenantId>-ec_<slug>" ids + REPLACE make concurrent/partial seeding
+     * converge instead of duplicating.
+     */
+    override suspend fun seedDefaultCategoriesIfMissing(tenantId: String): Int {
+        check(tenantId.isNotBlank()) { "seedDefaultCategoriesIfMissing: blank tenantId (D86)" }
+        val existing = expenseCategoryDao.getActiveByTenant(tenantId)
+        if (existing.isNotEmpty()) return 0
+        val defaults = DefaultExpenseCategories.entitiesForTenant(tenantId)
+        defaults.forEach { expenseCategoryDao.insert(it) }
+        return defaults.size
     }
 
     override suspend fun getExpenses(tenantId: String): List<Expense> {
