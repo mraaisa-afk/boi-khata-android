@@ -69,22 +69,35 @@ class DatabaseSeeder(
         )
 
         // P3a: Seed BD expense categories per Blueprint §7.8
-        val categories = listOf(
-            ExpenseCategoryEntity("ec_rent", SEED_TENANT_ID, "ভাড়া", "rent", true),
-            ExpenseCategoryEntity("ec_electricity", SEED_TENANT_ID, "বিদ্যুৎ", "electricity", true),
-            ExpenseCategoryEntity("ec_internet", SEED_TENANT_ID, "ইন্টারনেট", "internet", true),
-            ExpenseCategoryEntity("ec_salary", SEED_TENANT_ID, "বেতন", "salary", true),
-            ExpenseCategoryEntity("ec_ghori", SEED_TENANT_ID, "ঘরি/অ্যাডভান্স", "advance", true),
-            ExpenseCategoryEntity("ec_transport", SEED_TENANT_ID, "পরিবহন", "transport", true),
-            ExpenseCategoryEntity("ec_mfs_fee", SEED_TENANT_ID, "MFS-ফি", "mfs_fee", true),
-            ExpenseCategoryEntity("ec_other", SEED_TENANT_ID, "অন্যান্য", "other", true),
-        )
-        categories.forEach { expenseCategoryDao.insert(it) }
+        // (B-013: names/slugs drift-guarded against DefaultExpenseCategories
+        // by DatabaseSeederTest; ids stay legacy-stable for the demo-reset path.)
+        DefaultExpenseCategories.ENTRIES.forEach { (slug, nameBn) ->
+            expenseCategoryDao.insert(
+                ExpenseCategoryEntity(
+                    id = legacyT1CategoryId(slug),
+                    tenantId = SEED_TENANT_ID,
+                    nameBn = nameBn,
+                    icon = slug,
+                    isActive = true,
+                )
+            )
+        }
     }
 
     companion object {
         const val SEED_TENANT_ID = "t_1"
         const val SEED_USER_ID = "u_1"
+
+        /**
+         * Legacy t_1 ids for the demo-reset path. The ঘরি row has ALWAYS been
+         * "ec_ghori" (not "ec_advance") — keep the historical mapping so a
+         * demo reset produces the same rows it always has.
+         */
+        private val LEGACY_T1_ID_OVERRIDES = mapOf("advance" to "ec_ghori")
+
+        fun legacyT1CategoryId(slug: String): String =
+            LEGACY_T1_ID_OVERRIDES[slug] ?: "ec_$slug"
+
         const val DEFAULT_PIN = "1234"
 
         fun hashPin(pin: String): Pair<String, String> {

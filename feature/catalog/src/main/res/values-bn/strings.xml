@@ -18,5 +18,6 @@
     <string name="selling_price">বিক্রয় মূল্য (MRP)</string>
     <string name="initial_stock">প্রাথমিক স্টক</string>
     <string name="low_stock_threshold">স্টক সতর্কা সীমা</string>
+    <string name="required_fields_missing">বইয়ের নাম এবং লেখক আবশ্যক — ফর্মের উপরের দিকে</string>
     <string name="save">সেভ করুন</string>
 </resources>

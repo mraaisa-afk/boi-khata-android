@@ -40,4 +40,16 @@ class DatabaseSeederTest {
         val storedSalt = salt
         assertThat(DatabaseSeeder.verifyPin(pin, storedHash, storedSalt)).isTrue()
     }
+
+    @Test
+    fun `t1 demo-reset rows reproduce the historical ids exactly`() {
+        val ids = DefaultExpenseCategories.ENTRIES.map { (slug, _) ->
+            DatabaseSeeder.legacyT1CategoryId(slug)
+        }
+        // Legacy-stable: ec_ghori (NOT ec_advance) has always been the ঘরি id.
+        assertThat(ids).containsExactly(
+            "ec_rent", "ec_electricity", "ec_internet", "ec_salary",
+            "ec_ghori", "ec_transport", "ec_mfs_fee", "ec_other",
+        ).inOrder()
+    }
 }

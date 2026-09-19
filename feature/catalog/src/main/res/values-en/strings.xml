@@ -18,5 +18,6 @@
     <string name="selling_price">Selling Price (MRP)</string>
     <string name="initial_stock">Initial Stock</string>
     <string name="low_stock_threshold">Low Stock Threshold</string>
+    <string name="required_fields_missing">Book title and author are required — top of the form</string>
     <string name="save">Save</string>
 </resources>
