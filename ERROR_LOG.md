@@ -31,6 +31,17 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-016 — 2026-09-20 — P11 — C-round audit correction: MelaScreen was NOT a live Bangla-digit bug (toIntOrNull is Unicode-aware) — Part D inventory over-generalized the parse-bug class
+
+**Type:** Misunderstanding
+**Phase:** P11
+**Date:** 2026-09-20
+**Task:** Owner go-ahead on the Part D inventory: "fix all 4" raw-parse screens (Supplier/CashClose/Subscription/Mela) + CatalogViewModel D86 fail-fast, RED-then-GREEN per the B-007/B-010/B-012/B-013 pattern.
+**Error:** The Part D inventory (recorded in PROGRESS 2026-09-19 and repeated in ERR-015's closing note) classified all four sites as one bug class — "raw ASCII-only parse rejects Bangla digits". For three of them that is exactly right (all parse money via `toDoubleOrNull`). For `MelaScreen.kt:293–294` it was WRONG: the site parses QUANTITY via `toIntOrNull`, and on JVM `String.toIntOrNull()` delegates to `Integer.parseInt`, which is Unicode-digit-aware (`Character.digit('৫', 10) == 5`) — the gray-সেভ symptom never existed on that screen. The audit extrapolated from the Double parse path to the Int parse path without testing each.
+**Evidence (JDK 17 probe, run before concluding):** `Integer.parseInt("৫") == 5`, `Integer.parseInt("১২") == 12`, `Double.parseDouble("২০০")` throws NumberFormatException, `Character.digit('৫', 10) == 5`. Consequence observed in the RED run: `MelaQuantityParseTest` passed against the deliberately-kept raw parse (0 failures) while `SupplierAmountParseTest`, `CashCloseParseTest`, `SubscriptionAmountParseTest` each failed 2/4 Bangla cases — the RED discipline itself surfaced the audit error.
+**Fix applied:** C-1/C-3/C-4 fixed as planned (RED-proven → normalizer → GREEN). C-2 kept as a behavior-identical swap to the shared parse contract (`parseMelaQuantity` via BengaliNormalizer) with the KDoc and the test KDoc explicitly recording the disclosed correction — uniformity hardening, not a bug fix. PROGRESS.md Part D entry corrected in the same PR; CatalogViewModel got the D86 blank-tenant fail-fast (addBook AND updateBook — the audit had flagged only addBook; updateBook had the identical hole, fixed under the B-012 "trivial reuse, disclosed" precedent), RED-proven 2/8 → GREEN.
+**Lesson:** (1) Bug-class sweeps must enumerate the PARSE PATH, not the SYMPTOM: on JVM, `toDoubleOrNull`/`Double.parseDouble` is ASCII-only while `toIntOrNull`/`Integer.parseInt` accepts all Unicode Nd digits — "same raw call shape" is not "same behavior". Verify per-site with a probe or a RED test before classifying. (2) RED-first discipline is not bureaucracy — here it falsified an audit claim at zero cost (a passing RED suite is itself evidence). (3) When an owner approves "fix all N" on an inventory, corrections discovered mid-round must be disclosed in the same round, in code comments, tests, PROGRESS, and this log — never silently reclassified.
+
 ## ERR-015 — 2026-09-19 — P11 — B-013/B-014: «কোনো খরচের খাত নেই» on every install (seed unreachable) + Add Book সেভ gray with invisible required fields
 
 **Type:** Logic error (B-013 — data/bootstrap defect; B-014 — two-part: invisible-gate UX + B-007/B-012 parse class)
