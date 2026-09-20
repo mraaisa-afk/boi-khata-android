@@ -47,6 +47,7 @@ import com.boikhata.core.designsystem.format.DigitStyle
 import com.boikhata.core.designsystem.format.NumberFormatter
 import com.boikhata.core.domain.enums.StockChangeReason
 import com.boikhata.core.domain.model.Book
+import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.feature.melamode.R
 
 /**
@@ -290,10 +291,21 @@ private fun MoveStockSheet(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = onCancel, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.cancel)) }
             Button(
-                onClick = { selectedBook?.let { onConfirm(it.id, quantity.toIntOrNull() ?: 0, direction) } },
-                enabled = selectedBook != null && (quantity.toIntOrNull() ?: 0) > 0,
+                onClick = { selectedBook?.let { onConfirm(it.id, parseMelaQuantity(quantity), direction) } },
+                enabled = selectedBook != null && parseMelaQuantity(quantity) > 0,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.save)) }
         }
     }
 }
+
+/**
+ * C-2 (P11): single production parse for the mela stock-move sheet's quantity —
+ * gate and onClick share it. DISCLOSED AUDIT CORRECTION (C-2 RED evidence):
+ * the raw `toIntOrNull()` was actually Unicode-digit-aware on JVM
+ * (Integer.parseInt → Character.digit), so mela never had the gray-সেভ bug —
+ * the swap is uniformity hardening with the other 3 money-parsing fixes and
+ * keeps one parse contract if the helper ever changes underlying impl.
+ */
+internal fun parseMelaQuantity(raw: String): Int =
+    BengaliNormalizer.toAsciiDigits(raw).toIntOrNull() ?: 0

@@ -30,6 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.boikhata.core.domain.cloud.SubscriptionRecord
 import com.boikhata.core.domain.enums.Role
+import com.boikhata.core.domain.text.BengaliNormalizer
 
 /**
  * D48: SubscriptionScreen — manual bKash payment record.
@@ -151,7 +152,7 @@ fun SubscriptionScreen(
         } else {
             Button(
                 onClick = {
-                    val amount = amountText.toDoubleOrNull() ?: 0.0
+                    val amount = parseSubscriptionAmount(amountText)
                     if (amount > 0) {
                         viewModel.recordPayment(tenantId, role, amount, trxId, note)
                     }
@@ -171,3 +172,12 @@ fun SubscriptionScreen(
         }
     }
 }
+
+/**
+ * C-4 (P11): single production parse for the manual bKash subscription
+ * payment amount. The raw ASCII-only parse silently produced ৳0 on Bangla
+ * digits — the submit then no-op'd with no error, and the owner believed the
+ * payment was recorded.
+ */
+internal fun parseSubscriptionAmount(raw: String): Double =
+    BengaliNormalizer.toAsciiDigits(raw).toDoubleOrNull() ?: 0.0

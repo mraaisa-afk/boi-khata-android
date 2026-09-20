@@ -314,6 +314,7 @@ fun BookAddEditScreen(
                     if (isValid) {
                         if (isEdit && bookId != null) {
                             viewModel.updateBook(
+                                tenantId = tenantId,
                                 id = bookId,
                                 isbn = isbn.ifBlank { "" },
                                 titleBn = safeTitleBn,
@@ -333,6 +334,7 @@ fun BookAddEditScreen(
                             )
                         } else {
                             viewModel.addBook(
+                                tenantId = tenantId,
                                 isbn = isbn.ifBlank { "" },
                                 titleBn = safeTitleBn,
                                 titleEn = safeTitleEn.ifBlank { "" },
