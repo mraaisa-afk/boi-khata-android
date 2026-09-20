@@ -212,6 +212,16 @@ interface LicenseRepository {
 
 interface ExpenseRepository {
     suspend fun getCategories(tenantId: String): List<ExpenseCategory>
+
+    /**
+     * B-013: insert the Blueprint §7.8 default expense categories when the
+     * tenant has none. Returns the number of rows inserted (0 = the tenant
+     * already had categories — the call is a no-op and never resurrects
+     * categories the user removed). Bootstrap/metadata write, deliberately
+     * NOT behind LicenseWriteGuard: without it a SOFT_LOCKED device could
+     * never render the expense picker at all. Blank tenantId fails fast (D86).
+     */
+    suspend fun seedDefaultCategoriesIfMissing(tenantId: String): Int
     suspend fun getExpenses(tenantId: String): List<Expense>
     suspend fun getExpensesByDateRange(tenantId: String, start: Long, end: Long): List<Expense>
     suspend fun getExpensesByCategory(tenantId: String, categoryId: String): List<Expense>

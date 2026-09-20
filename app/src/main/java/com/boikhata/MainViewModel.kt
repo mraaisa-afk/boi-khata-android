@@ -6,6 +6,7 @@ import com.boikhata.core.domain.enums.Role
 import com.boikhata.core.domain.model.CloudUser
 import com.boikhata.core.domain.model.LicenseSyncResult
 import com.boikhata.core.domain.repository.AuthRepository
+import com.boikhata.core.domain.repository.ExpenseRepository
 import com.boikhata.core.domain.repository.LicenseSyncRepository
 import com.boikhata.core.domain.repository.TenantInfoRepository
 import com.boikhata.core.domain.repository.TenantRebindRepository
@@ -31,6 +32,7 @@ class MainViewModel @Inject constructor(
     private val tenantRebindRepository: TenantRebindRepository,
     private val licenseSyncRepository: LicenseSyncRepository,
     private val tenantInfoRepository: TenantInfoRepository,
+    private val expenseRepository: ExpenseRepository,
 ) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
@@ -77,6 +79,16 @@ class MainViewModel @Inject constructor(
                 if (ClaimsSession.needsRebind(oldTenantId, state.tenantId)) {
                     tenantRebindRepository.rebind(oldTenantId, state.tenantId)
                 }
+                // B-013: bootstrap the Blueprint §7.8 default expense categories for
+                // the ACTIVE tenant. Until this round the ONLY seedIfEmpty() call
+                // site was DemoResetter (destructive demo reset), so
+                // expense_categories was empty on every install — the B-010 chips
+                // correctly showed «কোনো খরচের খাত নেই» and Save was unreachable.
+                // Seeding runs AFTER the rebind and targets the claims tenantId, so
+                // rows are born on the right tenant (no migration needed). Wrapped
+                // in runCatching: a bootstrap failure must never block authentication.
+                // Idempotent — no-op once the tenant has any active category.
+                runCatching { expenseRepository.seedDefaultCategoriesIfMissing(state.tenantId) }
                 // D42: License sync (OWNER only, offline fallback)
                 val syncResult = licenseSyncRepository.syncLicense(state.tenantId, state.role)
                 // P4b inherited: fetch shop name from tenants Firestore doc

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,7 +40,40 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.boikhata.core.domain.enums.BookCategory
 import com.boikhata.core.domain.enums.BookCondition
+import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.feature.catalog.R
+
+/**
+ * B-014: the add-book form's numeric fields were parsed with raw
+ * `toIntOrNull()/toDoubleOrNull()` (BookAddEditScreen onClick). Bangla-keyboard
+ * digits (০-৯) pass the fields' `Char.isDigit()` filter (Unicode-aware) but
+ * the ASCII-only parse returned null — the Save GATE is titleBn/author only,
+ * so the button stayed enabled-looking-yet produced 2026/0.0/0.0/0/5
+ * defaults: books silently saved with ৳0.00 prices. Mirrors B-007/B-010/B-012;
+ * NOT the cause of the owner's grayed বই যোগ করুন button (that is the
+ * titleBn/author gate — see the helper text added below).
+ */
+internal data class BookFormNumbers(
+    val editionYear: Int,
+    val purchasePrice: Double,
+    val sellingPrice: Double,
+    val initialStock: Int,
+    val lowStockThreshold: Int,
+)
+
+internal fun parseBookFormNumbers(
+    editionYear: String,
+    purchasePrice: String,
+    sellingPrice: String,
+    initialStock: String,
+    lowStockThreshold: String,
+): BookFormNumbers = BookFormNumbers(
+    editionYear = BengaliNormalizer.toAsciiDigits(editionYear).toIntOrNull() ?: 2026,
+    purchasePrice = BengaliNormalizer.toAsciiDigits(purchasePrice).toDoubleOrNull() ?: 0.0,
+    sellingPrice = BengaliNormalizer.toAsciiDigits(sellingPrice).toDoubleOrNull() ?: 0.0,
+    initialStock = BengaliNormalizer.toAsciiDigits(initialStock).toIntOrNull() ?: 0,
+    lowStockThreshold = BengaliNormalizer.toAsciiDigits(lowStockThreshold).toIntOrNull() ?: 5,
+)
 
 /**
  * P2a: Add/Edit book screen — fully offline local entry.
@@ -133,7 +167,11 @@ fun BookAddEditScreen(
             OutlinedTextField(
                 value = titleBn,
                 onValueChange = { titleBn = it },
-                label = { Text(stringResource(R.string.title_bn)) },
+                // B-014: titleBn is a Save-gate field — mark it required. The owner's
+                // device test filled the scrolled-into-view fields while the two
+                // required ones sat above the fold; the disabled button had no
+                // visible reason.
+                label = { Text(stringResource(R.string.title_bn) + " *") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -147,7 +185,8 @@ fun BookAddEditScreen(
             OutlinedTextField(
                 value = author,
                 onValueChange = { author = it },
-                label = { Text(stringResource(R.string.author)) },
+                // B-014: author is a Save-gate field — mark it required.
+                label = { Text(stringResource(R.string.author) + " *") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -238,13 +277,29 @@ fun BookAddEditScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // B-014: the owner's device test hit a permanently gray «বই যোগ করুন»
+            // with the two REQUIRED fields (বইয়ের নাম, লেখক) scrolled off-screen —
+            // a disabled button with no visible reason. State the gate inline so
+            // the requirement is discoverable from anywhere in the form.
+            if (titleBn.isBlank() || author.isBlank()) {
+                Text(
+                    stringResource(R.string.required_fields_missing),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+
             Button(
                 onClick = {
-                    val parsedEdition = editionYear.toIntOrNull() ?: 2026
-                    val parsedPurchase = purchasePrice.toDoubleOrNull() ?: 0.0
-                    val parsedSelling = sellingPrice.toDoubleOrNull() ?: 0.0
-                    val parsedStock = initialStock.toIntOrNull() ?: 0
-                    val parsedLowStock = lowStockThreshold.toIntOrNull() ?: 5
+                    // B-014: single production parse (Bangla-digit normalized) —
+                    // replaces the inline raw parse that silently zeroed prices.
+                    val numbers = parseBookFormNumbers(
+                        editionYear = editionYear,
+                        purchasePrice = purchasePrice,
+                        sellingPrice = sellingPrice,
+                        initialStock = initialStock,
+                        lowStockThreshold = lowStockThreshold,
+                    )
 
                     val safeTitleBn = titleBn
                     val safeTitleEn = titleEn.ifBlank { "" }
@@ -267,12 +322,12 @@ fun BookAddEditScreen(
                                 publisher = safePublisher,
                                 classLevel = classLevel,
                                 subject = subject,
-                                editionYear = parsedEdition,
+                                editionYear = numbers.editionYear,
                                 category = category,
                                 condition = condition,
-                                purchasePrice = parsedPurchase,
-                                sellingPrice = parsedSelling,
-                                lowStockThreshold = parsedLowStock,
+                                purchasePrice = numbers.purchasePrice,
+                                sellingPrice = numbers.sellingPrice,
+                                lowStockThreshold = numbers.lowStockThreshold,
                                 isActive = isActive,
                                 onDone = onBack,
                             )
@@ -285,13 +340,13 @@ fun BookAddEditScreen(
                                 publisher = safePublisher,
                                 classLevel = classLevel,
                                 subject = subject,
-                                editionYear = parsedEdition,
+                                editionYear = numbers.editionYear,
                                 category = category,
                                 condition = condition,
-                                purchasePrice = parsedPurchase,
-                                sellingPrice = parsedSelling,
-                                initialStock = parsedStock,
-                                lowStockThreshold = parsedLowStock,
+                                purchasePrice = numbers.purchasePrice,
+                                sellingPrice = numbers.sellingPrice,
+                                initialStock = numbers.initialStock,
+                                lowStockThreshold = numbers.lowStockThreshold,
                                 onDone = onBack,
                             )
                         }
