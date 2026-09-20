@@ -143,7 +143,7 @@
 | `agent/p11-b9-d88-header-more-nav` | #67 | B-009 আরও-tab state restoration + TabNavigationTest; D88 HomeAppBar ivory remap (owner ruling); D89 deferred-untouched; ERR-013 | Merged (CI green; device-confirmed 2026-09-19) |
 | `agent/p11-b10-expense-khata-fixes` | #68 | B-010 expense sheet dead category/parse + B-011 ক্যাশবুক spelling + B-012 তোলা/cashbook/khata-dialog Bangla-digit parse + U-002 opening-due write path; FAB Option-1 logged; ERR-014 | Merged (CI green; device round 2026-09-19 → B-013/B-014 found) |
 | `agent/p11-b13-expense-seed-book-gate` | #69 | B-013 session-bootstrap category seeding + B-014 add-book gate visibility/parse; ERR-015; FAB Option-1 CONFIRMED; Part D audit inventory | Merged (CI green) |
-| `agent/p11-c1-parse-cleanup-catalog-failfast` | — | C-1..C-5 parse-cleanup (supplier/cash-close/subscription/mela) + D86 catalog write fail-fast; Part A audit + Part B payment-model proposal delivered; ERR-016 | Open — pending push/PR |
+| `agent/p11-c1-parse-cleanup-catalog-failfast` | #70 | C-1..C-5 parse-cleanup (supplier/cash-close/subscription/mela) + D86 catalog write fail-fast; Part A audit + Part B payment-model proposal delivered; ERR-016 | Open — PR #70 (https://github.com/mraaisa-afk/boi-khata-android/pull/70), CI pending at stamp time |
 
 **Rule:** if future work belongs to an existing workstream above, push to that same branch/PR instead of creating a new one.
 
