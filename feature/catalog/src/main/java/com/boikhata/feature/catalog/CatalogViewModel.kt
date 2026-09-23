@@ -58,6 +58,7 @@ class CatalogViewModel @Inject constructor(
     }
 
     fun addBook(
+        tenantId: String,
         isbn: String?,
         titleBn: String,
         titleEn: String?,
@@ -74,14 +75,20 @@ class CatalogViewModel @Inject constructor(
         lowStockThreshold: Int,
         onDone: () -> Unit,
     ) {
+        // C-5/D86 fail-fast: refuse to guess a tenant for a write — a book saved
+        // with a blank tenantId is invisible to every tenant-scoped query (B-004 class).
+        if (tenantId.isBlank()) {
+            _uiState.value = CatalogUiState.Error("টেনান্ট শনাক্ত করা যায়নি — অ্যাপ রিস্টার্ট করুন")
+            return
+        }
         viewModelScope.launch {
             try {
                 bookRepository.addBook(
-                    currentTenantId, isbn, titleBn, titleEn, author, publisher,
+                    tenantId, isbn, titleBn, titleEn, author, publisher,
                     classLevel, subject, editionYear, category, condition,
                     purchasePrice, sellingPrice, initialStock, lowStockThreshold,
                 )
-                loadCatalog(currentTenantId)
+                loadCatalog(tenantId)
                 onDone()
             } catch (e: Exception) {
                 _uiState.value = CatalogUiState.Error(e.message ?: "সেভ ব্যর্থ")
@@ -90,6 +97,7 @@ class CatalogViewModel @Inject constructor(
     }
 
     fun updateBook(
+        tenantId: String,
         id: String,
         isbn: String?,
         titleBn: String,
@@ -107,14 +115,19 @@ class CatalogViewModel @Inject constructor(
         isActive: Boolean,
         onDone: () -> Unit,
     ) {
+        // C-5/D86 fail-fast (same contract as addBook above).
+        if (tenantId.isBlank()) {
+            _uiState.value = CatalogUiState.Error("টেনান্ট শনাক্ত করা যায়নি — অ্যাপ রিস্টার্ট করুন")
+            return
+        }
         viewModelScope.launch {
             try {
                 bookRepository.updateBook(
-                    currentTenantId, id, isbn, titleBn, titleEn, author, publisher,
+                    tenantId, id, isbn, titleBn, titleEn, author, publisher,
                     classLevel, subject, editionYear, category, condition,
                     purchasePrice, sellingPrice, lowStockThreshold, isActive,
                 )
-                loadCatalog(currentTenantId)
+                loadCatalog(tenantId)
                 onDone()
             } catch (e: Exception) {
                 _uiState.value = CatalogUiState.Error(e.message ?: "আপডেট ব্যর্থ")

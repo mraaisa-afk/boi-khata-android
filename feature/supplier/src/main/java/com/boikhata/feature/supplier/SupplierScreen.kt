@@ -52,6 +52,7 @@ import com.boikhata.core.domain.aging.AgingBucket
 import com.boikhata.core.domain.enums.CashbookAccount
 import com.boikhata.core.domain.enums.SupplierEntryType
 import com.boikhata.core.domain.model.SupplierBalance
+import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.feature.supplier.R
 
 /**
@@ -405,13 +406,22 @@ private fun AddEntrySheet(
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = onCancel, modifier = Modifier.weight(1f)) { Text(stringResource(R.string.cancel)) }
             Button(
-                onClick = { onConfirm(type, amount.toDoubleOrNull() ?: 0.0, desc, trxId.ifBlank { null }, account) },
-                enabled = (amount.toDoubleOrNull() ?: 0.0) > 0,
+                onClick = { onConfirm(type, parseSupplierAmount(amount), desc, trxId.ifBlank { null }, account) },
+                enabled = parseSupplierAmount(amount) > 0,
                 modifier = Modifier.weight(1f),
             ) { Text(stringResource(R.string.save)) }
         }
     }
 }
+
+/**
+ * C-1 (P11): single production parse for the supplier entry sheet's amount —
+ * the Save gate and the onClick MUST share it (B-012 lesson: they used to
+ * duplicate a raw ASCII-only parse that rejected the Bangla digits ০-৯ which
+ * the field's own isDigit() filter accepts).
+ */
+internal fun parseSupplierAmount(raw: String): Double =
+    BengaliNormalizer.toAsciiDigits(raw).toDoubleOrNull() ?: 0.0
 
 private fun bucketLabel(bucket: AgingBucket): String = when (bucket) {
     AgingBucket.GREEN -> "🟢 <১৫দি"

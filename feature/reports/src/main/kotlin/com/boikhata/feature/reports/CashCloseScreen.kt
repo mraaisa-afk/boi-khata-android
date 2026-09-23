@@ -34,6 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.boikhata.core.designsystem.format.DigitStyle
 import com.boikhata.core.designsystem.format.NumberFormatter
 import com.boikhata.core.domain.model.CashCloseReport
+import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.shared.receipt.CashCloseReportBuilder
 
 /**
@@ -67,7 +68,7 @@ fun CashCloseScreen(
                 OutlinedTextField(
                     value = if (mfsRate > 0) mfsRate.toString() else "",
                     onValueChange = { v ->
-                        val rate = v.toDoubleOrNull() ?: 0.0
+                        val rate = parseCashCloseNumber(v)
                         viewModel.setMfsFeeRate(rate)
                     },
                     label = { Text(stringResource(R.string.mfs_fee_rate)) },
@@ -78,7 +79,7 @@ fun CashCloseScreen(
                 OutlinedTextField(
                     value = if (countedCash > 0) countedCash.toString() else "",
                     onValueChange = { v ->
-                        val cash = v.toDoubleOrNull() ?: 0.0
+                        val cash = parseCashCloseNumber(v)
                         viewModel.setCountedCash(cash)
                     },
                     label = { Text(stringResource(R.string.counted_cash)) },
@@ -201,3 +202,11 @@ private fun CloseRow(label: String, amount: Double, isBold: Boolean = false) {
         )
     }
 }
+
+/**
+ * C-3 (P11): single production parse for the cash-close owner inputs (MFS fee
+ * rate + counted cash). The raw ASCII-only parse silently zeroed Bangla-digit
+ * input — corrupting the fee estimate and the নগদ মিলান variance.
+ */
+internal fun parseCashCloseNumber(raw: String): Double =
+    BengaliNormalizer.toAsciiDigits(raw).toDoubleOrNull() ?: 0.0
