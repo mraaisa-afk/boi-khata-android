@@ -12,9 +12,11 @@
 - Role: OWNER, MANAGER, SALES, ACCOUNTANT
 - LicenseState: FULL, PAID_UNVERIFIED, GRACE, SOFT_LOCKED, SUSPENDED
 - KhataEntryType: CREDIT, PAYMENT, ADJUSTMENT, OPENING
-- CashbookAccount: CASH, BKASH, BANK
+- CashbookAccount: CASH, BKASH, BANK, MOBILE (P12/D92: MOBILE = মোবাইল ব্যাংকিং bucket — never folded into BKASH)
 - CashbookEntryType: INCOME, EXPENSE, TRANSFER (⚠ ADJUSTMENT নেই!)
-- PaymentMethod: CASH, BKASH, NAGAD, CREDIT
+- PaymentMethod: CASH, BKASH, NAGAD, CREDIT, BANK, MOBILE (P12/D92: BANK/MOBILE are display-summary values for multi-line bills; legacy strings keep parsing)
+- PaymentLineCategory: CASH, BANK, MOBILE, DUE (P12/D92: bill_payment_lines rows; DUE is repo-derived, never caller-supplied)
+- MfsProvider: BKASH, NAGAD, ROCKET, UPAY, OTHER (P12/D92: hardcoded starter set; upgrade path to a managed list via future D-entry)
 - BookCategory: TEXTBOOK, GENERAL, STATIONERY, OTHER
 - StockChangeReason: SALE, PURCHASE, RETURN, ADJUSTMENT, MELA_IN, MELA_OUT
 - BookCondition: NEW, USED, DAMAGED
@@ -23,7 +25,7 @@
    PURCHASE=credit purchase→increases payable; PAYMENT=cash/MFS→decreases payable;
    ADJUSTMENT=±correction. Mirrors KhataEntryType with supplier-specific credits.)
 
-## ৩. Room-স্কিমা v6 (টেবিল → কলাম; টাকার-টেবিল = ট্যাগড 🔒 append-only)
+## ৩. Room-স্কিমা v7 (টেবিল → কলাম; টাকার-টেবিল = ট্যাগড 🔒 append-only)
 
 - tenants(id PK, name, phone, createdAt)
 - users(id PK, tenantId, name, role, pinHash, salt, isActive, createdAt, updatedAt)
@@ -40,6 +42,9 @@
   userId, subtotal, discountAmount, discountType, vatAmount, totalAmount, paymentMethod,
   paidAmount, dueAmount, khataEntryId?, billDate, status, idempotencyKey)
 - bill_lines(id PK, tenantId, billId, bookId, bookTitleBn, quantity, unitPrice, lineTotal, vatAmount)
+- bill_payment_lines(id PK, tenantId, billId, method, provider?, amount, cashbookEntryId?,
+  createdAt, index: billId, index: tenantId) — P12/D92; authoritative per-bill payment lines
+  (paid CASH/BANK/MOBILE + repo-derived DUE); additive-only v7; bills keeps its legacy columns
 - khata_customers(id PK, tenantId, nameBn, phone?, address?, creditLimit, isActive,
   createdAt, updatedAt)
 - khata_entries 🔒(id PK, tenantId, customerId, amount, type, description, referenceBillId?,

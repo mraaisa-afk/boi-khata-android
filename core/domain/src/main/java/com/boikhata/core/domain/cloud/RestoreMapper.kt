@@ -171,6 +171,38 @@ object RestoreMapper {
         vatAmount = getDouble(map, "vatAmount") ?: 0.0,
     )
 
+    // ── P12/D92: payment lines (nested inside the bill document) ─────────────
+
+    data class BillPaymentLineFields(
+        val id: String, val tenantId: String, val billId: String, val method: String,
+        val provider: String?, val amount: Double, val cashbookEntryId: String?,
+        val createdAt: Long,
+    )
+
+    fun billPaymentLineFromMap(map: Map<String, Any?>): BillPaymentLineFields = BillPaymentLineFields(
+        id = getStringOrEmpty(map, "id"),
+        tenantId = getStringOrEmpty(map, "tenantId"),
+        billId = getStringOrEmpty(map, "billId"),
+        method = getStringOrEmpty(map, "method"),
+        provider = getString(map, "provider"),
+        amount = getDouble(map, "amount") ?: 0.0,
+        cashbookEntryId = getString(map, "cashbookEntryId"),
+        createdAt = getLong(map, "createdAt") ?: 0L,
+    )
+
+    /**
+     * Extract the nested paymentLines array from a bill document.
+     * OLD-FORMAT TOLERANT: backups created before P12 have no "paymentLines"
+     * key → returns an empty list (legacy bills legitimately have no lines).
+     */
+    fun paymentLinesFromBillMap(billMap: Map<String, Any?>): List<BillPaymentLineFields> {
+        val raw = billMap["paymentLines"] as? List<*> ?: return emptyList()
+        return raw.mapNotNull { item ->
+            @Suppress("UNCHECKED_CAST")
+            (item as? Map<String, Any?>)?.let { billPaymentLineFromMap(it) }
+        }
+    }
+
     data class KhataCustomerFields(
         val id: String, val tenantId: String, val nameBn: String, val phone: String?,
         val address: String?, val creditLimit: Double, val isActive: Boolean,

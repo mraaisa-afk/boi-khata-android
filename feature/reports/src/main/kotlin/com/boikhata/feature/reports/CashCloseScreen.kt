@@ -130,6 +130,8 @@ private fun CloseContent(report: CashCloseReport, onShare: () -> Unit) {
             CloseRow(stringResource(R.string.cash_sales), report.salesByMethod.cash)
             CloseRow(stringResource(R.string.bkash_sales), report.salesByMethod.bkash)
             CloseRow(stringResource(R.string.nagad_sales), report.salesByMethod.nagad)
+            CloseRow(stringResource(R.string.bank_sales), report.salesByMethod.bank)
+            CloseRow(stringResource(R.string.mobile_other_sales), report.salesByMethod.mobileOther)
             CloseRow(stringResource(R.string.credit_sales), report.salesByMethod.credit)
             CloseRow(stringResource(R.string.total_sales), report.salesByMethod.total, true)
         }

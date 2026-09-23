@@ -61,7 +61,7 @@ class TenantRebindPlannerTest {
     fun `all tenant tables should have at least 19 core tables`() {
         // CONVENTIONS §3 defines 19 core tables; P3b added 3 = 22.
         // master_catalog excluded (shared, no tenantId) = 21 tenant-scoped tables.
-        assertThat(TenantRebindPlanner.ALL_TENANT_TABLES.size).isAtLeast(21)
+        assertThat(TenantRebindPlanner.ALL_TENANT_TABLES.size).isAtLeast(24) // P12: +bill_payment_lines
     }
 
     @Test

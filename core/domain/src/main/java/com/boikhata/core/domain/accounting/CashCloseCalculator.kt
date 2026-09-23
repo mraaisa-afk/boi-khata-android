@@ -1,5 +1,7 @@
 package com.boikhata.core.domain.accounting
 
+import com.boikhata.core.domain.enums.MfsProvider
+import com.boikhata.core.domain.enums.PaymentLineCategory
 import com.boikhata.core.domain.enums.PaymentMethod
 import com.boikhata.core.domain.model.CashCloseReport
 import com.boikhata.core.domain.model.Expense
@@ -26,6 +28,16 @@ object CashCloseCalculator {
         val paymentMethod: PaymentMethod,
         val paidAmount: Double,
         val dueAmount: Double,
+        // P12/D92: authoritative payment lines when the bill has them (post-v7
+        // checkout). Empty for legacy bills → the bill-level columns are used.
+        val lines: List<LineForClose> = emptyList(),
+    )
+
+    /** One bill_payment_lines row reduced for the calculator (pure values). */
+    data class LineForClose(
+        val method: String, // PaymentLineCategory name
+        val provider: String?, // MfsProvider name (MOBILE lines only)
+        val amount: Double,
     )
 
     /**
@@ -48,13 +60,45 @@ object CashCloseCalculator {
         mfsFeeRate: Double,
         date: Long,
     ): CashCloseReport {
-        // Sales by payment method
-        val cash = bills.filter { it.paymentMethod == PaymentMethod.CASH }.sumOf { it.paidAmount }
-        val bkash = bills.filter { it.paymentMethod == PaymentMethod.BKASH }.sumOf { it.paidAmount }
-        val nagad = bills.filter { it.paymentMethod == PaymentMethod.NAGAD }.sumOf { it.paidAmount }
-        val credit = bills.filter { it.paymentMethod == PaymentMethod.CREDIT }.sumOf { it.dueAmount }
-        val total = cash + bkash + nagad + credit
-        val salesByMethod = SalesByMethod(cash, bkash, nagad, credit, total)
+        // Sales by payment method. P12/D92: bills WITH payment lines aggregate
+        // per line (2-way/3-way splits land in the right bucket); legacy bills
+        // (no lines) fall back to the bill-level columns.
+        var cash = 0.0
+        var bkash = 0.0
+        var nagad = 0.0
+        var bank = 0.0
+        var mobileOther = 0.0
+        var credit = 0.0
+        for (bill in bills) {
+            if (bill.lines.isEmpty()) {
+                when (bill.paymentMethod) {
+                    PaymentMethod.CASH -> cash += bill.paidAmount
+                    PaymentMethod.BKASH -> bkash += bill.paidAmount
+                    PaymentMethod.NAGAD -> nagad += bill.paidAmount
+                    PaymentMethod.CREDIT -> credit += bill.dueAmount
+                    PaymentMethod.BANK -> bank += bill.paidAmount
+                    PaymentMethod.MOBILE -> mobileOther += bill.paidAmount
+                }
+            } else {
+                for (line in bill.lines) {
+                    when (line.method) {
+                        PaymentLineCategory.CASH.name -> cash += line.amount
+                        PaymentLineCategory.BANK.name -> bank += line.amount
+                        PaymentLineCategory.MOBILE.name -> when (line.provider) {
+                            MfsProvider.BKASH.name -> bkash += line.amount
+                            MfsProvider.NAGAD.name -> nagad += line.amount
+                            else -> mobileOther += line.amount
+                        }
+                        PaymentLineCategory.DUE.name -> credit += line.amount
+                    }
+                }
+            }
+        }
+        val total = cash + bkash + nagad + bank + mobileOther + credit
+        val salesByMethod = SalesByMethod(
+            cash = cash, bkash = bkash, nagad = nagad, credit = credit,
+            total = total, bank = bank, mobileOther = mobileOther,
+        )
 
         // Expenses by category
         val categoryMap = expenseCategories.associateBy { it.id }
@@ -69,7 +113,9 @@ object CashCloseCalculator {
             .sortedByDescending { it.total }
         val totalExpenses = expenses.sumOf { it.amount }
 
-        // MFS fee: estimated = BKASH sales × rate / 100 (bKash is the dominant MFS)
+        // MFS fee: estimated = bKash sales × rate / 100 (bKash is the dominant MFS).
+        // P12: bKash MOBILE lines land in the same bucket, so the estimate covers
+        // them too (Nagad/Rocket/Upay fees still NOT estimated — disclosed in D92).
         val mfsFeeEstimated = if (mfsFeeRate > 0) {
             (bkash * mfsFeeRate / 100.0)
         } else 0.0

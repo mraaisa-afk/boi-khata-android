@@ -3,20 +3,25 @@ package com.boikhata.core.database.repository
 import androidx.room.withTransaction
 import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.BillDao
+import com.boikhata.core.database.dao.BillPaymentLineDao
 import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.entity.BillEntity
 import com.boikhata.core.database.entity.BillLineEntity
+import com.boikhata.core.database.entity.BillPaymentLineEntity
 import com.boikhata.core.database.entity.CashbookEntryEntity
 import com.boikhata.core.database.entity.KhataEntryEntity
 import com.boikhata.core.database.entity.StockLedgerEntity
 import com.boikhata.core.domain.accounting.PeriodLockChecker
 import com.boikhata.core.domain.accounting.PeriodLockGuard
 import com.boikhata.core.domain.enums.KhataEntryType
+import com.boikhata.core.domain.enums.MfsProvider
+import com.boikhata.core.domain.enums.PaymentLineCategory
 import com.boikhata.core.domain.enums.PaymentMethod
 import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.repository.BillLineInput
+import com.boikhata.core.domain.repository.PaymentLineSpec
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -98,12 +103,21 @@ class SaleRepositoryImplTest {
             rows.filter { it.tenantId == tenantId && it.date >= start && it.date < end }
     }
 
+    private class FakeBillPaymentLineDao : BillPaymentLineDao {
+        val rows = mutableListOf<BillPaymentLineEntity>()
+        override suspend fun insertAll(lines: List<BillPaymentLineEntity>) { rows.addAll(lines) }
+        override suspend fun getByBill(billId: String) = rows.filter { it.billId == billId }
+        override suspend fun countForBill(billId: String) = rows.count { it.billId == billId }
+        override suspend fun getByBillDateRange(tenantId: String, startOfDay: Long, endOfDay: Long) = emptyList<BillPaymentLineEntity>()
+    }
+
     private object NoLock : PeriodLockChecker {
         override suspend fun getLockedPeriods(tenantId: String): Set<PeriodLockGuard.LockedPeriod> = emptySet()
         override suspend fun assertNotLocked(tenantId: String, date: Long) { /* no-op */ }
     }
 
     private lateinit var billDao: FakeBillDao
+    private lateinit var billPaymentLineDao: FakeBillPaymentLineDao
     private lateinit var stockLedgerDao: FakeStockLedgerDao
     private lateinit var khataEntryDao: FakeKhataEntryDao
     private lateinit var cashbookDao: FakeCashbookDao
@@ -117,6 +131,7 @@ class SaleRepositoryImplTest {
     @Before
     fun setup() {
         billDao = FakeBillDao()
+        billPaymentLineDao = FakeBillPaymentLineDao()
         stockLedgerDao = FakeStockLedgerDao()
         khataEntryDao = FakeKhataEntryDao()
         cashbookDao = FakeCashbookDao()
@@ -129,6 +144,7 @@ class SaleRepositoryImplTest {
         repo = SaleRepositoryImpl(
             db = db,
             billDao = billDao,
+            billPaymentLineDao = billPaymentLineDao,
             stockLedgerDao = stockLedgerDao,
             khataEntryDao = khataEntryDao,
             cashbookDao = cashbookDao,
@@ -207,5 +223,154 @@ class SaleRepositoryImplTest {
         assertThat(history.single().customerNameBn).isEqualTo("করিম")
         assertThat(history.single().totalAmount).isEqualTo(1950.0)
         assertThat(repo.getBillsByCustomer("t_1", "someone-else")).isEmpty()
+    }
+
+    // ── P12/D92: multi-line payment model ────────────────────────────────────
+
+    @Test
+    fun `two paid lines - 600 cash plus 400 mobile bKash - close a 1000 bill with zero due`() = runTest {
+        // The owner's required example: total ৳1000 → ৳600 নগদ + ৳400 বিকাশ.
+        val thousandOnly = listOf(
+            BillLineInput(bookId = "misir-ali", bookTitleBn = "মিসির আলী", quantity = 2, unitPrice = 500.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
+        ) // subtotal 1000, 0% VAT
+        val billId = repo.createBillWithPaymentLines(
+            tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+            userId = "u_1", lines = thousandOnly, discountAmount = 0.0, discountType = "FIXED",
+            paidLines = listOf(
+                PaymentLineSpec(PaymentLineCategory.CASH, null, 600.0),
+                PaymentLineSpec(PaymentLineCategory.MOBILE, MfsProvider.BKASH, 400.0),
+            ),
+        )
+
+        val bill = billDao.bills.single()
+        assertThat(bill.paidAmount).isEqualTo(1000.0)
+        assertThat(bill.dueAmount).isEqualTo(0.0)
+        assertThat(bill.status).isEqualTo("COMPLETED")
+        assertThat(khataEntryDao.rows).isEmpty() // nothing on the khata
+
+        // BOTH payment lines recorded, each with its own cashbook mirror
+        val pl = billPaymentLineDao.getByBill(billId)
+        assertThat(pl).hasSize(2)
+        val cashLine = pl.first { it.method == PaymentLineCategory.CASH.name }
+        val mobileLine = pl.first { it.method == PaymentLineCategory.MOBILE.name }
+        assertThat(cashLine.amount).isEqualTo(600.0)
+        assertThat(mobileLine.amount).isEqualTo(400.0)
+        assertThat(mobileLine.provider).isEqualTo(MfsProvider.BKASH.name)
+
+        // MOBILE money goes to the MOBILE bucket — never folded into BKASH
+        val cashIncome = cashbookDao.rows.first { it.account == "CASH" }
+        val mobileIncome = cashbookDao.rows.first { it.account == "MOBILE" }
+        assertThat(cashIncome.amount).isEqualTo(600.0)
+        assertThat(mobileIncome.amount).isEqualTo(400.0)
+        // link integrity: payment line points at its own mirror row
+        assertThat(mobileLine.cashbookEntryId).isEqualTo(mobileIncome.id)
+        assertThat(cashLine.cashbookEntryId).isEqualTo(cashIncome.id)
+    }
+
+    @Test
+    fun `three-way - 600 cash plus 300 mobile plus 100 due - posts the remainder to khata`() = runTest {
+        val billId = repo.createBillWithPaymentLines(
+            tenantId = "t_1", customerId = "karim", customerNameBn = "করিম", customerPhone = null,
+            userId = "u_1", lines = lines, discountAmount = 0.0, discountType = "FIXED",
+            // D92 example scaled: paid 900 of 1950 → 1050 বাকি
+            paidLines = listOf(
+                PaymentLineSpec(PaymentLineCategory.CASH, null, 600.0),
+                PaymentLineSpec(PaymentLineCategory.MOBILE, MfsProvider.NAGAD, 300.0),
+            ),
+        )
+
+        val bill = billDao.bills.single()
+        assertThat(bill.paidAmount).isEqualTo(900.0)
+        assertThat(bill.dueAmount).isEqualTo(1050.0)
+        assertThat(bill.status).isEqualTo("PARTIAL")
+
+        // বাকি → CREDIT khata entry for the customer
+        val entry = khataEntryDao.rows.single()
+        assertThat(entry.type).isEqualTo(KhataEntryType.CREDIT.name)
+        assertThat(entry.amount).isEqualTo(1050.0)
+        assertThat(entry.customerId).isEqualTo("karim")
+
+        // 3 rows: two paid lines + one explicit DUE line (no cashbook mirror on DUE)
+        val pl = billPaymentLineDao.getByBill(billId)
+        assertThat(pl).hasSize(3)
+        val dueLine = pl.first { it.method == PaymentLineCategory.DUE.name }
+        assertThat(dueLine.amount).isEqualTo(1050.0)
+        assertThat(dueLine.cashbookEntryId).isNull()
+        assertThat(pl.count { it.method == PaymentLineCategory.DUE.name }).isEqualTo(1)
+        assertThat(cashbookDao.rows).hasSize(2) // only the money that moved
+    }
+
+    @Test
+    fun `validation - overpay, provider-less mobile, zero amount, due-without-customer all fail fast`() = runTest {
+        val paid600 = listOf(PaymentLineSpec(PaymentLineCategory.CASH, null, 600.0))
+
+        // overpay: 600 cash + 400 mobile on a 1000 bill is fine, but 700+400 is not
+        try {
+            repo.createBillWithPaymentLines(
+                tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+                userId = "u_1", lines = lines, discountAmount = 0.0, discountType = "FIXED",
+                paidLines = listOf(
+                    PaymentLineSpec(PaymentLineCategory.CASH, null, 700.0),
+                    PaymentLineSpec(PaymentLineCategory.MOBILE, MfsProvider.BKASH, 400.0),
+                ),
+            )
+            org.junit.Assert.fail("overpay must be rejected")
+        } catch (expected: IllegalArgumentException) { /* জমা বিলের মোটের চেয়ে বেশি হতে পারে না */ }
+
+        // MOBILE line without a provider is rejected
+        try {
+            repo.createBillWithPaymentLines(
+                tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+                userId = "u_1", lines = lines, discountAmount = 0.0, discountType = "FIXED",
+                paidLines = listOf(PaymentLineSpec(PaymentLineCategory.MOBILE, null, 500.0)),
+            )
+            org.junit.Assert.fail("provider-less MOBILE line must be rejected")
+        } catch (expected: IllegalArgumentException) { /* প্রোভাইডার নির্বাচন করুন */ }
+
+        // zero/negative amount line is rejected
+        try {
+            repo.createBillWithPaymentLines(
+                tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+                userId = "u_1", lines = lines, discountAmount = 0.0, discountType = "FIXED",
+                paidLines = listOf(PaymentLineSpec(PaymentLineCategory.CASH, null, 0.0)),
+            )
+            org.junit.Assert.fail("zero-amount line must be rejected")
+        } catch (expected: IllegalArgumentException) { /* পরিমাণ ০-এর বেশি হতে হবে */ }
+
+        // due > 0 without a customer is rejected (fail-fast, no orphan due)
+        try {
+            repo.createBillWithPaymentLines(
+                tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+                userId = "u_1", lines = lines, discountAmount = 0.0, discountType = "FIXED",
+                paidLines = paid600,
+            )
+            org.junit.Assert.fail("due without customer must be rejected")
+        } catch (expected: IllegalArgumentException) { /* বাকি থাকলে ক্রেতা নির্বাচন করুন */ }
+
+        // nothing was written by any failed attempt (D22 atomicity)
+        assertThat(billDao.bills).isEmpty()
+        assertThat(billPaymentLineDao.rows).isEmpty()
+        assertThat(cashbookDao.rows).isEmpty()
+        assertThat(stockLedgerDao.rows).isEmpty()
+    }
+
+    @Test
+    fun `legacy createBill maps to equivalent payment lines - NAGAD no longer folds into BKASH bucket`() = runTest {
+        val billId = repo.createBill(
+            tenantId = "t_1", customerId = "karim", customerNameBn = "করিম", customerPhone = null,
+            userId = "u_1", lines = lines, discountAmount = 0.0, discountType = "PERCENTAGE",
+            paymentMethod = PaymentMethod.NAGAD, paidAmount = 500.0,
+        )
+        // legacy NAGAD payment: MOBILE line + NAGAD provider + MOBILE cashbook bucket
+        // (+ the DUE line for the 1450 remainder — P12 appends it explicitly)
+        val pl = billPaymentLineDao.getByBill(billId)
+        assertThat(pl).hasSize(2)
+        val mobileLine = pl.first { it.method == PaymentLineCategory.MOBILE.name }
+        assertThat(mobileLine.provider).isEqualTo(MfsProvider.NAGAD.name)
+        assertThat(mobileLine.amount).isEqualTo(500.0)
+        assertThat(pl.first { it.method == PaymentLineCategory.DUE.name }.amount).isEqualTo(1450.0)
+        assertThat(cashbookDao.rows.single().account).isEqualTo("MOBILE")
+        // denormalized summary stays legacy-parseable
+        assertThat(billDao.bills.single().paymentMethod).isEqualTo("NAGAD")
     }
 }

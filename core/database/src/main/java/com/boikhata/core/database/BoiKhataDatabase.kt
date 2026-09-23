@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import com.boikhata.core.database.dao.AuditLogDao
 import com.boikhata.core.database.dao.BackupDao
 import com.boikhata.core.database.dao.BillDao
+import com.boikhata.core.database.dao.BillPaymentLineDao
 import com.boikhata.core.database.dao.BookDao
 import com.boikhata.core.database.dao.BudgetDao
 import com.boikhata.core.database.dao.CashbookDao
@@ -28,6 +29,7 @@ import com.boikhata.core.database.dao.UserDao
 import com.boikhata.core.database.entity.AuditLogEntity
 import com.boikhata.core.database.entity.BillEntity
 import com.boikhata.core.database.entity.BillLineEntity
+import com.boikhata.core.database.entity.BillPaymentLineEntity
 import com.boikhata.core.database.entity.BookEntity
 import com.boikhata.core.database.entity.BudgetEntity
 import com.boikhata.core.database.entity.CashbookEntryEntity
@@ -56,7 +58,8 @@ import com.boikhata.core.database.entity.UserEntity
  * + 1 P5 table (mela_sessions).
  * v1 = initial schema; v2 = D16 normalized columns; v3 = D32/D35 accounting tables;
  * v4 = D57 mela_sessions table; v5 = D64 trial_redemptions table;
- * v6 = D70 supplier_entries idempotencyKey unique index.
+ * v6 = D70 supplier_entries idempotencyKey unique index;
+ * v7 = P12/D92 bill_payment_lines table (additive-only, zero transformation).
  */
 @Database(
     entities = [
@@ -68,6 +71,7 @@ import com.boikhata.core.database.entity.UserEntity
         StockLedgerEntity::class,
         BillEntity::class,
         BillLineEntity::class,
+        BillPaymentLineEntity::class,
         KhataCustomerEntity::class,
         KhataEntryEntity::class,
         KhataInstallmentEntity::class,
@@ -85,7 +89,7 @@ import com.boikhata.core.database.entity.UserEntity
         MelaSessionEntity::class,
         TrialRedemptionEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 abstract class BoiKhataDatabase : RoomDatabase() {
@@ -96,6 +100,7 @@ abstract class BoiKhataDatabase : RoomDatabase() {
     abstract fun bookDao(): BookDao
     abstract fun stockLedgerDao(): StockLedgerDao
     abstract fun billDao(): BillDao
+    abstract fun billPaymentLineDao(): BillPaymentLineDao
     abstract fun khataCustomerDao(): KhataCustomerDao
     abstract fun khataEntryDao(): KhataEntryDao
     abstract fun khataInstallmentDao(): KhataInstallmentDao

@@ -2,6 +2,7 @@ package com.boikhata.core.cloud
 
 import com.boikhata.core.domain.cloud.BackupMapper
 import com.boikhata.core.database.dao.BackupDao
+import com.boikhata.core.database.dao.BillPaymentLineDao
 import com.boikhata.core.database.dao.CloudSyncStateDao
 import com.boikhata.core.domain.enums.Role
 import com.boikhata.core.domain.repository.BackupResult
@@ -30,6 +31,7 @@ import javax.inject.Singleton
 class BackupRepositoryImpl @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val backupDao: BackupDao,
+    private val billPaymentLineDao: BillPaymentLineDao,
     private val cloudSyncStateDao: CloudSyncStateDao,
 ) : BackupRepository {
 
@@ -134,6 +136,15 @@ class BackupRepositoryImpl @Inject constructor(
                     paidAmount = it.paidAmount, dueAmount = it.dueAmount,
                     khataEntryId = it.khataEntryId, billDate = it.billDate,
                     status = it.status, idempotencyKey = it.idempotencyKey,
+                    // P12/D92: embed the authoritative payment lines (legacy bills → none)
+                    paymentLines = billPaymentLineDao.getByBill(it.id).map { pl ->
+                        BackupMapper.billPaymentLineToMap(
+                            id = pl.id, tenantId = tenantId, billId = pl.billId,
+                            method = pl.method, provider = pl.provider,
+                            amount = pl.amount, cashbookEntryId = pl.cashbookEntryId,
+                            createdAt = pl.createdAt,
+                        )
+                    },
                 )
             }
             BackupMapper.COL_BILL_LINES -> backupDao.getBillLinesForBackup(tenantId).map {

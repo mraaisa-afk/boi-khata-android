@@ -117,6 +117,25 @@ class ReceiptBuilderTest {
     }
 
     @Test
+    fun `should render one জমা row per payment line for split bills`() {
+        // P12/D92: 2-way/3-way splits show one row per line; the legacy single
+        // জমা/মাধ্যম rows are replaced by the authoritative per-line breakdown.
+        val text = ReceiptBuilder.buildReceiptText(
+            bill, lines, "Shop", formatAmount, formatDate,
+            paymentLines = listOf(
+                ReceiptBuilder.PaymentLineDisplay("জমা (নগদ)", 600.0),
+                ReceiptBuilder.PaymentLineDisplay("জমা (নগদ (Nagad))", 300.0),
+                ReceiptBuilder.PaymentLineDisplay("বাকি", 100.0),
+            ),
+        )
+        assertThat(text).contains("জমা (নগদ): ৳600")
+        assertThat(text).contains("জমা (নগদ (Nagad)): ৳300")
+        assertThat(text).contains("বাকি: ৳100")
+        assertThat(text).doesNotContain("মাধ্যম:")
+        assertThat(text).doesNotContain("জমা: ৳480")
+    }
+
+    @Test
     fun `should include due amount for partial payment`() {
         val partialBill = bill.copy(
             paymentMethod = PaymentMethod.CREDIT,

@@ -4,6 +4,7 @@ import com.boikhata.core.domain.cloud.BackupMapper
 import com.boikhata.core.domain.cloud.RestoreMapper
 import com.boikhata.core.database.dao.BackupDao
 import com.boikhata.core.database.dao.BillDao
+import com.boikhata.core.database.dao.BillPaymentLineDao
 import com.boikhata.core.database.dao.BookDao
 import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.CloudSyncStateDao
@@ -15,6 +16,7 @@ import com.boikhata.core.database.dao.OwnerDrawingDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.entity.BillEntity
 import com.boikhata.core.database.entity.BillLineEntity
+import com.boikhata.core.database.entity.BillPaymentLineEntity
 import com.boikhata.core.database.entity.BookEntity
 import com.boikhata.core.database.entity.CashbookEntryEntity
 import com.boikhata.core.database.entity.ExpenseCategoryEntity
@@ -53,6 +55,7 @@ class RestoreRepositoryImpl @Inject constructor(
     private val bookDao: BookDao,
     private val stockLedgerDao: StockLedgerDao,
     private val billDao: BillDao,
+    private val billPaymentLineDao: BillPaymentLineDao,
     private val khataCustomerDao: KhataCustomerDao,
     private val khataEntryDao: KhataEntryDao,
     private val expenseDao: ExpenseDao,
@@ -168,6 +171,20 @@ class RestoreRepositoryImpl @Inject constructor(
                 khataEntryId = fields.khataEntryId, billDate = fields.billDate,
                 status = fields.status, idempotencyKey = fields.idempotencyKey,
             ))
+            // P12/D92: restore the nested payment lines. Old-format documents
+            // (no "paymentLines" key) restore zero rows — the legacy bill keeps
+            // its denormalized columns, which is exactly the pre-P12 state.
+            val paymentLines = RestoreMapper.paymentLinesFromBillMap(data)
+            if (paymentLines.isNotEmpty()) {
+                billPaymentLineDao.insertAll(paymentLines.map { pl ->
+                    BillPaymentLineEntity(
+                        id = pl.id, tenantId = pl.tenantId, billId = pl.billId,
+                        method = pl.method, provider = pl.provider,
+                        amount = pl.amount, cashbookEntryId = pl.cashbookEntryId,
+                        createdAt = pl.createdAt,
+                    )
+                })
+            }
             count++
         }
         return count

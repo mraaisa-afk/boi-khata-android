@@ -1,6 +1,7 @@
 package com.boikhata.core.database.repository
 
 import com.boikhata.core.database.dao.BillDao
+import com.boikhata.core.database.dao.BillPaymentLineDao
 import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.ExpenseCategoryDao
 import com.boikhata.core.database.dao.ExpenseDao
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 @Singleton
 class CashCloseRepositoryImpl @Inject constructor(
     private val billDao: BillDao,
+    private val billPaymentLineDao: BillPaymentLineDao,
     private val expenseDao: ExpenseDao,
     private val expenseCategoryDao: ExpenseCategoryDao,
     private val cashbookDao: CashbookDao,
@@ -54,11 +56,22 @@ class CashCloseRepositoryImpl @Inject constructor(
             ) }
         val cashBalance = CashbookBalanceCalculator.calculateBalance(cashEntries, CashbookAccount.CASH).balance
 
-        val billsForClose = bills.map {
+        val billsForClose = bills.map { bill ->
+            // P12/D92: bills created after the v7 migration carry authoritative
+            // per-line payment rows; legacy bills (and pre-P12 rows) have none and
+            // fall back to the denormalized bill columns inside the calculator.
+            val lines = billPaymentLineDao.getByBill(bill.id).map {
+                CashCloseCalculator.LineForClose(
+                    method = it.method,
+                    provider = it.provider,
+                    amount = it.amount,
+                )
+            }
             CashCloseCalculator.BillForClose(
-                paymentMethod = PaymentMethod.valueOf(it.paymentMethod),
-                paidAmount = it.paidAmount,
-                dueAmount = it.dueAmount,
+                paymentMethod = PaymentMethod.valueOf(bill.paymentMethod),
+                paidAmount = bill.paidAmount,
+                dueAmount = bill.dueAmount,
+                lines = lines,
             )
         }
 

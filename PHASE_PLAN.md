@@ -173,7 +173,7 @@
 
 **Provider-list mechanism (decision recorded):** hardcoded starter set as a single Kotlin source of truth (like DefaultExpenseCategories but compile-time): বিকাশ / নগদ (Nagad) / রকেট / উপায় / অন্যান্য. Rationale: the MFS provider market is small and stable; a DB-managed list (expense-categories style) would add a table + CRUD/settings UI that D92 v1 did not budget; the Standing Instruction means this can be revised any time via a D-entry — the upgrade path (additive table + settings screen) stays open.
 
-**Status:** IN PROGRESS (this round).
+**Status:** IMPLEMENTED 2026-09-24 on `agent/p12-multi-line-payments` (schema v7 + D22 extension + per-line cashbook MOBILE bucket + POS multi-line editor + all consumers + backup/restore + MigrationTestHelper/Robolectric tests). Pending: push + PR + CI, owner device test (migration on live pilot data; 2-way/3-way splits), D92 paste.
 
 **D-decisions:** D92 (drafted 2026-09-20; re-issued with this round's report for owner paste).
 

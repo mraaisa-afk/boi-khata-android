@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.boikhata.core.domain.enums.BookCategory
+import com.boikhata.core.domain.enums.MfsProvider
+import com.boikhata.core.domain.enums.PaymentLineCategory
 import com.boikhata.core.domain.enums.PaymentMethod
 import com.boikhata.core.domain.model.Bill
 import com.boikhata.core.domain.model.BillLine
@@ -14,6 +16,7 @@ import com.boikhata.core.domain.repository.BillLineInput
 import com.boikhata.core.domain.repository.BillRepository
 import com.boikhata.core.domain.repository.BookRepository
 import com.boikhata.core.domain.repository.KhataRepository
+import com.boikhata.core.domain.repository.PaymentLineSpec
 import com.boikhata.core.domain.sale.VatCalculator
 import com.boikhata.core.domain.text.BengaliNormalizer
 import com.boikhata.shared.receipt.ReceiptBuilder
@@ -118,13 +121,63 @@ class SaleViewModel @Inject constructor(
     }
 
     fun setPaymentMethod(method: PaymentMethod) {
-        _cartState.value = _cartState.value.copy(paymentMethod = method)
+        // P12 compatibility setter — the POS now drives multi-line state directly;
+        // this rewrites the list as the equivalent single line.
+        val line = when (method) {
+            PaymentMethod.CASH -> PaymentLineUi(PaymentLineCategory.CASH, null, "")
+            PaymentMethod.BKASH -> PaymentLineUi(PaymentLineCategory.MOBILE, MfsProvider.BKASH, "")
+            PaymentMethod.NAGAD -> PaymentLineUi(PaymentLineCategory.MOBILE, MfsProvider.NAGAD, "")
+            PaymentMethod.CREDIT -> PaymentLineUi(PaymentLineCategory.CASH, null, "0")
+            PaymentMethod.BANK -> PaymentLineUi(PaymentLineCategory.BANK, null, "")
+            PaymentMethod.MOBILE -> PaymentLineUi(PaymentLineCategory.MOBILE, MfsProvider.OTHER, "")
+        }
+        _cartState.value = _cartState.value.copy(paymentLines = listOf(line))
         recalculateTotals()
     }
 
     fun setPaidAmount(amount: String) {
-        _cartState.value = _cartState.value.copy(paidAmountInput = amount)
+        // P12 compatibility setter — sets the FIRST line's amount (single-line case).
+        val lines = _cartState.value.paymentLines
+        if (lines.isEmpty()) return
+        _cartState.value = _cartState.value.copy(
+            paymentLines = lines.mapIndexed { i, l -> if (i == 0) l.copy(amountInput = amount) else l }
+        )
         recalculateTotals()
+    }
+
+    // ── P12/D92: multi-line payment entry ─────────────────────────────────
+
+    fun addPaymentLine(category: PaymentLineCategory) {
+        val lines = _cartState.value.paymentLines
+        if (lines.any { it.category == category }) return // one line per category
+        _cartState.value = _cartState.value.copy(
+            paymentLines = lines + PaymentLineUi(category, null, "")
+        )
+        recalculateTotals()
+    }
+
+    fun removePaymentLine(index: Int) {
+        val lines = _cartState.value.paymentLines
+        if (index !in lines.indices || lines.size == 1) return // keep ≥ 1 line
+        _cartState.value = _cartState.value.copy(paymentLines = lines.filterIndexed { i, _ -> i != index })
+        recalculateTotals()
+    }
+
+    fun setPaymentLineAmount(index: Int, input: String) {
+        val lines = _cartState.value.paymentLines
+        if (index !in lines.indices) return
+        _cartState.value = _cartState.value.copy(
+            paymentLines = lines.mapIndexed { i, l -> if (i == index) l.copy(amountInput = input) else l }
+        )
+        recalculateTotals()
+    }
+
+    fun setPaymentLineProvider(index: Int, provider: MfsProvider) {
+        val lines = _cartState.value.paymentLines
+        if (index !in lines.indices) return
+        _cartState.value = _cartState.value.copy(
+            paymentLines = lines.mapIndexed { i, l -> if (i == index) l.copy(provider = provider) else l }
+        )
     }
 
     fun selectCustomer(customer: KhataCustomer?) {
@@ -169,14 +222,17 @@ class SaleViewModel @Inject constructor(
 
         val totalAmount = (subtotal + vatAmount - discountAmount).coerceAtLeast(0.0)
 
-        val paidAmount = when (state.paymentMethod) {
-            PaymentMethod.CREDIT -> 0.0
-            else -> {
-                // B-007: Bengali-digit tolerance (same as the discount field).
-                val inputPaid = BengaliNormalizer.toAsciiDigits(state.paidAmountInput).toDoubleOrNull() ?: totalAmount
-                inputPaid.coerceAtMost(totalAmount)
+        // P12/D92: paid = sum of payment-line amounts. Blank input behaves like
+        // the legacy field: a SINGLE blank line = full total (plain cash sale);
+        // in a multi-line split every amount must be typed explicitly.
+        val paidAmount = state.paymentLines.sumOf { line ->
+            val parsed = BengaliNormalizer.toAsciiDigits(line.amountInput).toDoubleOrNull()
+            when {
+                parsed != null -> parsed.coerceAtLeast(0.0)
+                state.paymentLines.size == 1 && line.amountInput.isBlank() -> totalAmount
+                else -> 0.0
             }
-        }
+        }.coerceAtMost(totalAmount)
         val dueAmount = (totalAmount - paidAmount).coerceAtLeast(0.0)
 
         _cartState.value = state.copy(
@@ -226,18 +282,56 @@ class SaleViewModel @Inject constructor(
                 val customerName = state.selectedCustomer?.nameBn ?: "হাটি ক্রেতা"
                 val customerPhone = state.selectedCustomer?.phone
 
-                val billId = billRepository.createBill(
-                    tenantId = currentTenantId,
-                    customerId = state.selectedCustomer?.id,
-                    customerNameBn = customerName,
-                    customerPhone = customerPhone,
-                    userId = "u_1", // seed owner
-                    lines = lines,
-                    discountAmount = state.discountAmount,
-                    discountType = discountType,
-                    paymentMethod = state.paymentMethod,
-                    paidAmount = state.paidAmount,
-                )
+                // P12/D92: single-line checkouts keep the legacy createBill entry
+                // point (and its exact test contract); splits (বাকি combinations)
+                // use the multi-line transaction.
+                val activeLines = state.paymentLines.filter { lineInputAmount(it, state) > 0.0 }
+                val billId = if (activeLines.size <= 1) {
+                    val single = activeLines.firstOrNull()
+                        ?: state.paymentLines.firstOrNull()
+                        ?: PaymentLineUi(PaymentLineCategory.CASH, null, "")
+                    val amount = lineInputAmount(single, state)
+                    val legacyMethod = when (single.category) {
+                        PaymentLineCategory.CASH -> if (amount <= 0.0) PaymentMethod.CREDIT else PaymentMethod.CASH
+                        PaymentLineCategory.BANK -> PaymentMethod.BANK
+                        PaymentLineCategory.MOBILE -> when (single.provider) {
+                            MfsProvider.BKASH -> PaymentMethod.BKASH
+                            MfsProvider.NAGAD -> PaymentMethod.NAGAD
+                            else -> PaymentMethod.MOBILE
+                        }
+                        PaymentLineCategory.DUE -> PaymentMethod.CREDIT
+                    }
+                    billRepository.createBill(
+                        tenantId = currentTenantId,
+                        customerId = state.selectedCustomer?.id,
+                        customerNameBn = customerName,
+                        customerPhone = customerPhone,
+                        userId = "u_1", // seed owner
+                        lines = lines,
+                        discountAmount = state.discountAmount,
+                        discountType = discountType,
+                        paymentMethod = legacyMethod,
+                        paidAmount = amount,
+                    )
+                } else {
+                    billRepository.createBillWithPaymentLines(
+                        tenantId = currentTenantId,
+                        customerId = state.selectedCustomer?.id,
+                        customerNameBn = customerName,
+                        customerPhone = customerPhone,
+                        userId = "u_1", // seed owner
+                        lines = lines,
+                        discountAmount = state.discountAmount,
+                        discountType = discountType,
+                        paidLines = activeLines.map { line ->
+                            PaymentLineSpec(
+                                category = line.category,
+                                provider = line.provider,
+                                amount = lineInputAmount(line, state),
+                            )
+                        },
+                    )
+                }
                 _cartState.value = CartState() // reset cart
                 onDone(billId)
             } catch (e: Exception) {
@@ -251,6 +345,14 @@ class SaleViewModel @Inject constructor(
             try {
                 val bill = billRepository.getBill(currentTenantId, billId) ?: return@launch
                 val lines = billRepository.getBillLines(billId)
+                // P12/D92: per-line জমা rows on the receipt (paid + DUE); legacy
+                // bills have no lines → single জমা/মাধ্যম rows as before.
+                val paymentLines = billRepository.getPaymentLines(billId).map { pl ->
+                    ReceiptBuilder.PaymentLineDisplay(
+                        labelBn = ReceiptBuilder.paymentLineLabel(pl.category.name, pl.provider?.name),
+                        amount = pl.amount,
+                    )
+                }
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val text = ReceiptBuilder.buildReceiptText(
                     bill = bill,
@@ -290,6 +392,16 @@ class SaleViewModel @Inject constructor(
         }
     }
 
+    /** P12: resolved amount of a payment line (blank single line = full total). */
+    private fun lineInputAmount(line: PaymentLineUi, state: CartState): Double {
+        val parsed = BengaliNormalizer.toAsciiDigits(line.amountInput).toDoubleOrNull()
+        return when {
+            parsed != null -> parsed.coerceAtLeast(0.0)
+            state.paymentLines.size == 1 && line.amountInput.isBlank() -> state.totalAmount
+            else -> 0.0
+        }
+    }
+
     fun clearCart() {
         _cartState.value = CartState()
     }
@@ -319,14 +431,21 @@ data class CartState(
     val selectedCustomer: KhataCustomer? = null,
     val discountInput: String = "",
     val isPercentageDiscount: Boolean = true,
-    val paymentMethod: PaymentMethod = PaymentMethod.CASH,
-    val paidAmountInput: String = "",
+    // P12/D92: combinable payment lines (default = one blank নগদ line = full cash).
+    val paymentLines: List<PaymentLineUi> = listOf(PaymentLineUi(PaymentLineCategory.CASH, null, "")),
     val subtotal: Double = 0.0,
     val vatAmount: Double = 0.0,
     val discountAmount: Double = 0.0,
     val totalAmount: Double = 0.0,
     val paidAmount: Double = 0.0,
     val dueAmount: Double = 0.0,
+)
+
+/** P12/D92: one editable payment line in the POS checkout editor. */
+data class PaymentLineUi(
+    val category: PaymentLineCategory,
+    val provider: MfsProvider?,
+    val amountInput: String,
 )
 
 sealed interface BookSearchState {

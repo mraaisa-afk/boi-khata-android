@@ -14,13 +14,13 @@
 
 ## Current Schema Version
 
-**Current Room DB version: v6**
+**Current Room DB version: v7**
 
 - Database class: `core/database/src/main/java/com/boikhata/core/database/BoiKhataDatabase.kt`
-- `exportSchema = true`
-- Entities registered: **24**
-- Last migration: `Migration5To6`
-- Next migration would be: `Migration6To7`
+- `exportSchema = true` (schemas exported to `core/database/schemas/` since P12)
+- Entities registered: **25**
+- Last migration: `Migration6To7`
+- Next migration would be: `Migration7To8`
 
 ### Naming convention
 
@@ -33,6 +33,7 @@ Migration classes in this repo are named `Migration<N>To<N+1>`:
 | `Migration3To4` | `migration/Migration3To4.kt` |
 | `Migration4To5` | `migration/Migration4To5.kt` |
 | `Migration5To6` | `migration/Migration5To6.kt` |
+| `Migration6To7` | `migration/Migration6To7.kt` |
 
 > Do **not** write `MigrationV1_V2`. That form does not exist in this codebase.
 
@@ -50,6 +51,7 @@ Sourced from the KDoc block on `BoiKhataDatabase`.
 | v4 | `Migration3To4` | `mela_sessions` table | D57 |
 | v5 | `Migration4To5` | `trial_redemptions` table | D64 |
 | v6 | `Migration5To6` | Unique index on `supplier_entries.idempotencyKey` | D70 |
+| v7 | `Migration6To7` | `bill_payment_lines` table (ADDITIVE-ONLY — no column changes, no data transformation) | D92 |
 
 > **Known gap:** the per-migration SQL was not read line by line during this audit.
 > Before relying on the exact column-level changes for v2 and v3, open the migration
@@ -58,12 +60,12 @@ Sourced from the KDoc block on `BoiKhataDatabase`.
 
 ---
 
-## Registered Entities (v5)
+## Registered Entities (v7)
 
-All 24 entities declared in the `@Database` annotation:
+All 25 entities declared in the `@Database` annotation:
 
 `TenantEntity`, `UserEntity`, `DeviceEntity`, `CloudSyncStateEntity`, `BookEntity`,
-`StockLedgerEntity`, `BillEntity`, `BillLineEntity`, `KhataCustomerEntity`,
+`StockLedgerEntity`, `BillEntity`, `BillLineEntity`, `BillPaymentLineEntity`, `KhataCustomerEntity`,
 `KhataEntryEntity`, `KhataInstallmentEntity`, `ExpenseCategoryEntity`, `ExpenseEntity`,
 `CashbookEntryEntity`, `OwnerDrawingEntity`, `SupplierEntity`, `SupplierEntryEntity`,
 `MasterCatalogEntity`, `AuditLogEntity`, `PeriodLockEntity`, `RecurringExpenseEntity`,
@@ -76,7 +78,7 @@ All 24 entities declared in the `@Database` annotation:
 > **G16:** any change to this list requires reading this file first, updating the table
 > below in the same PR, and updating the test that asserts the total count.
 
-**Verified count: 23 tables.**
+**Verified count: 24 tables** (P12/D92 added `bill_payment_lines`).
 
 Source: `core/domain/src/main/java/com/boikhata/core/domain/cloud/TenantRebindPlanner.kt`
 (decision **D41**, Firebase-Project-Context constraint 12).
@@ -106,6 +108,7 @@ Source: `core/domain/src/main/java/com/boikhata/core/domain/cloud/TenantRebindPl
 | 21 | `budgets` |
 | 22 | `mela_sessions` |
 | 23 | `trial_redemptions` |
+| 24 | `bill_payment_lines` (P12/D92) |
 
 ### Excluded table
 
