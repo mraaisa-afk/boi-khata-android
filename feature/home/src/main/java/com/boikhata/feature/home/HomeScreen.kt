@@ -208,7 +208,7 @@ private fun SyncStatusChip() {
 
 @Composable
 private fun HeroCard(data: HomeData, amountVisible: Boolean, onAmountToggle: () -> Unit, modifier: Modifier = Modifier) {
-    // D81: Full D79 formula — নিট লাভ = (নগদ বিক্রি + খাতা আদায়) − নগদ ব্যয়
+        // D81: Full D79 formula — নিট লাভ = (নগদ বিক্রি + খাতা আদায়) − নগদ খরচ
     val todayIncome = data.todaySalesTotal + data.todayKhataCollection
     val netProfit = todayIncome - data.todayExpenseTotal
     val heroText = if (amountVisible) formatBengaliTaka(netProfit) else stringResource(R.string.home_hero_amount_hidden)

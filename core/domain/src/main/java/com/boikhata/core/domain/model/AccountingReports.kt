@@ -48,7 +48,7 @@ data class PnLReport(
         PnLLine("ক্রয়-COGS (কেনা বই)", "Purchase COGS", -cogsPurchase),
         PnLLine("কনসাইনমেন্ট-কমিশন", "Consignment Commission", -cogsConsignment),
         PnLLine("মোট COGS", "Total COGS", -totalCogs),
-        PnLLine("সর্বমোট লাভ", "Gross Profit", grossProfit),
+        PnLLine("স্থূল মুনাফা", "Gross Profit", grossProfit),
         PnLLine("খরচ", "Expenses", -expenses),
         PnLLine("মালিকের তোলা", "Owner Drawings", -ownerDrawings),
         PnLLine("ভ্যাট আদায়", "VAT Collected", vatCollected),
@@ -90,7 +90,7 @@ data class BalanceSheetLite(
     fun assetLines(): List<BalanceSheetComponent> = listOf(
         BalanceSheetComponent("নগদ (ক্যাশ+বিকাশ+ব্যাংক)", "Cash (Cash+bKash+Bank)", cash),
         BalanceSheetComponent("ইনভেন্টরি", "Inventory", inventory),
-        BalanceSheetComponent("খাতা পাওনা", "Receivables", receivables),
+        BalanceSheetComponent("খাতার বাকি (প্রাপ্য)", "Receivables", receivables),
         BalanceSheetComponent("ঘরি অগ্রিম", "Ghori Advances", ghoriAdvances),
         BalanceSheetComponent("মোট সম্পদ", "Total Assets", totalAssets),
     )
@@ -101,9 +101,9 @@ data class BalanceSheetLite(
     )
 
     fun equityLines(): List<BalanceSheetComponent> = listOf(
-        BalanceSheetComponent("অবধৃত মুনাফা", "Retained Earnings", retainedEarnings),
+        BalanceSheetComponent("সঞ্চিত মুনাফা", "Retained Earnings", retainedEarnings),
         BalanceSheetComponent("মালিকের তোলা (কম)", "Less: Drawings", -lessDrawings),
-        BalanceSheetComponent("মোত ইক্যুইটি", "Total Equity", totalEquity),
+        BalanceSheetComponent("মোট ইক্যুইটি", "Total Equity", totalEquity),
     )
 }
 

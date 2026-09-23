@@ -88,10 +88,32 @@ class ReceiptBuilderTest {
     @Test
     fun `should include subtotal discount vat and total`() {
         val text = ReceiptBuilder.buildReceiptText(bill, lines, "Shop", formatAmount, formatDate)
-        assertThat(text).contains("উপমুট")
+        // Part A (PR #71): উপমুট → সর্বমোট — guard against the legacy term returning.
+        assertThat(text).contains("সর্বমোট")
+        assertThat(text).doesNotContain("উপমুট")
         assertThat(text).contains("ছাড়")
         assertThat(text).contains("ভ্যাট")
         assertThat(text).contains("মোট")
+    }
+
+    @Test
+    fun `should label percentage discount distinctly from fixed discount`() {
+        // A5a: the old code had two IDENTICAL branches ("ছাড়" else "ছাড়") — the
+        // discountType was dead. Percentage bills must now read «ছাড় (%):».
+        val pctBill = bill.copy(discountType = "PERCENTAGE")
+        val pctText = ReceiptBuilder.buildReceiptText(pctBill, lines, "Shop", formatAmount, formatDate)
+        assertThat(pctText).contains("ছাড় (%):")
+        val fixedText = ReceiptBuilder.buildReceiptText(bill, lines, "Shop", formatAmount, formatDate)
+        assertThat(fixedText).contains("ছাড়:")
+        assertThat(fixedText).doesNotContain("ছাড় (%)")
+    }
+
+    @Test
+    fun `should disambiguate Nagad mobile banking from cash`() {
+        // A4: PaymentMethod.NAGAD rendered as bare «নগদ» — identical to CASH.
+        val nagadBill = bill.copy(paymentMethod = PaymentMethod.NAGAD)
+        val text = ReceiptBuilder.buildReceiptText(nagadBill, lines, "Shop", formatAmount, formatDate)
+        assertThat(text).contains("নগদ (Nagad)")
     }
 
     @Test

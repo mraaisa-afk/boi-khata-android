@@ -15,7 +15,7 @@
     <string name="discount">ছাড়</string>
     <string name="payment_method">পেমেন্ট মাধ্যম</string>
     <string name="paid_amount">জমা পরিমাণ</string>
-    <string name="subtotal">উপমুট</string>
+    <string name="subtotal">সর্বমোট</string>
     <string name="vat">ভ্যাট</string>
     <string name="total">মোট</string>
     <string name="due">বাকি</string>

@@ -14,7 +14,7 @@
     <string name="cogs_purchase">ক্রয়-COGS</string>
     <string name="cogs_consignment">কনসাইনমেন্ট-কমিশন</string>
     <string name="total_cogs">মোট COGS</string>
-    <string name="gross_profit">সর্বমোট লাভ</string>
+    <string name="gross_profit">স্থূল মুনাফা</string>
     <string name="expenses">খরচ</string>
     <string name="owner_drawings">মালিকের তোলা</string>
     <string name="vat_collected">ভ্যাট আদায়</string>
@@ -23,14 +23,14 @@
     <string name="assets">সম্পদ</string>
     <string name="cash">নগদ</string>
     <string name="inventory">ইনভেন্টরি</string>
-    <string name="receivables">খাতা পাওনা</string>
+    <string name="receivables">খাতার বাকি (প্রাপ্য)</string>
     <string name="ghori_advances">ঘরি অগ্রিম</string>
     <string name="total_assets">মোট সম্পদ</string>
     <string name="liabilities">দায়</string>
     <string name="supplier_payables">সাপ্লায়ার দেনা</string>
     <string name="total_liabilities">মোট দায়</string>
     <string name="equity">ইক্যুইটি</string>
-    <string name="retained_earnings">অবধৃত মুনাফা</string>
+    <string name="retained_earnings">সঞ্চিত মুনাফা</string>
     <string name="less_drawings">মালিকের তোলা (কম)</string>
     <string name="total_equity">মোট ইক্যুইটি</string>
     <string name="lock_period">মাস তালাবদ্ধ করুন</string>
@@ -49,14 +49,14 @@
     <string name="nagad_sales">নগদ (Nagad) বিক্রি</string>
     <string name="credit_sales">বাকি বিক্রি</string>
     <string name="total_sales">মোট বিক্রি</string>
-    <string name="expenses_by_category">খরচ (শ্রেণি অনুয়ায়ী)</string>
+    <string name="expenses_by_category">খরচ (খাত অনুযায়ী)</string>
     <string name="total_expenses">মোট খরচ</string>
     <string name="mfs_fee">MFS-ফি (আনুমানিক)</string>
     <string name="mfs_fee_rate">MFS-ফি হার (%)</string>
     <string name="cash_reconciliation">নগদ মিলান</string>
     <string name="system_cash">হিসাব-অনুযায়ী</string>
     <string name="counted_cash">গোনা নগদ</string>
-    <string name="variance">ভ্যারিয়েন্স</string>
+    <string name="variance">ফারাক</string>
     <string name="share_close">WhatsApp-এ শেয়ার</string>
     <string name="share_hisab_pack">হিসাব-প্যাক শেয়ার</string>
     <string name="no_expenses_today">আজ কোনো খরচ নেই</string>
@@ -69,9 +69,9 @@
     <string name="trend_profit">লাভ</string>
     <string name="trend_expenses">খরচ</string>
     <string name="mom_change">মাসের পরিবর্তন: %1$.1f%%</string>
-    <string name="top_books">সেরা বিক্রি বই</string>
-    <string name="top_customers">বেশি কেনা ক্রেতা</string>
-    <string name="top_expenses">বড় খরচের শ্রেণি</string>
+    <string name="top_books">সর্বাধিক বিক্রিত বই</string>
+    <string name="top_customers">সর্বাধিক কেনাকাটার ক্রেতা</string>
+    <string name="top_expenses">বড় খরচের খাত</string>
     <string name="share_report">রিপোর্ট শেয়ার</string>
 
     <!-- P6: Comparison tab -->

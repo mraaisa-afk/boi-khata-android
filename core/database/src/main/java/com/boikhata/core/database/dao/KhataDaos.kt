@@ -58,8 +58,8 @@ interface KhataEntryDao {
     /**
      * D81: Aggregate sum of PAYMENT-type entries within a date window.
      * Used by HomeViewModel to compute the «খাতা আদায়» component of the D79
-     * net-profit formula:  নিট লাভ = (নগদ বিক্রি + খাতা আদায়) − নগদ ব্যয়.
-     * Only positive amounts are included; negative ADJUSTMENTs (দেনা মুন) are excluded.
+     * net-profit formula:  নিট লাভ = (নগদ বিক্রি + খাতা আদায়) − নগদ খরচ.
+     * Only positive amounts are included; negative ADJUSTMENTs (দেনা-পাওনা) are excluded.
      */
     @Query("""
         SELECT COALESCE(SUM(amount), 0.0)

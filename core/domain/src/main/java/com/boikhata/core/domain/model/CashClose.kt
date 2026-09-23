@@ -38,13 +38,13 @@ data class CashCloseReport(
     fun toLines(): List<PnLLine> = listOf(
         PnLLine("নগদ বিক্রি", "Cash Sales", salesByMethod.cash),
         PnLLine("বিকাশ বিক্রি", "bKash Sales", salesByMethod.bkash),
-        PnLLine("নগদ বিক্রি (নগদ)", "Nagad Sales", salesByMethod.nagad),
+        PnLLine("নগদ (Nagad) বিক্রি", "Nagad Sales", salesByMethod.nagad),
         PnLLine("বাকি বিক্রি", "Credit Sales", salesByMethod.credit),
         PnLLine("মোট বিক্রি", "Total Sales", salesByMethod.total),
         PnLLine("মোট খরচ", "Total Expenses", -totalExpenses),
         PnLLine("MFS-ফি (আনুমানিক)", "MFS Fee (est.)", -mfsFeeEstimated),
         PnLLine("হিসাব-অনুযায়ী নগদ", "System Cash", systemCashInHand),
         PnLLine("গোনা নগদ", "Counted Cash", countedCash),
-        PnLLine("ভ্যারিয়েন্স", "Variance", variance),
+        PnLLine("ফারাক", "Variance", variance),
     )
 }

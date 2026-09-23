@@ -206,7 +206,7 @@ class KhataRepositoryImpl @Inject constructor(
             customerId = customerId,
             amount = -currentDue, // D15: negative ADJUSTMENT reduces balance
             type = KhataEntryType.ADJUSTMENT,
-            description = "দেনা মুন",
+            description = "দেনা-পাওনা",
             referenceBillId = null,
             collectedByUserId = collectedByUserId,
         )

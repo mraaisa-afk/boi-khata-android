@@ -70,7 +70,7 @@ class KhataStatementBuilderTest {
     fun `should handle debt forgiveness as negative adjustment`() {
         val entries = listOf(
             KhataEntry("e1", KhataEntryType.CREDIT, 1000.0, now - 20 * dayMs),
-            KhataEntry("e2", KhataEntryType.ADJUSTMENT, -1000.0, now - 1 * dayMs, description = "দেনা মুন"),
+            KhataEntry("e2", KhataEntryType.ADJUSTMENT, -1000.0, now - 1 * dayMs, description = "দেনা-পাওনা"),
         )
         val stmt = KhataStatementBuilder.buildStatement(customer, entries, now)
         assertThat(stmt.totalDue).isWithin(0.01).of(0.0)
