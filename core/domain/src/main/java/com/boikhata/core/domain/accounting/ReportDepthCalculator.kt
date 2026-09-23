@@ -45,7 +45,7 @@ object ReportDepthCalculator {
         val rows = listOf(
             row("নিট বিক্রি", a.netRevenue, b.netRevenue),
             row("মোট COGS", a.totalCogs, b.totalCogs),
-            row("সর্বমোট লাভ", a.grossProfit, b.grossProfit),
+            row("স্থূল মুনাফা", a.grossProfit, b.grossProfit),
             row("খরচ", a.expenses, b.expenses),
             row("নিট লাভ", a.netProfit, b.netProfit),
             row("মার্জিন (%)", a.marginPercent, b.marginPercent),

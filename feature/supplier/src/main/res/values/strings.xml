@@ -3,7 +3,7 @@
     <string name="add_supplier">সাপ্লায়ার যোগ করুন</string>
     <string name="supplier_name">সাপ্লায়ার/পাবলিশার নাম</string>
     <string name="phone">ফোন</string>
-    <string name="settlement_cycle">সেটেলমেন্ট চক্র (দিন)</string>
+    <string name="settlement_cycle">পরিশোধ চক্র (দিন)</string>
     <string name="notes">নোট</string>
     <string name="no_suppliers">কোনো সাপ্লায়ার নেই।</string>
     <string name="total_payable">মোট দেনা</string>
@@ -18,7 +18,7 @@
     <string name="entry_description">বিবরণ</string>
     <string name="trx_id">trxID (ঐচ্ছিক)</string>
     <string name="share_statement">স্টেটমেন্ট শেয়ার</string>
-    <string name="settlement_reminders">সেটেলমেন্ট রিমাইন্ডার</string>
+    <string name="settlement_reminders">পরিশোধ রিমাইন্ডার</string>
     <string name="no_entries">কোনো লেনদেন নেই।</string>
     <string name="save">সেভ</string>
     <string name="cancel">বাতিল</string>

@@ -186,7 +186,7 @@ class KhataViewModel @Inject constructor(
             try {
                 val customer = khataRepository.getCustomer(tenantId, customerId)
                 if (customer == null) {
-                    _detailState.value = KhataDetailUiState.Error("কাস্টমার পাওয়া যায়নি")
+                    _detailState.value = KhataDetailUiState.Error("ক্রেতা পাওয়া যায়নি")
                     return@launch
                 }
                 val entries = khataRepository.getEntries(tenantId, customerId)
@@ -262,7 +262,7 @@ class KhataViewModel @Inject constructor(
                 loadDetail(currentTenantId, customerId)
                 onDone()
             } catch (e: Exception) {
-                _detailState.value = KhataDetailUiState.Error(e.message ?: "দেনা মুন ব্যর্থ")
+                _detailState.value = KhataDetailUiState.Error(e.message ?: "দেনা-পাওনা ব্যর্থ")
             }
         }
     }

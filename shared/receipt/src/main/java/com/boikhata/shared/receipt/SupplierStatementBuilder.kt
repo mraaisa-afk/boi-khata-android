@@ -39,11 +39,11 @@ object SupplierStatementBuilder {
         val sb = StringBuilder()
         sb.append("═══════════════════════════════\n")
         sb.append("${statement.shopName}\n")
-        sb.append("সাপ্লায়ার সেটেলমেন্ট স্টেটমেন্ট\n")
+        sb.append("সাপ্লায়ার পরিশোধ স্টেটমেন্ট\n")
         sb.append("═══════════════════════════════\n")
         sb.append("সাপ্লায়ার: ${statement.supplier.nameBn}\n")
         statement.supplier.phone?.takeIf { it.isNotBlank() }?.let { sb.append("ফোন: $it\n") }
-        sb.append("সেটেলমেন্ট চক্র: ${statement.supplier.settlementCycle}\n")
+        sb.append("পরিশোধ চক্র: ${statement.supplier.settlementCycle}\n")
         val start = statement.startDate
         val rangeLabel = when {
             start != null ->

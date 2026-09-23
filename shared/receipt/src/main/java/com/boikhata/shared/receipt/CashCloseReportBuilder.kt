@@ -37,7 +37,7 @@ object CashCloseReportBuilder {
         sb.append("মোট বিক্রি: ${formatAmount(report.salesByMethod.total)}\n\n")
 
         // Expenses by category
-        sb.append("── খরচ (শ্রেণি অনুযায়ী) ──\n")
+        sb.append("── খরচ (খাত অনুযায়ী) ──\n")
         if (report.expensesByCategory.isEmpty()) {
             sb.append("আজ কোনো খরচ নেই\n")
         } else {
@@ -58,7 +58,7 @@ object CashCloseReportBuilder {
         sb.append("── নগদ মিলান ──\n")
         sb.append("হিসাব-অনুযায়ী: ${formatAmount(report.systemCashInHand)}\n")
         sb.append("গোনা নগদ: ${formatAmount(report.countedCash)}\n")
-        sb.append("ভ্যারিয়েন্স: ${formatAmount(report.variance)} (${report.varianceLabelBn})\n")
+        sb.append("ফারাক: ${formatAmount(report.variance)} (${report.varianceLabelBn})\n")
         sb.append("\n")
         sb.append("═══════════════════════════════\n")
 

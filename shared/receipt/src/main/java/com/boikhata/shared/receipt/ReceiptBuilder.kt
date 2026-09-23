@@ -54,9 +54,9 @@ object ReceiptBuilder {
         }
 
         sb.append("━━━━━━━━━━━━━━━\n")
-        sb.append("উপমুট: ${formatAmount(bill.subtotal)}\n")
+        sb.append("সর্বমোট: ${formatAmount(bill.subtotal)}\n")
         if (bill.discountAmount > 0.01) {
-            val discountLabel = if (bill.discountType == "PERCENTAGE") "ছাড়" else "ছাড়"
+            val discountLabel = if (bill.discountType == "PERCENTAGE") "ছাড় (%)" else "ছাড়"
             sb.append("$discountLabel: −${formatAmount(bill.discountAmount)}\n")
         }
         if (bill.vatAmount > 0.01) {
@@ -78,7 +78,7 @@ object ReceiptBuilder {
     private fun paymentMethodLabel(method: PaymentMethod): String = when (method) {
         PaymentMethod.CASH -> "নগদ"
         PaymentMethod.BKASH -> "বিকাশ"
-        PaymentMethod.NAGAD -> "নগদ"
+        PaymentMethod.NAGAD -> "নগদ (Nagad)"
         PaymentMethod.CREDIT -> "বাকি (খাতা)"
     }
 }

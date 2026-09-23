@@ -547,6 +547,6 @@ private fun FilterChip(
 private fun paymentLabel(method: PaymentMethod): String = when (method) {
     PaymentMethod.CASH -> "নগদ"
     PaymentMethod.BKASH -> "বিকাশ"
-    PaymentMethod.NAGAD -> "নগদ"
+    PaymentMethod.NAGAD -> "নগদ (Nagad)"
     PaymentMethod.CREDIT -> "বাকি"
 }

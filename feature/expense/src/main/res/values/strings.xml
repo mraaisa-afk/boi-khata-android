@@ -5,7 +5,7 @@
     <string name="add_expense">খরচ যোগ করুন</string>
     <string name="add_entry">এন্ট্রি যোগ করুন</string>
     <string name="add_drawing">তোলা যোগ করুন</string>
-    <string name="category">শ্রেণি</string>
+    <string name="category">খাত</string>
     <string name="amount">পরিমাণ</string>
     <string name="description">বিবরণ</string>
     <string name="save">সেভ</string>

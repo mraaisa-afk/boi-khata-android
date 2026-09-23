@@ -157,7 +157,7 @@ interface KhataRepository {
      * D81: Sum of PAYMENT-type khata entries in [start, end].
      * This is the «খাতা আদায়» component of the D79 net-profit formula:
      *   নিট লাভ = (todaySalesTotal + todayKhataCollection) − todayExpenseTotal.
-     * Only positive amounts are counted; negative ADJUSTMENTs (দেনা মুন) are excluded by the DAO.
+     * Only positive amounts are counted; negative ADJUSTMENTs (দেনা-পাওনা) are excluded by the DAO.
      */
     suspend fun getKhataCollectionByDateRange(tenantId: String, start: Long, end: Long): Double
 }
