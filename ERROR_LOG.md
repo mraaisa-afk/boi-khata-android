@@ -31,6 +31,31 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-018 — 2026-09-24 — P11 — Part A terminology fixes reported as done+verified were NEVER pushed; owner's installed build showed the old terms
+
+**Type:** Blocker (delivery-pipeline failure) — owner-visible regression report
+**Phase:** P11 (Part A terminology batch)
+**Date:** 2026-09-24
+**Task:** Owner installed the post-PR-#70 build and reported two "fixed and grep-verified" terms still live: উপমুট on the POS/checkout summary card (in-app sale screen, not the receipt) and দেনা মুন as the khata customer-detail button label.
+**Error:** Owner device evidence (4 screenshots, 2026-09-24) showed old terminology on main-derived build `7c47ece`.
+**Root cause (git forensics, file/line evidence):**
+- `git cat-file -t 767e190` / `743b86a` on a fresh clone → **"Not a valid object name"** — the Part A commits existed ONLY in the previous sandbox and were never pushed (that session ended with "PUSH BLOCKED: no GitHub token"; the token arrived only after the round closed).
+- PR #70 was merged at branch tip `f1bce2d` (merge commit `7c47ece`, parents `8766080` + `f1bce2d`) — so main received ONLY the C-round parse fixes; the Part A batch and its docs (incl. ERR-017, P12 PHASE_PLAN section) never landed and were destroyed by the sandbox reset.
+- Hypotheses (a) "third string source for the POS card" and (c) "different string key for the khata button" were DISPROVEN with binding evidence: `PosScreen.kt:230` renders `stringResource(R.string.subtotal)` = the exact key (`feature/sale/…/values-bn/strings.xml:18`) the batch fixes; `KhataCustomerDetailScreen.kt:168/272` render `stringResource(R.string.forgive_debt)` = the exact key (`feature/khata/…/values-bn/strings.xml:19`). No separate source exists.
+**Fix applied:** Full A1–A5 batch re-implemented on new branch `agent/part-a-terminology-reland` off merged main (commit `bba3208`), RED→GREEN re-proven (:shared:receipt 36 tests: RED 3 failed → GREEN 36/36), composition-tolerant sweep re-run (order-independent nukta/phola canonicalization — the sweep itself was hardened this round after the first pass missed decomposed য়-words: CashClose.kt:48 ভ্যারিয়েন্স had 0 false-negative hits under the old normalizer). ERR-017 (lost to the same reset) re-created below from the session record.
+**Lesson:** (1) A report that says "fixed and grep-verified" MUST state the delivery state in its first line: LANDED (pushed + CI) vs LOCAL-ONLY (push blocked). Local-only work is one sandbox reset away from not existing. (2) When a session ends push-blocked, the NEXT session's first act is to push or bundle the branch — before any new work. (3) grep verification for Bengali terms must canonicalize nukta order (য় = U+09AF+U+09BC vs U+09DF, etc.) or it silently under-reports.
+
+## ERR-017 — 2026-09-20 — P11 — ReceiptBuilder discount label: dead identical-branch (`if … "ছাড়" else "ছাড়"`) — re-created after loss with ERR-018's batch
+
+**Type:** Logic error (dead branch — cosmetic-but-real: label carried no information)
+**Phase:** P11 (Part A5a ruling)
+**Date:** 2026-09-20 (original forensics; re-created 2026-09-24 — the original entry died with never-pushed commit `743b86a`, see ERR-018)
+**Task:** Part A owner ruling A5a approved fixing the identical-branches discount label found in the terminology audit.
+**Error:** `ReceiptBuilder.kt:59` read `val discountLabel = if (bill.discountType == "PERCENTAGE") "ছাড়" else "ছাড়"` — both branches byte-identical, so `discountType` was dead and percentage bills rendered the same label as fixed-amount bills.
+**Root cause:** Copy-paste when the label was introduced (D21 era); no test asserted a distinction, so nothing caught it.
+**Fix applied (RED→GREEN, ERR-013 discipline):** Tests FIRST — `ReceiptBuilderTest.should label percentage discount distinctly from fixed discount` (PERCENTAGE → contains «ছাড় (%):», FIXED → contains «ছাড়:» and doesNotContain «ছাড় (%)»), subtotal test updated with a `doesNotContain("উপমুট")` legacy-term guard, plus a Nagad-disambiguation test. RED: 36 tests / 3 failed. Then `ReceiptBuilder.kt:59` branches → «ছাড় (%)» / «ছাড়». GREEN: 36/36. (Composition note: the repo's ড় is decomposed U+09A1+U+09BC — production strings must match the test strings' composition byte-for-byte or Truth fails; see ERR-018's sweep hardening.)
+**Lesson:** An `if/else` returning identical literals is a compile-legal no-op that code review never catches — grep for `else "` branches returning the same literal when auditing label logic, and pin each branch with a test the day it's fixed.
+
 ## ERR-016 — 2026-09-20 — P11 — C-round audit correction: MelaScreen was NOT a live Bangla-digit bug (toIntOrNull is Unicode-aware) — Part D inventory over-generalized the parse-bug class
 
 **Type:** Misunderstanding
@@ -300,5 +325,5 @@ e: HomeScreen.kt:203 Unresolved reference 'contentDescription'
 
 ---
 
-*Last updated: 2026-09-18 · Maintained by: Agent (append) + Builder/Sakira (review)*
+*Last updated: 2026-09-24 · Maintained by: Agent (append) + Builder/Sakira (review)*
 *Read by: the agent every session, last 10 entries mandatory*

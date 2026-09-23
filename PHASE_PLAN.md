@@ -30,6 +30,7 @@
 | **P8** | GA | Exit-gate open | TBD | No |
 | **P10** | Design rebuild + D79/D81 | Items done; exit-gate open (device) | D71–D84 | Yes (Design v2) |
 | **P11** | Crash-hardening + route-safety + device-gate automation | Open | D82–D84 (basis) | No |
+| **P12** | Multi-line payment model (bill_payment_lines) | **In progress — opened by owner override 2026-09-24 (P11 exit-gate still open)** | D92 (draft re-issued this round) | No |
 | **Post-GA** | Speculative | Not in PROGRESS.md yet | TBD | Yes (Design v2) |
 
 ---
@@ -154,6 +155,28 @@
 
 **D-decisions:** D82–D84 (basis); D85 (B-003 optional-arg navigation ruling); D86 (write-path tenant threading, fixes B-004); D87 (search-as-filter pickers + U-register, fixes U-001); **D88 — RULED by owner, implemented + merged via PR #67 (D71 §1 superseded); owner pasted D88+D90 to DECISIONS.md 2026-09-19; D89 — DEFERRED by owner (partial-payment UX, untouched); D90 — RULED + pasted by owner (U-002 opening-due write path); FAB «নতুন বিক্রি» restore-state — OPTION 1 CONFIRMED by owner 2026-09-19 (tracked accepted limitation, no code change); B-013 seeding policy — DRAFT D-entry text in PR #69 description (session-bootstrap defaults, idempotent, claims-tenant-scoped), pending owner DECISIONS.md commit; Part B payment-model redesign — DRAFT D-entry text delivered in chat 2026-09-20 (multi-line bill_payment_lines, additive Migration6To7, CONVENTIONS §2/§3 amendment required), pending owner ruling; Part A terminology batch — owner ruling pending (no strings touched)**
 
+**2026-09-24 status update:** PR #70 MERGED at `f1bce2d`. The Part A implementation commits (`767e190`/`743b86a`) were **never pushed** (no token that session) and died with the sandbox reset — the owner's device regression report (2026-09-24) proved main never had them (ERR-018); the batch is RE-LANDED on `agent/part-a-terminology-reland` (`bba3208`, RED→GREEN re-proven). Part A rulings A1–A5 all received 2026-09-20 and are now implemented (A5b হাটি ক্রেতা + A5c MFS-ফি explicitly NOT renamed per ruling). Part B (P12) implementation **authorized by owner 2026-09-24 by explicit override of the open P11 exit-gate** — see the P12 section. ERR-017 (lost) re-created; ERR-018 written.
+
+---
+
+## P12 — Multi-line payment model (bill_payment_lines)
+
+**Gate note — OWNER OVERRIDE, LOGGED 2026-09-24:** P12 implementation began **before the P11 exit-gate formally closed** (open items: B-005/B-006 + normal-sale + B-013/B-014 + C-round device re-tests, Roborazzi screenshot tests, Part A device sweep, D91/D92 DECISIONS.md pastes). The owner explicitly authorized starting P12 now and instructed that this be logged so it is never mistaken for a properly closed gate. The P11 exit-gate items remain open and mandatory.
+
+**Owner requirements (2026-09-24 restatement, per D92 draft):**
+1. Payment method categories at checkout: নগদ (cash) / ব্যাংক (bank or bank transfer) / মোবাইল ব্যাংকিং (mobile banking — shows a provider selector: বিকাশ, নগদ (Nagad), রকেট, উপায়, অন্যান্য) — বাকি (credit) remains its own option.
+2. MULTIPLE payment lines combinable within a SINGLE sale (e.g. ৳1000 = ৳600 নগদ + ৳400 mobile banking → zero remaining due).
+3. 3-way combination explicitly IN SCOPE (ruled in D92): paid + paid + remaining বাকি in the same sale (e.g. ৳600 cash + ৳300 mobile + ৳100 বাকি posted to the customer's খাতা).
+4. Build per the full D92 specification: additive-only Migration6To7 for `bill_payment_lines` (zero data transformation; legacy bills keep the single-method columns), D22 atomic transaction extended to write all payment lines + per-line cashbook mirror rows in ONE transaction, explicit **MOBILE** cashbook bucket (ruling: do NOT reuse BKASH), and every downstream consumer updated (CashCloseCalculator, CashCloseReportBuilder, CashCloseScreen, CashCloseRepositoryImpl, ReceiptBuilder, PosScreen, cloud Backup/Restore mappers, BillHistoryScreen).
+5. RED→GREEN test discipline; MigrationTestHelper test for 6→7; backup/restore round-trip tests for old-format AND new-format bills.
+6. CONVENTIONS §2 (PaymentMethod enum) + §3 (bills schema) amendment is a P12-implementation-time task — done in this phase (the owner ruled MOBILE bucket in advance).
+
+**Provider-list mechanism (decision recorded):** hardcoded starter set as a single Kotlin source of truth (like DefaultExpenseCategories but compile-time): বিকাশ / নগদ (Nagad) / রকেট / উপায় / অন্যান্য. Rationale: the MFS provider market is small and stable; a DB-managed list (expense-categories style) would add a table + CRUD/settings UI that D92 v1 did not budget; the Standing Instruction means this can be revised any time via a D-entry — the upgrade path (additive table + settings screen) stays open.
+
+**Status:** IN PROGRESS (this round).
+
+**D-decisions:** D92 (drafted 2026-09-20; re-issued with this round's report for owner paste).
+
 ---
 
 ## Next-Phase Eligibility Check
@@ -167,5 +190,5 @@ Before starting any phase:
 
 ---
 
-*Last updated: 2026-09-19 · Maintained by: Builder + Sakira Suva*
-*Gate authority: PROGRESS.md (D66) · Phase numbering: P0 to P11 (P9 unused)*
+*Last updated: 2026-09-24 · Maintained by: Builder + Sakira Suva*
+*Gate authority: PROGRESS.md (D66) · Phase numbering: P0 to P12 (P9 unused)*
