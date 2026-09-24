@@ -1,5 +1,6 @@
 package com.boikhata.feature.sale
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -22,6 +24,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.boikhata.core.designsystem.format.DigitStyle
 import com.boikhata.core.designsystem.format.NumberFormatter
+import com.boikhata.core.domain.enums.MfsProvider
+import com.boikhata.core.domain.enums.PaymentLineCategory
 import com.boikhata.core.domain.enums.PaymentMethod
 import com.boikhata.core.domain.model.Book
 import com.boikhata.core.domain.model.KhataCustomer
@@ -193,34 +198,95 @@ fun PosScreen(
                     }
                 }
 
-                // Payment method
+                // P12/D92: multi-line payment entry — নগদ / ব্যাংক / মোবাইল
+                // ব্যাংকিং (with provider selector) are combinable in ONE sale;
+                // the remainder posts as বাকি (preview below). The single blank
+                // নগদ line keeps the legacy “full cash payment” default.
                 Text(stringResource(R.string.payment_method), style = MaterialTheme.typography.labelMedium)
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    PaymentMethod.entries.filter { it != PaymentMethod.NAGAD }.forEach { method ->
-                        val selected = cartState.paymentMethod == method
+                cartState.paymentLines.forEachIndexed { index, line ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         FilterChip(
-                            selected = selected,
-                            onClick = { viewModel.setPaymentMethod(method) },
-                            label = { Text(paymentLabel(method)) },
+                            selected = true,
+                            onClick = {},
+                            label = { Text(paymentLineCategoryLabel(line.category)) },
                         )
+                        OutlinedTextField(
+                            value = line.amountInput,
+                            onValueChange = { input ->
+                                // B-007 pattern: ASCII + Bengali digits both parse in the VM.
+                                viewModel.setPaymentLineAmount(index, input.filter { it.isDigit() || it in '০'..'৯' || it == '.' })
+                            },
+                            label = { Text(stringResource(R.string.paid_amount)) },
+                            placeholder = {
+                                Text(
+                                    if (cartState.paymentLines.size == 1) {
+                                        NumberFormatter.formatMoney(cartState.totalAmount, DigitStyle.BANGLA)
+                                    } else {
+                                        "০"
+                                    }
+                                )
+                            },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                        )
+                        if (cartState.paymentLines.size > 1) {
+                            IconButton(onClick = { viewModel.removePaymentLine(index) }) {
+                                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.remove_payment_line))
+                            }
+                        }
+                    }
+                    if (line.category == PaymentLineCategory.MOBILE) {
+                        // Provider selector (D87 chips pattern — always-visible, tap to pick).
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            MfsProvider.entries.forEach { provider ->
+                                FilterChip(
+                                    selected = line.provider == provider,
+                                    onClick = { viewModel.setPaymentLineProvider(index, provider) },
+                                    label = { Text(mfsProviderLabel(provider)) },
+                                )
+                            }
+                        }
                     }
                 }
-
-                // Paid amount (for partial payment)
-                if (cartState.paymentMethod != PaymentMethod.CREDIT) {
-                    OutlinedTextField(
-                        value = cartState.paidAmountInput,
-                        onValueChange = { input ->
-                            // B-007: ASCII + Bengali digits both parse in the VM now.
-                            viewModel.setPaidAmount(input.filter { it.isDigit() || it in '০'..'৯' || it == '.' })
-                        },
-                        label = { Text(stringResource(R.string.paid_amount)) },
-                        placeholder = { Text(NumberFormatter.formatMoney(cartState.totalAmount, DigitStyle.BANGLA)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
+                // Add another payment method (one line per category)
+                val present = cartState.paymentLines.map { it.category }.toSet()
+                val addable = PaymentLineCategory.entries
+                    .filter { it != PaymentLineCategory.DUE && it !in present }
+                if (addable.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        addable.forEach { category ->
+                            FilterChip(
+                                selected = false,
+                                onClick = { viewModel.addPaymentLine(category) },
+                                label = {
+                                    Text("+ " + paymentLineCategoryLabel(category))
+                                },
+                            )
+                        }
+                    }
+                }
+                // P12: বাকি-remainder preview (posts to the selected customer's খাতা)
+                if (cartState.dueAmount > 0.01) {
+                    Text(
+                        text = stringResource(R.string.remaining_due_preview) + " " +
+                            NumberFormatter.formatMoney(cartState.dueAmount, DigitStyle.BANGLA),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
 
@@ -549,4 +615,24 @@ private fun paymentLabel(method: PaymentMethod): String = when (method) {
     PaymentMethod.BKASH -> "বিকাশ"
     PaymentMethod.NAGAD -> "নগদ (Nagad)"
     PaymentMethod.CREDIT -> "বাকি"
+    // P12/D92: summary values for multi-line bills
+    PaymentMethod.BANK -> "ব্যাংক"
+    PaymentMethod.MOBILE -> "মোবাইল ব্যাংকিং"
+}
+
+/** P12/D92: POS editor labels for the payment-line categories. */
+private fun paymentLineCategoryLabel(category: PaymentLineCategory): String = when (category) {
+    PaymentLineCategory.CASH -> "নগদ"
+    PaymentLineCategory.BANK -> "ব্যাংক"
+    PaymentLineCategory.MOBILE -> "মোবাইল ব্যাংকিং"
+    PaymentLineCategory.DUE -> "বাকি"
+}
+
+/** P12/D92: mobile-banking provider labels (নগদ disambiguated from cash). */
+private fun mfsProviderLabel(provider: MfsProvider): String = when (provider) {
+    MfsProvider.BKASH -> "বিকাশ"
+    MfsProvider.NAGAD -> "নগদ (Nagad)"
+    MfsProvider.ROCKET -> "রকেট"
+    MfsProvider.UPAY -> "উপায়"
+    MfsProvider.OTHER -> "অন্যান্য"
 }

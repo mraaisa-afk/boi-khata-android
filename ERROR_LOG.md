@@ -31,6 +31,17 @@
 <!-- New entries go ABOVE this line. Most recent entry first. -->
 <!-- DO NOT edit entries below. ONLY append above. -->
 
+## ERR-019 — 2026-09-24 — P12 — PR #72 merged into the WRONG BASE (stacked PR not retargeted after base PR #71 merged) — P12 was NOT on main while the owner believed it was
+
+**Type:** Blocker (delivery-pipeline failure) — owner-visible confusion
+**Phase:** P12 (multi-line payment model)
+**Date:** 2026-09-24
+**Task:** Land P12 (`agent/p12-multi-line-payments` @ `f647342`) on main after PR #71 (Part A re-land) merged.
+**Error:** Owner merged #71 → main (`cad3199`, CI green), then merged #72 — but #72's base was still the stacked base branch `agent/part-a-terminology-reland`, so GitHub merged P12 INTO that branch (merge commit `801a4bc`, parents `d8507ec` + `f647342`) instead of into main. `main...f647342` = diverged / ahead-by-1 → **P12 absent from main**. Owner reported "72 not shown in actions": `ci.yml` push-trigger is `main`-only and a merge into a non-default branch creates no PR check — so no CI run appeared and nothing flagged the miss.
+**Root cause:** The agent opened #72 as a stacked PR (base = Part A branch) with the intent to retarget its base to main immediately after #71 merged — but the retarget was never executed before the owner merged #71 and #72 in quick succession. A "merge in this order" instruction is not a control; nothing in the flow enforced the retarget step.
+**Fix applied:** P12 re-landed as **PR #73 (base `main` ← `agent/p12-multi-line-payments`)**: identical content to the CI-green #72 head (main's tree already equals the old base's tree, so the new merge ref exercises the same content against main) plus a docs commit (this entry + PROGRESS/PHASE_PLAN status updates). Owner action reduced to: merge #73.
+**Lesson:** Never leave a stacked PR's base pointing at a sibling branch past the moment its base PR merges — retarget IMMEDIATELY after the base merge lands (or simply open every PR with base main and accept the stacked diff view). The retarget is the control, not the merge-order instruction.
+
 ## ERR-018 — 2026-09-24 — P11 — Part A terminology fixes reported as done+verified were NEVER pushed; owner's installed build showed the old terms
 
 **Type:** Blocker (delivery-pipeline failure) — owner-visible regression report

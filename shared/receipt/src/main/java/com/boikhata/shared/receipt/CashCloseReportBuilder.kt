@@ -33,6 +33,10 @@ object CashCloseReportBuilder {
         sb.append("নগদ: ${formatAmount(report.salesByMethod.cash)}\n")
         sb.append("বিকাশ: ${formatAmount(report.salesByMethod.bkash)}\n")
         sb.append("নগদ (Nagad): ${formatAmount(report.salesByMethod.nagad)}\n")
+        // P12/D92: additive buckets — bank transfers and mobile-banking lines on
+        // providers other than bKash/Nagad (Rocket/Upay/other).
+        sb.append("ব্যাংক: ${formatAmount(report.salesByMethod.bank)}\n")
+        sb.append("মোবাইল ব্যাংকিং (অন্যান্য): ${formatAmount(report.salesByMethod.mobileOther)}\n")
         sb.append("বাকি: ${formatAmount(report.salesByMethod.credit)}\n")
         sb.append("মোট বিক্রি: ${formatAmount(report.salesByMethod.total)}\n\n")
 

@@ -6,6 +6,7 @@ import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.AuditLogDao
 import com.boikhata.core.database.dao.BackupDao
 import com.boikhata.core.database.dao.BillDao
+import com.boikhata.core.database.dao.BillPaymentLineDao
 import com.boikhata.core.database.dao.BookDao
 import com.boikhata.core.database.dao.BudgetDao
 import com.boikhata.core.database.dao.CashbookDao
@@ -31,6 +32,7 @@ import com.boikhata.core.database.migration.Migration2To3
 import com.boikhata.core.database.migration.Migration3To4
 import com.boikhata.core.database.migration.Migration4To5
 import com.boikhata.core.database.migration.Migration5To6
+import com.boikhata.core.database.migration.Migration6To7
 import com.boikhata.core.database.seed.DatabaseSeeder
 import dagger.Module
 import dagger.Provides
@@ -52,7 +54,7 @@ object DatabaseModule {
             BoiKhataDatabase::class.java,
             BoiKhataDatabase.DATABASE_NAME
         )
-            .addMigrations(Migration1To2, Migration2To3, Migration3To4, Migration4To5, Migration5To6)
+            .addMigrations(Migration1To2, Migration2To3, Migration3To4, Migration4To5, Migration5To6, Migration6To7)
             .fallbackToDestructiveMigrationOnDowngrade()
             .build()
     }
@@ -64,6 +66,7 @@ object DatabaseModule {
     @Provides fun provideBookDao(db: BoiKhataDatabase): BookDao = db.bookDao()
     @Provides fun provideStockLedgerDao(db: BoiKhataDatabase): StockLedgerDao = db.stockLedgerDao()
     @Provides fun provideBillDao(db: BoiKhataDatabase): BillDao = db.billDao()
+    @Provides fun provideBillPaymentLineDao(db: BoiKhataDatabase): BillPaymentLineDao = db.billPaymentLineDao()
     @Provides fun provideKhataCustomerDao(db: BoiKhataDatabase): KhataCustomerDao = db.khataCustomerDao()
     @Provides fun provideKhataEntryDao(db: BoiKhataDatabase): KhataEntryDao = db.khataEntryDao()
     @Provides fun provideKhataInstallmentDao(db: BoiKhataDatabase): KhataInstallmentDao = db.khataInstallmentDao()

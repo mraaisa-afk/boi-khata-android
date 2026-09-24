@@ -37,4 +37,6 @@
     <string name="subscription_button">সাবস্ক্রিপশন</string>
     <string name="supplier_button">সাপ্লায়ার</string>
     <string name="mela_button">মেলা</string>
+    <string name="remove_payment_line">বাদ দিন</string>
+    <string name="remaining_due_preview">বাকি থাকবে:</string>
 </resources>

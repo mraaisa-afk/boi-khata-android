@@ -88,7 +88,7 @@ data class BalanceSheetLite(
     }
 
     fun assetLines(): List<BalanceSheetComponent> = listOf(
-        BalanceSheetComponent("নগদ (ক্যাশ+বিকাশ+ব্যাংক)", "Cash (Cash+bKash+Bank)", cash),
+        BalanceSheetComponent("নগদ (ক্যাশ+বিকাশ+ব্যাংক+মোবাইল)", "Cash (Cash+bKash+Bank+Mobile)", cash),
         BalanceSheetComponent("ইনভেন্টরি", "Inventory", inventory),
         BalanceSheetComponent("খাতার বাকি (প্রাপ্য)", "Receivables", receivables),
         BalanceSheetComponent("ঘরি অগ্রিম", "Ghori Advances", ghoriAdvances),

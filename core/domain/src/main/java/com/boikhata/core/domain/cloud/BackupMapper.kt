@@ -166,7 +166,9 @@ object BackupMapper {
         subtotal: Double, discountAmount: Double, discountType: String, vatAmount: Double,
         totalAmount: Double, paymentMethod: String, paidAmount: Double, dueAmount: Double,
         khataEntryId: String?, billDate: Long, status: String, idempotencyKey: String,
-    ): Map<String, Any?> = mapOf(
+        paymentLines: List<Map<String, Any?>> = emptyList(),
+    ): Map<String, Any?> {
+        val base = mapOf(
         "id" to id,
         "tenantId" to tenantId,
         "billNumber" to billNumber,
@@ -186,6 +188,27 @@ object BackupMapper {
         "billDate" to billDate,
         "status" to status,
         "idempotencyKey" to idempotencyKey,
+        )
+        // P12/D92: new-format bills embed their payment lines as a nested array
+        // (old-format backups simply lack the key - restore is tolerant both ways).
+        // Kept INSIDE the bills document so CONVENTIONS §5's 10-collection set
+        // stays frozen; a future D-entry can promote it to its own collection.
+        return if (paymentLines.isEmpty()) base else base + ("paymentLines" to paymentLines)
+    }
+
+    /** P12/D92: one bill_payment_lines row for the nested bill backup array. */
+    fun billPaymentLineToMap(
+        id: String, tenantId: String, billId: String, method: String,
+        provider: String?, amount: Double, cashbookEntryId: String?, createdAt: Long,
+    ): Map<String, Any?> = mapOf(
+        "id" to id,
+        "tenantId" to tenantId,
+        "billId" to billId,
+        "method" to method,
+        "provider" to provider,
+        "amount" to amount,
+        "cashbookEntryId" to cashbookEntryId,
+        "createdAt" to createdAt,
     )
 
     fun billLineToMap(

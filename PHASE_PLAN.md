@@ -171,9 +171,11 @@
 5. RED→GREEN test discipline; MigrationTestHelper test for 6→7; backup/restore round-trip tests for old-format AND new-format bills.
 6. CONVENTIONS §2 (PaymentMethod enum) + §3 (bills schema) amendment is a P12-implementation-time task — done in this phase (the owner ruled MOBILE bucket in advance).
 
+**Status (2026-09-24, post-implementation):** IMPLEMENTED — schema v7 + D22 `createBillWithPaymentLines` + per-line cashbook + MOBILE bucket + POS multi-line editor + all consumers; 14-module testDebugUnitTest green, 9-module lintDebug green, assembleDebug green. **Delivery incident:** PR #72 was merged into its stacked base branch (`agent/part-a-terminology-reland` @ `801a4bc`) instead of main — P12 was briefly NOT on main while the owner believed it was; no CI ran for that merge. Logged as **ERR-019**; re-landed as **PR #73 (base main)** with identical content. Lesson recorded: retarget a stacked PR's base immediately after its base PR merges, or open non-stacked PRs.
+
 **Provider-list mechanism (decision recorded):** hardcoded starter set as a single Kotlin source of truth (like DefaultExpenseCategories but compile-time): বিকাশ / নগদ (Nagad) / রকেট / উপায় / অন্যান্য. Rationale: the MFS provider market is small and stable; a DB-managed list (expense-categories style) would add a table + CRUD/settings UI that D92 v1 did not budget; the Standing Instruction means this can be revised any time via a D-entry — the upgrade path (additive table + settings screen) stays open.
 
-**Status:** IN PROGRESS (this round).
+**Status:** IMPLEMENTED 2026-09-24 on `agent/p12-multi-line-payments` (schema v7 + D22 extension + per-line cashbook MOBILE bucket + POS multi-line editor + all consumers + backup/restore + MigrationTestHelper/Robolectric tests). Pending: push + PR + CI, owner device test (migration on live pilot data; 2-way/3-way splits), D92 paste.
 
 **D-decisions:** D92 (drafted 2026-09-20; re-issued with this round's report for owner paste).
 

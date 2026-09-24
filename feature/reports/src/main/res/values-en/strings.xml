@@ -52,6 +52,8 @@
     <string name="cash_sales">Cash Sales</string>
     <string name="bkash_sales">bKash Sales</string>
     <string name="nagad_sales">Nagad Sales</string>
+    <string name="bank_sales">Bank sales</string>
+    <string name="mobile_other_sales">Mobile banking (other)</string>
     <string name="credit_sales">Credit Sales</string>
     <string name="total_sales">Total Sales</string>
     <string name="expenses_by_category">Expenses by Category</string>

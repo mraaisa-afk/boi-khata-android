@@ -12,6 +12,9 @@ data class SalesByMethod(
     val nagad: Double,
     val credit: Double, // sales on khata (due)
     val total: Double,
+    // P12/D92 additive buckets (defaulted so legacy constructors keep compiling):
+    val bank: Double = 0.0, // ব্যাংক paid lines
+    val mobileOther: Double = 0.0, // MOBILE lines on providers other than bKash/Nagad (Rocket/Upay/other)
 )
 
 /** One expense category total for the day. */
@@ -39,6 +42,8 @@ data class CashCloseReport(
         PnLLine("নগদ বিক্রি", "Cash Sales", salesByMethod.cash),
         PnLLine("বিকাশ বিক্রি", "bKash Sales", salesByMethod.bkash),
         PnLLine("নগদ (Nagad) বিক্রি", "Nagad Sales", salesByMethod.nagad),
+        PnLLine("ব্যাংক বিক্রি", "Bank Sales", salesByMethod.bank),
+        PnLLine("মোবাইল ব্যাংকিং বিক্রি (অন্যান্য)", "Mobile Banking Sales (other)", salesByMethod.mobileOther),
         PnLLine("বাকি বিক্রি", "Credit Sales", salesByMethod.credit),
         PnLLine("মোট বিক্রি", "Total Sales", salesByMethod.total),
         PnLLine("মোট খরচ", "Total Expenses", -totalExpenses),

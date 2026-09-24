@@ -109,7 +109,7 @@ class CashCloseCalculatorTest {
         val bills = listOf(bill(PaymentMethod.CASH, 1000.0))
         val report = CashCloseCalculator.compute(bills, emptyList(), emptyList(), 1000.0, 1000.0, 0.0, 0L)
         val lines = report.toLines()
-        assertThat(lines.size).isEqualTo(10)
+        assertThat(lines.size).isEqualTo(12) // P12: + ব্যাংক + মোবাইল (অন্যান্য) rows
         assertThat(lines.map { it.labelEn }).containsAtLeast("Cash Sales", "Total Sales", "Variance")
     }
 
@@ -121,5 +121,61 @@ class CashCloseCalculatorTest {
         assertThat(report.mfsFeeEstimated).isEqualTo(0.0)
         assertThat(report.variance).isEqualTo(0.0)
         assertThat(report.varianceLabelBn).isEqualTo("মিলেছে")
+    }
+
+    // ── P12/D92: per-line salesByMethod aggregation ─────────────────────────
+
+    @Test
+    fun `bills with payment lines aggregate per line - splits land in the right buckets`() {
+        val mixed = CashCloseCalculator.BillForClose(
+            paymentMethod = PaymentMethod.MOBILE,
+            paidAmount = 900.0,
+            dueAmount = 100.0,
+            lines = listOf(
+                CashCloseCalculator.LineForClose("CASH", null, 600.0),
+                CashCloseCalculator.LineForClose("MOBILE", "NAGAD", 300.0),
+                CashCloseCalculator.LineForClose("DUE", null, 100.0),
+            ),
+        )
+        val bankBill = CashCloseCalculator.BillForClose(
+            paymentMethod = PaymentMethod.BANK,
+            paidAmount = 250.0,
+            dueAmount = 0.0,
+            lines = listOf(CashCloseCalculator.LineForClose("BANK", null, 250.0)),
+        )
+        val report = CashCloseCalculator.compute(listOf(mixed, bankBill), emptyList(), emptyList(), 0.0, 0.0, 0.0, 0L)
+        assertThat(report.salesByMethod.cash).isEqualTo(600.0)
+        assertThat(report.salesByMethod.nagad).isEqualTo(300.0)
+        assertThat(report.salesByMethod.bank).isEqualTo(250.0)
+        assertThat(report.salesByMethod.credit).isEqualTo(100.0)
+        assertThat(report.salesByMethod.total).isEqualTo(1250.0)
+    }
+
+    @Test
+    fun `mobile lines on other providers land in mobileOther and bkash lines feed the fee estimate`() {
+        val b = CashCloseCalculator.BillForClose(
+            paymentMethod = PaymentMethod.MOBILE,
+            paidAmount = 700.0,
+            dueAmount = 0.0,
+            lines = listOf(
+                CashCloseCalculator.LineForClose("MOBILE", "BKASH", 400.0),
+                CashCloseCalculator.LineForClose("MOBILE", "ROCKET", 200.0),
+                CashCloseCalculator.LineForClose("MOBILE", "UPAY", 100.0),
+            ),
+        )
+        val report = CashCloseCalculator.compute(listOf(b), emptyList(), emptyList(), 0.0, 0.0, 1.5, 0L)
+        assertThat(report.salesByMethod.bkash).isEqualTo(400.0)
+        assertThat(report.salesByMethod.mobileOther).isEqualTo(300.0)
+        // fee still estimates on bKash sales only (disclosed in D92)
+        assertThat(report.mfsFeeEstimated).isEqualTo(6.0)
+    }
+
+    @Test
+    fun `legacy bills without lines still aggregate from the bill columns`() {
+        val bills = listOf(bill(PaymentMethod.CASH, 1000.0), bill(PaymentMethod.CREDIT, 0.0, due = 300.0))
+        val report = CashCloseCalculator.compute(bills, emptyList(), emptyList(), 0.0, 0.0, 0.0, 0L)
+        assertThat(report.salesByMethod.cash).isEqualTo(1000.0)
+        assertThat(report.salesByMethod.credit).isEqualTo(300.0)
+        assertThat(report.salesByMethod.total).isEqualTo(1300.0)
     }
 }

@@ -442,4 +442,6 @@ private fun accountLabel(account: CashbookAccount): String = when (account) {
     CashbookAccount.CASH -> "নগদ"
     CashbookAccount.BKASH -> "বিকাশ"
     CashbookAccount.BANK -> "ব্যাংক"
+    // P12/D92: explicit mobile-banking bucket (no longer folded into বিকাশ)
+    CashbookAccount.MOBILE -> "মোবাইল ব্যাংকিং"
 }

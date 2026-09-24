@@ -36,6 +36,7 @@ object TenantRebindPlanner {
         "stock_ledger",
         "bills",
         "bill_lines",
+        "bill_payment_lines", // P12/D92: tenant-scoped payment lines (rebind migrates stray rows)
         "khata_customers",
         "khata_entries",
         "khata_installments",

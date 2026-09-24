@@ -178,6 +178,32 @@ interface BillRepository {
     suspend fun getBillsByCustomer(tenantId: String, customerId: String): List<com.boikhata.core.domain.model.BillSummary>
     suspend fun getBill(tenantId: String, billId: String): Bill?
     suspend fun getBillLines(billId: String): List<BillLine>
+
+    /**
+     * P12/D92: multi-line checkout. `paidLines` are the PAID lines only
+     * (CASH / BANK / MOBILE with provider); the repo derives the বাকি
+     * remainder and — when it exists — appends the DUE line, posts it to the
+     * customer's খাতা, and writes one cashbook mirror row PER PAID LINE inside
+     * the same D22 atomic transaction. Validation (fail-fast):
+     * amounts > 0, sum(paid) ≤ total, MOBILE lines must carry a provider,
+     * বাকি > 0 requires a customer.
+     */
+    suspend fun createBillWithPaymentLines(
+        tenantId: String,
+        customerId: String?,
+        customerNameBn: String,
+        customerPhone: String?,
+        userId: String,
+        lines: List<BillLineInput>,
+        discountAmount: Double,
+        discountType: String,
+        paidLines: List<PaymentLineSpec>,
+    ): String
+
+    /** P12/D92: the authoritative payment lines of a bill (paid + DUE). */
+    suspend fun getPaymentLines(billId: String): List<PaymentLine>
+
+    @Deprecated("P12: use createBillWithPaymentLines — kept for legacy callers/tests")
     suspend fun createBill(
         tenantId: String,
         customerId: String?,
@@ -198,6 +224,22 @@ data class BillLineInput(
     val quantity: Int,
     val unitPrice: Double,
     val category: com.boikhata.core.domain.enums.BookCategory,
+)
+
+/** P12/D92: one PAID payment line as entered at checkout. */
+data class PaymentLineSpec(
+    val category: com.boikhata.core.domain.enums.PaymentLineCategory,
+    val provider: com.boikhata.core.domain.enums.MfsProvider?,
+    val amount: Double,
+)
+
+/** P12/D92: one stored payment line (paid or DUE) for display/consumers. */
+data class PaymentLine(
+    val id: String,
+    val billId: String,
+    val category: com.boikhata.core.domain.enums.PaymentLineCategory,
+    val provider: com.boikhata.core.domain.enums.MfsProvider?,
+    val amount: Double,
 )
 
 interface LicenseRepository {

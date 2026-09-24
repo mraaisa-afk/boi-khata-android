@@ -37,4 +37,6 @@
     <string name="subscription_button">Subscription</string>
     <string name="supplier_button">Supplier</string>
     <string name="mela_button">Mela</string>
+    <string name="remove_payment_line">Remove</string>
+    <string name="remaining_due_preview">Due remaining:</string>
 </resources>

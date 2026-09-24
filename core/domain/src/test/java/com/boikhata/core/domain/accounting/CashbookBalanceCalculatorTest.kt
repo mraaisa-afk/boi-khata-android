@@ -68,16 +68,19 @@ class CashbookBalanceCalculatorTest {
     }
 
     @Test
-    fun `should calculate balances for all three accounts`() {
+    fun `should calculate balances for all four accounts including the P12 MOBILE bucket`() {
         val entries = listOf(
             entry(CashbookAccount.CASH, CashbookEntryType.INCOME, 1000.0),
             entry(CashbookAccount.BKASH, CashbookEntryType.INCOME, 500.0),
             entry(CashbookAccount.BANK, CashbookEntryType.INCOME, 2000.0),
+            // P12/D92: mobile-banking sales land in their own bucket now
+            entry(CashbookAccount.MOBILE, CashbookEntryType.INCOME, 750.0),
         )
         val balances = CashbookBalanceCalculator.calculateAllBalances(entries)
-        assertThat(balances).hasSize(3)
+        assertThat(balances).hasSize(4)
         assertThat(balances.find { it.account == CashbookAccount.CASH }?.balance).isWithin(0.01).of(1000.0)
         assertThat(balances.find { it.account == CashbookAccount.BKASH }?.balance).isWithin(0.01).of(500.0)
         assertThat(balances.find { it.account == CashbookAccount.BANK }?.balance).isWithin(0.01).of(2000.0)
+        assertThat(balances.find { it.account == CashbookAccount.MOBILE }?.balance).isWithin(0.01).of(750.0)
     }
 }
