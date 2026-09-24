@@ -1,6 +1,7 @@
 package com.boikhata.core.cloud
 
 import com.boikhata.core.domain.cloud.BackupMapper
+import com.boikhata.core.domain.cloud.KhataRepairPlanner
 import com.boikhata.core.domain.cloud.RestoreMapper
 import com.boikhata.core.database.dao.BackupDao
 import com.boikhata.core.database.dao.BillDao
@@ -26,11 +27,13 @@ import com.boikhata.core.database.entity.KhataEntryEntity
 import com.boikhata.core.database.entity.OwnerDrawingEntity
 import com.boikhata.core.database.entity.StockLedgerEntity
 import com.boikhata.core.domain.enums.Role
+import com.boikhata.core.domain.enums.KhataEntryType
 import com.boikhata.core.domain.repository.RestoreResult
 import com.boikhata.core.domain.repository.RestoreStrategy
 import com.boikhata.core.domain.repository.RestoreRepository
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -99,6 +102,7 @@ class RestoreRepositoryImpl @Inject constructor(
             totalRestored += restoreCashbookEntries(tenantId)
             totalRestored += restoreExpenseCategories(tenantId)
             totalRestored += restoreOwnerDrawings(tenantId)
+            totalRestored += repairMissingKhataCredits(tenantId)
 
             cloudSyncStateDao.updateLastRestoreAt(System.currentTimeMillis(), System.currentTimeMillis())
             RestoreResult.Success(totalRestored)
@@ -305,6 +309,51 @@ class RestoreRepositoryImpl @Inject constructor(
             count++
         }
         return count
+    }
+
+    /**
+     * D92 follow-up (2026-09-24 device round, Issues 3/4): restore-time khata
+     * integrity repair. bills and khata_entries restore INDEPENDENTLY (Firestore
+     * has no cross-collection atomicity), so a partial/out-of-sync backup restores
+     * bills with dueAmount > 0 but NO matching বাকি CREDIT entry — silently
+     * understating the customer's মোট বাকি (device evidence: INV #0002's ৳400
+     * remainder absent from ইলিয়াস's খাতা). This pass re-creates the missing
+     * CREDIT entries idempotently (skips bills that already have one).
+     */
+    private suspend fun repairMissingKhataCredits(tenantId: String): Int {
+        val bills = billDao.getByTenant(tenantId)
+        val existingReferenceBillIds = khataEntryDao.getByTenant(tenantId)
+            .mapNotNull { it.referenceBillId }
+            .toSet()
+        val plan = KhataRepairPlanner.planMissingCreditEntries(
+            bills = bills.map {
+                KhataRepairPlanner.BillForRepair(
+                    id = it.id,
+                    billNumber = it.billNumber,
+                    customerId = it.customerId,
+                    dueAmount = it.dueAmount,
+                    billDate = it.billDate,
+                )
+            },
+            existingReferenceBillIds = existingReferenceBillIds,
+        )
+        for (p in plan) {
+            khataEntryDao.insert(
+                KhataEntryEntity(
+                    id = UUID.randomUUID().toString(),
+                    tenantId = tenantId,
+                    customerId = p.customerId,
+                    amount = p.amount,
+                    type = KhataEntryType.CREDIT.name,
+                    description = "বিক্রি বাকি (${p.billNumber}) — রিস্টোর মেরামত",
+                    referenceBillId = p.referenceBillId,
+                    collectedByUserId = "restore-repair",
+                    date = p.date,
+                    idempotencyKey = UUID.randomUUID().toString(),
+                )
+            )
+        }
+        return plan.size
     }
 
     private suspend fun restoreOwnerDrawings(tenantId: String): Int {

@@ -109,7 +109,7 @@ class CashCloseCalculatorTest {
         val bills = listOf(bill(PaymentMethod.CASH, 1000.0))
         val report = CashCloseCalculator.compute(bills, emptyList(), emptyList(), 1000.0, 1000.0, 0.0, 0L)
         val lines = report.toLines()
-        assertThat(lines.size).isEqualTo(12) // P12: + ব্যাংক + মোবাইল (অন্যান্য) rows
+        assertThat(lines.size).isEqualTo(13) // P12: + ব্যাংক + মোবাইল (অন্যান্য); D93: + খাতায় জমা row
         assertThat(lines.map { it.labelEn }).containsAtLeast("Cash Sales", "Total Sales", "Variance")
     }
 
@@ -177,5 +177,118 @@ class CashCloseCalculatorTest {
         assertThat(report.salesByMethod.cash).isEqualTo(1000.0)
         assertThat(report.salesByMethod.credit).isEqualTo(300.0)
         assertThat(report.salesByMethod.total).isEqualTo(1300.0)
+    }
+
+    // ── D93 (2026-09-24 device round): khata-advance split for overpaid bills ──
+
+    private fun line(method: String, provider: String?, amount: Double) =
+        CashCloseCalculator.LineForClose(method, provider, amount)
+
+    @Test
+    fun `overpaid bill - excess goes to khataAdvance not the sales buckets`() {
+        // ৳1500 handed over for a ৳1000 bill → ৳1000 cash sales + ৳500 খাতায় জমা
+        val bills = listOf(
+            CashCloseCalculator.BillForClose(
+                paymentMethod = PaymentMethod.CASH,
+                paidAmount = 1000.0,
+                dueAmount = 0.0,
+                lines = listOf(line("CASH", null, 1500.0)),
+                billTotal = 1000.0,
+            ),
+        )
+        val report = CashCloseCalculator.compute(bills, emptyList(), emptyList(), 0.0, 0.0, 0.0, 0L)
+        assertThat(report.salesByMethod.cash).isEqualTo(1000.0)
+        assertThat(report.salesByMethod.khataAdvance).isEqualTo(500.0)
+        assertThat(report.salesByMethod.total).isEqualTo(1000.0) // advance excluded from মোট বিক্রি
+    }
+
+    @Test
+    fun `multi-line overpayment - split capped per line in order`() {
+        // CASH 600 + BKASH 900 on a 1000 bill: cash 600 (sale) + bkash 400 (sale) + 500 advance
+        val bills = listOf(
+            CashCloseCalculator.BillForClose(
+                paymentMethod = PaymentMethod.MOBILE,
+                paidAmount = 1000.0,
+                dueAmount = 0.0,
+                lines = listOf(
+                    line("CASH", null, 600.0),
+                    line("MOBILE", "BKASH", 900.0),
+                ),
+                billTotal = 1000.0,
+            ),
+        )
+        val report = CashCloseCalculator.compute(bills, emptyList(), emptyList(), 0.0, 0.0, 0.0, 0L)
+        assertThat(report.salesByMethod.cash).isEqualTo(600.0)
+        assertThat(report.salesByMethod.bkash).isEqualTo(400.0)
+        assertThat(report.salesByMethod.khataAdvance).isEqualTo(500.0)
+        assertThat(report.salesByMethod.total).isEqualTo(1000.0)
+    }
+
+    @Test
+    fun `partial and full-credit bills keep legacy split - zero advance`() {
+        // CASH 600 + DUE 400 on a 1000 bill → cash 600, credit 400, advance 0
+        val bills = listOf(
+            CashCloseCalculator.BillForClose(
+                paymentMethod = PaymentMethod.CASH,
+                paidAmount = 600.0,
+                dueAmount = 400.0,
+                lines = listOf(line("CASH", null, 600.0), line("DUE", null, 400.0)),
+                billTotal = 1000.0,
+            ),
+            CashCloseCalculator.BillForClose(
+                paymentMethod = PaymentMethod.CREDIT,
+                paidAmount = 0.0,
+                dueAmount = 800.0,
+                lines = listOf(line("DUE", null, 800.0)),
+                billTotal = 800.0,
+            ),
+        )
+        val report = CashCloseCalculator.compute(bills, emptyList(), emptyList(), 0.0, 0.0, 0.0, 0L)
+        assertThat(report.salesByMethod.cash).isEqualTo(600.0)
+        assertThat(report.salesByMethod.credit).isEqualTo(1200.0)
+        assertThat(report.salesByMethod.khataAdvance).isEqualTo(0.0)
+    }
+
+    @Test
+    fun `legacy bills without billTotal keep the pre-D93 behavior`() {
+        val bills = listOf(
+            CashCloseCalculator.BillForClose(
+                paymentMethod = PaymentMethod.CASH,
+                paidAmount = 1500.0,
+                dueAmount = 0.0,
+                lines = listOf(line("CASH", null, 1500.0)),
+                billTotal = 0.0, // unknown → no split
+            ),
+        )
+        val report = CashCloseCalculator.compute(bills, emptyList(), emptyList(), 0.0, 0.0, 0.0, 0L)
+        assertThat(report.salesByMethod.cash).isEqualTo(1500.0)
+        assertThat(report.salesByMethod.khataAdvance).isEqualTo(0.0)
+    }
+
+    // ── D94 label ruling: নগদে X / [provider] হতে X / বাকিতে X ──
+
+    @Test
+    fun `toLines uses the D94 label pattern and includes the khata-advance row`() {
+        val report = CashCloseCalculator.compute(
+            bills = listOf(
+                CashCloseCalculator.BillForClose(
+                    paymentMethod = PaymentMethod.CASH,
+                    paidAmount = 1000.0,
+                    dueAmount = 0.0,
+                    lines = listOf(line("CASH", null, 1500.0)),
+                    billTotal = 1000.0,
+                ),
+            ),
+            expenses = emptyList(), expenseCategories = emptyList(),
+            cashbookCashBalance = 0.0, countedCash = 0.0, mfsFeeRate = 0.0, date = 0L,
+        )
+        val labels = report.toLines().map { it.labelBn }
+        assertThat(labels).containsAtLeast(
+            "নগদে বিক্রি", "বিকাশ হতে বিক্রি", "নগদ (Nagad) হতে বিক্রি",
+            "ব্যাংক হতে বিক্রি", "মোবাইল ব্যাংকিং (অন্যান্য) হতে বিক্রি", "বাকিতে বিক্রি",
+            "খাতায় জমা (অতিরিক্ত)",
+        ).inOrder()
+        // old labels are gone
+        assertThat(labels).containsNoneOf("নগদ বিক্রি", "বিকাশ বিক্রি", "বাকি বিক্রি")
     }
 }

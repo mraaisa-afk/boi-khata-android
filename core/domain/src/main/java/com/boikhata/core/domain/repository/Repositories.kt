@@ -180,13 +180,22 @@ interface BillRepository {
     suspend fun getBillLines(billId: String): List<BillLine>
 
     /**
+     * D94: COGS for bills in the window — Σ(bill_lines.quantity × books.purchasePrice)
+     * over ALL bills in the window (credit/বাকি sales included — a credit sale has
+     * real acquisition cost even though no cash moved). Books deleted or without a
+     * purchase price contribute 0 (same basis as the D29 P&L — disclosed).
+     */
+    suspend fun getCogsByDateRange(tenantId: String, start: Long, end: Long): Double
+
+    /**
      * P12/D92: multi-line checkout. `paidLines` are the PAID lines only
      * (CASH / BANK / MOBILE with provider); the repo derives the বাকি
      * remainder and — when it exists — appends the DUE line, posts it to the
      * customer's খাতা, and writes one cashbook mirror row PER PAID LINE inside
      * the same D22 atomic transaction. Validation (fail-fast):
-     * amounts > 0, sum(paid) ≤ total, MOBILE lines must carry a provider,
-     * বাকি > 0 requires a customer.
+     * amounts > 0, overpayment allowed only for a named customer (excess →
+     * khata জমা, D93), MOBILE lines must carry a provider, বাকি > 0 requires a
+     * customer.
      */
     suspend fun createBillWithPaymentLines(
         tenantId: String,

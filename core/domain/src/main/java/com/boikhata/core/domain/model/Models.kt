@@ -64,11 +64,17 @@ data class HomeAnalyticsPoint(
 data class HomeData(
     val totalDue: Double,
     val dueCustomerCount: Int,
-    /** D81: bills.paidAmount only — cash received from today's sales. */
+    /** D94 (owner ruling 2026-09-24): ALL bill totals — নগদ + মোবাইল + বাকি. A
+     *  credit sale is still revenue (replaces the D81 paidAmount basis). */
     val todaySalesTotal: Double,
-    /** D81: sum of khata PAYMENT entries for today — খাতা আদায় component. */
+    /** D81: sum of khata PAYMENT entries for today — খাতা আদায় (kept for its own stat;
+     *  NOT part of revenue — collections of old dues were already revenue when sold). */
     val todayKhataCollection: Double = 0.0,
     val todayExpenseTotal: Double = 0.0,
+    /** D94: Σ(bill_lines.quantity × books.purchasePrice) for today's sold items. */
+    val todayCogs: Double = 0.0,
+    /** D94: (revenue − COGS) − expenses — the accounting-correct net profit. */
+    val todayNetProfit: Double = 0.0,
     val todayBillCount: Int,
     val topDueCustomers: List<KhataCustomerDue>,
     val cashBalance: Double,

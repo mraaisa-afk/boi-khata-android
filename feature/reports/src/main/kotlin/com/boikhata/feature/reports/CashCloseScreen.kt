@@ -82,7 +82,7 @@ fun CashCloseScreen(
                         val cash = parseCashCloseNumber(v)
                         viewModel.setCountedCash(cash)
                     },
-                    label = { Text(stringResource(R.string.counted_cash)) },
+                    label = { Text(stringResource(R.string.enter_amount_placeholder)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -133,6 +133,9 @@ private fun CloseContent(report: CashCloseReport, onShare: () -> Unit) {
             CloseRow(stringResource(R.string.bank_sales), report.salesByMethod.bank)
             CloseRow(stringResource(R.string.mobile_other_sales), report.salesByMethod.mobileOther)
             CloseRow(stringResource(R.string.credit_sales), report.salesByMethod.credit)
+            if (report.salesByMethod.khataAdvance > 0.01) {
+                CloseRow(stringResource(R.string.khata_advance), report.salesByMethod.khataAdvance)
+            }
             CloseRow(stringResource(R.string.total_sales), report.salesByMethod.total, true)
         }
         // Expenses by category

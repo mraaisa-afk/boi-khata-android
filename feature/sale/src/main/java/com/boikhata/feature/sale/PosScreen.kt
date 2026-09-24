@@ -289,6 +289,26 @@ fun PosScreen(
                         fontWeight = FontWeight.Bold,
                     )
                 }
+                // D93: overpayment preview — named customer → the excess becomes a
+                // খাতা জমা (no error); walk-in → meaningful block hint (no khata target).
+                if (cartState.overpaymentAmount > 0.01) {
+                    if (cartState.selectedCustomer != null) {
+                        Text(
+                            text = stringResource(R.string.khata_advance_preview) + " " +
+                                NumberFormatter.formatMoney(cartState.overpaymentAmount, DigitStyle.BANGLA),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.walk_in_overpay_error),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.error,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                }
 
                 // Totals summary
                 Card(modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(2.dp)) {

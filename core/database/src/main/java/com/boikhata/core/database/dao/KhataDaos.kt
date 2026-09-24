@@ -56,9 +56,20 @@ interface KhataEntryDao {
     suspend fun getByTenant(tenantId: String): List<KhataEntryEntity>
 
     /**
+     * D92 restore-repair: count entries linked to a bill by referenceBillId —
+     * used to detect restored bills whose বাকি CREDIT never made it into the
+     * backup (bills ↔ khata_entries restore independently; Firestore has no
+     * cross-collection atomicity). Idempotency guard for the repair pass.
+     */
+    @Query("SELECT COUNT(*) FROM khata_entries WHERE referenceBillId = :referenceBillId")
+    suspend fun countByReferenceBillId(referenceBillId: String): Int
+
+    /**
      * D81: Aggregate sum of PAYMENT-type entries within a date window.
-     * Used by HomeViewModel to compute the «খাতা আদায়» component of the D79
-     * net-profit formula:  নিট লাভ = (নগদ বিক্রি + খাতা আদায়) − নগদ খরচ.
+     * D94 (2026-09-24): খাতা আদায় is no longer part of the home নিট লাভ
+     * formula (নিট লাভ = (মোট বিক্রি − COGS) − খরচ); the aggregate is still
+     * exposed for the খাতা আদায় stat. Only positive amounts are included;
+     * negative ADJUSTMENTs (দেনা-পাওনা) are excluded.
      * Only positive amounts are included; negative ADJUSTMENTs (দেনা-পাওনা) are excluded.
      */
     @Query("""

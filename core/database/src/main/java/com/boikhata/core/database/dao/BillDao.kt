@@ -39,4 +39,18 @@ interface BillDao {
 
     @Query("UPDATE bills SET khataEntryId = :khataEntryId WHERE id = :billId")
     suspend fun updateKhataEntryId(billId: String, khataEntryId: String)
+
+    /**
+     * D94: COGS for bills in the window — Σ(quantity × purchasePrice) over ALL
+     * bills (credit sales included). LEFT JOIN: books deleted later, or rows
+     * without a price, contribute 0 — same disclosed basis as the D29 P&L
+     * (AccountingRepositoryImpl bookCache ?: 0.0).
+     */
+    @Query(
+        "SELECT COALESCE(SUM(bl.quantity * COALESCE(bk.purchasePrice, 0.0)), 0.0) " +
+            "FROM bill_lines bl INNER JOIN bills bi ON bl.billId = bi.id " +
+            "LEFT JOIN books bk ON bl.bookId = bk.id " +
+            "WHERE bi.tenantId = :tenantId AND bi.billDate >= :startOfDay AND bi.billDate < :endOfDay"
+    )
+    suspend fun getCogsByDateRange(tenantId: String, startOfDay: Long, endOfDay: Long): Double
 }

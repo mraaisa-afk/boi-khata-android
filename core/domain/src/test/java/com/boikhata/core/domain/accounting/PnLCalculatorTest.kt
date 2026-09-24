@@ -176,4 +176,28 @@ class PnLCalculatorTest {
         assertThat(labels).containsAtLeast("Purchase COGS", "Consignment Commission", "Total COGS")
         assertThat(lines.size).isEqualTo(11)
     }
+
+    // ── D94 (2026-09-24 owner ruling): revenue includes credit sales; COGS subtracted ──
+
+    @Test
+    fun `credit-method bill counts fully in revenue and its COGS is subtracted for net profit`() {
+        // A pure বাকি sale: মোট ৳1000, জমা ৳0 (nothing received yet) — still revenue,
+        // still carries the books' acquisition cost.
+        val creditBill = PnLCalculator.BillForPnL(
+            id = "b-credit",
+            subtotal = 1000.0,
+            discountAmount = 0.0,
+            vatAmount = 0.0,
+            totalAmount = 1000.0,
+            paidAmount = 0.0, // nothing received — CREDIT sale
+            billDate = 0L,
+            lines = listOf(line("bk1", 2, 500.0, 300.0)), // 2 × ৳300 purchase price = ৳600 COGS
+        )
+        val pnl = PnLCalculator.compute(listOf(creditBill), expensesTotal = 50.0, ownerDrawingsTotal = 0.0, consignmentCommission = 0.0, gregorianYear = 2026, gregorianMonth = 9)
+        assertThat(pnl.revenue).isEqualTo(1000.0)      // credit sale IS revenue (D94 #1)
+        assertThat(pnl.netRevenue).isEqualTo(1000.0)
+        assertThat(pnl.totalCogs).isEqualTo(600.0)     // COGS subtracted (D94 #2)
+        assertThat(pnl.grossProfit).isEqualTo(400.0)
+        assertThat(pnl.netProfit).isEqualTo(350.0)     // (1000 − 600) − 50
+    }
 }

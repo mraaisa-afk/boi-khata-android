@@ -56,6 +56,8 @@ class KhataRepositoryImplTest {
             entries.filter { it.tenantId == tenantId && it.customerId == customerId }
         override suspend fun getByTenant(tenantId: String) =
             entries.filter { it.tenantId == tenantId }
+        override suspend fun countByReferenceBillId(referenceBillId: String) =
+            entries.count { it.referenceBillId == referenceBillId }
         override suspend fun getPaymentSumByDateRange(tenantId: String, start: Long, end: Long) =
             entries.filter {
                 it.tenantId == tenantId && it.type == "PAYMENT" && it.amount > 0 &&

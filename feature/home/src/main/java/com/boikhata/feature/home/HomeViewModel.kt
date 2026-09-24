@@ -79,8 +79,10 @@ class HomeViewModel @Inject constructor(
                 dueList.sortByDescending { it.dueAmount }
                 val topDue = dueList.take(5)
 
-                // D81: Use paidAmount (cash received) instead of totalAmount (includes unpaid credit)
-                val todaySalesTotal = todayBills.sumOf { it.paidAmount }
+                // D94 (owner ruling 2026-09-24): revenue = ALL bill totals
+                // (নগদ + মোবাইল + বাকি) — a credit sale is still valid revenue.
+                // Replaces the D81 paidAmount basis.
+                val todaySalesTotal = todayBills.sumOf { it.totalAmount }
                 val todayBillCount = todayBills.size
 
                 // D81: খাতা আদায় — PAYMENT-type khata entries collected today
@@ -88,10 +90,17 @@ class HomeViewModel @Inject constructor(
                     tenantId, startOfToday, endOfToday,
                 )
 
+                // D94: today's COGS — Σ(quantity × purchasePrice) over today's sold
+                // items, credit sales included (same basis as the D29 P&L).
+                val todayCogs = billRepository.getCogsByDateRange(tenantId, startOfToday, endOfToday)
+
                 val todayExpenses = expenseRepository.getExpensesByDateRange(
                     tenantId, startOfToday, endOfToday,
                 )
                 val todayExpenseTotal = todayExpenses.sumOf { it.amount }
+
+                // D94: নিট লাভ = (revenue − COGS) − expenses — accounting-correct
+                val todayNetProfit = todaySalesTotal - todayCogs - todayExpenseTotal
 
                 val yesterdayBills = billRepository.getBillsByDate(
                     tenantId, startOfYesterday, endOfYesterday,
@@ -99,8 +108,10 @@ class HomeViewModel @Inject constructor(
                 val yesterdayExpenses = expenseRepository.getExpensesByDateRange(
                     tenantId, startOfYesterday, endOfYesterday,
                 )
-                // D81: Fix paidAmount for yesterday trend (khata collection excluded; delta is directional)
-                val yesterdayNetProfit = yesterdayBills.sumOf { it.paidAmount } -
+                // D94: yesterday's net profit on the accrual basis (revenue − COGS − expenses)
+                val yesterdayRevenue = yesterdayBills.sumOf { it.totalAmount }
+                val yesterdayCogs = billRepository.getCogsByDateRange(tenantId, startOfYesterday, endOfYesterday)
+                val yesterdayNetProfit = yesterdayRevenue - yesterdayCogs -
                     yesterdayExpenses.sumOf { it.amount }
 
                 val monthStart = Calendar.getInstance().apply {
@@ -115,11 +126,13 @@ class HomeViewModel @Inject constructor(
                     val dayEnd = if (dayStart == startOfToday) endOfToday else dayStart + 24L * 60 * 60 * 1000 - 1L
                     val dayBills = billRepository.getBillsByDate(tenantId, dayStart, dayEnd)
                     val dayExpenses = expenseRepository.getExpensesByDateRange(tenantId, dayStart, dayEnd)
+                    // D94: accrual basis per day — revenue (all bills) − COGS − expenses
+                    val dayRevenue = dayBills.sumOf { it.totalAmount }
+                    val dayCogs = billRepository.getCogsByDateRange(tenantId, dayStart, dayEnd)
                     monthAnalytics.add(
                         HomeAnalyticsPoint(
                             dayOfMonth = dayCursor.get(Calendar.DAY_OF_MONTH),
-                            // D81: paidAmount for consistent sparkline with hero formula
-                            netProfit = dayBills.sumOf { it.paidAmount } - dayExpenses.sumOf { it.amount },
+                            netProfit = dayRevenue - dayCogs - dayExpenses.sumOf { it.amount },
                         )
                     )
                     dayCursor.add(Calendar.DAY_OF_MONTH, 1)
@@ -141,6 +154,8 @@ class HomeViewModel @Inject constructor(
                         todaySalesTotal = todaySalesTotal,
                         todayKhataCollection = todayKhataCollection,
                         todayExpenseTotal = todayExpenseTotal,
+                        todayCogs = todayCogs,
+                        todayNetProfit = todayNetProfit,
                         todayBillCount = todayBillCount,
                         topDueCustomers = topDue,
                         cashBalance = cashBalance,
