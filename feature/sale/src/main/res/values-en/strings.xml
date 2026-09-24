@@ -39,4 +39,6 @@
     <string name="mela_button">Mela</string>
     <string name="remove_payment_line">Remove</string>
     <string name="remaining_due_preview">Due remaining:</string>
+    <string name="khata_advance_preview">Will be credited to the customer\'s khata:</string>
+    <string name="walk_in_overpay_error">Overpayment cannot be held for a walk-in customer. Please refund the excess.</string>
 </resources>

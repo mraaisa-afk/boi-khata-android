@@ -179,6 +179,11 @@
 
 **D-decisions:** D92 (drafted 2026-09-20; re-issued with this round's report for owner paste).
 
+**P12 device-round follow-up (2026-09-24, branch `agent/p13-device-round-fixes`):** owner device testing of the merged P12 build surfaced 5 issues — fixed per mandatory protocol:
+1. **D93 (new ruling, implemented):** overpayment at checkout — named customer → excess posts to their খাতা as a জমা entry INSIDE the D22 transaction; walk-in → rejected with an explanatory message. CashClose gains a `khataAdvance` bucket (মোট বিক্রি stays = sales). D93 draft text re-issued for DECISIONS.md.
+2. **D94 (new ruling, implemented):** revenue = ALL bill totals (credit included) — Home + P&L; নিট লাভ = (revenue − COGS) − expenses via a new `getCogsByDateRange` JOIN (books.purchasePrice; deleted books contribute 0 — disclosed, same basis as the D29 P&L); আজকের হিসাব labels → «নগদে X / [provider] হতে X / বাকিতে X»; গোনা নগদ field placeholder → «৳ পরিমাণ লিখুন». D94 draft text re-issued for DECISIONS.md.
+3. **Issues 3/4 (ইলিয়াস +400 missing, রহিম's empty history):** NOT live code bugs (both write/read paths proven correct at file/line level, both generations); consistent with an out-of-sync cloud restore (bills ↔ khata_entries collections restore independently). Shipped: restore-time khata integrity repair (KhataRepairPlanner + RestoreRepositoryImpl.repairMissingKhataCredits, idempotent). রহিম's bills — if absent from the backup — are unrecoverable from code; owner confirmation pending.
+
 ---
 
 ## Next-Phase Eligibility Check

@@ -51,6 +51,7 @@ class SaleRepositoryImplTest {
     private class FakeBillDao : BillDao {
         val bills = mutableListOf<BillEntity>()
         val lines = mutableListOf<BillLineEntity>()
+        val bookPrices = mutableMapOf<String, Double>()
         override suspend fun insert(bill: BillEntity) { bills.add(bill) }
         override suspend fun insertLines(lines: List<BillLineEntity>) { this.lines.addAll(lines) }
         override suspend fun getByDateRange(tenantId: String, startOfDay: Long, endOfDay: Long) =
@@ -64,6 +65,13 @@ class SaleRepositoryImplTest {
         override suspend fun countForTenant(tenantId: String) = bills.count { it.tenantId == tenantId }
         override suspend fun updateKhataEntryId(billId: String, khataEntryId: String) {
             bills.replaceAll { if (it.id == billId) it.copy(khataEntryId = khataEntryId) else it }
+        }
+        override suspend fun getCogsByDateRange(tenantId: String, startOfDay: Long, endOfDay: Long): Double {
+            val billIds = bills
+                .filter { it.tenantId == tenantId && it.billDate >= startOfDay && it.billDate < endOfDay }
+                .map { it.id }
+            return lines.filter { it.billId in billIds }
+                .sumOf { line -> line.quantity * (bookPrices[line.bookId] ?: 0.0) }
         }
     }
 
@@ -91,6 +99,8 @@ class SaleRepositoryImplTest {
         override suspend fun getPaymentSumByDateRange(tenantId: String, start: Long, end: Long) =
             rows.filter { it.tenantId == tenantId && it.type == "PAYMENT" && it.amount > 0 && it.date >= start && it.date <= end }
                 .sumOf { it.amount }
+        override suspend fun countByReferenceBillId(referenceBillId: String) =
+            rows.count { it.referenceBillId == referenceBillId }
     }
 
     private class FakeCashbookDao : CashbookDao {
@@ -127,6 +137,11 @@ class SaleRepositoryImplTest {
         BillLineInput(bookId = "misir-ali", bookTitleBn = "মিসির আলী", quantity = 3, unitPrice = 350.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
         BillLineInput(bookId = "himu", bookTitleBn = "হিমু", quantity = 3, unitPrice = 300.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
     ) // subtotal = 1950, books = 0% VAT (D19)
+
+    /** D93 overpayment tests: a clean ৳1000 cart (1 × ৳1000 book, no VAT). */
+    private val cart1000 = listOf(
+        BillLineInput(bookId = "boi-x", bookTitleBn = "বই", quantity = 1, unitPrice = 1000.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
+    )
 
     @Before
     fun setup() {
@@ -301,21 +316,21 @@ class SaleRepositoryImplTest {
     }
 
     @Test
-    fun `validation - overpay, provider-less mobile, zero amount, due-without-customer all fail fast`() = runTest {
+    fun `validation - walk-in overpay, provider-less mobile, zero amount, due-without-customer all fail fast`() = runTest {
         val paid600 = listOf(PaymentLineSpec(PaymentLineCategory.CASH, null, 600.0))
 
-        // overpay: 600 cash + 400 mobile on a 1000 bill is fine, but 700+400 is not
+        // D93: overpay WITHOUT a customer (হাটি ক্রেতা) is rejected with the walk-in message —
+        // there is no khata to absorb the excess
         try {
             repo.createBillWithPaymentLines(
                 tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
-                userId = "u_1", lines = lines, discountAmount = 0.0, discountType = "FIXED",
-                paidLines = listOf(
-                    PaymentLineSpec(PaymentLineCategory.CASH, null, 700.0),
-                    PaymentLineSpec(PaymentLineCategory.MOBILE, MfsProvider.BKASH, 400.0),
-                ),
+                userId = "u_1", lines = cart1000, discountAmount = 0.0, discountType = "FIXED",
+                paidLines = listOf(PaymentLineSpec(PaymentLineCategory.CASH, null, 1500.0)),
             )
-            org.junit.Assert.fail("overpay must be rejected")
-        } catch (expected: IllegalArgumentException) { /* জমা বিলের মোটের চেয়ে বেশি হতে পারে না */ }
+            org.junit.Assert.fail("walk-in overpay must be rejected")
+        } catch (expected: IllegalArgumentException) {
+            assertThat(expected.message!!).isEqualTo("হাটি ক্রেতার জন্য অতিরিক্ত জমা রাখা সম্ভব নয়। অতিরিক্ত ফেরত দিন।")
+        }
 
         // MOBILE line without a provider is rejected
         try {
@@ -352,6 +367,106 @@ class SaleRepositoryImplTest {
         assertThat(billPaymentLineDao.rows).isEmpty()
         assertThat(cashbookDao.rows).isEmpty()
         assertThat(stockLedgerDao.rows).isEmpty()
+        assertThat(khataEntryDao.rows).isEmpty()
+    }
+
+    @Test
+    fun `overpayment from a named customer posts the excess to their khata and completes the bill`() = runTest {
+        // D93 owner ruling: ইলিয়াস owes ৳1200 from before; he buys a ৳1000 book and
+        // hands over ৳1500 — ৳1000 settles the bill, ৳500 is a জমা toward his khata.
+        val billId = repo.createBillWithPaymentLines(
+            tenantId = "t_1", customerId = "elias", customerNameBn = "ইলিয়াস", customerPhone = null,
+            userId = "u_1", lines = cart1000, discountAmount = 0.0, discountType = "FIXED",
+            paidLines = listOf(PaymentLineSpec(PaymentLineCategory.CASH, null, 1500.0)),
+        )
+
+        // bill: fully paid, no due — the overpay never touches dueAmount
+        val bill = billDao.bills.single()
+        assertThat(bill.totalAmount).isEqualTo(1000.0)
+        assertThat(bill.paidAmount).isEqualTo(1000.0)
+        assertThat(bill.dueAmount).isEqualTo(0.0)
+        assertThat(bill.status).isEqualTo("COMPLETED")
+        assertThat(bill.customerId).isEqualTo("elias")
+
+        // khata: ONE PAYMENT (জমা) entry for the ৳500 excess — SAME transaction
+        val entry = khataEntryDao.rows.single()
+        assertThat(entry.type).isEqualTo(KhataEntryType.PAYMENT.name)
+        assertThat(entry.amount).isEqualTo(500.0)
+        assertThat(entry.customerId).isEqualTo("elias")
+        assertThat(entry.referenceBillId).isEqualTo(billId)
+
+        // payment lines record the ACTUAL money received; no DUE row (due = 0)
+        val pl = billPaymentLineDao.getByBill(billId)
+        assertThat(pl).hasSize(1)
+        assertThat(pl.single().method).isEqualTo(PaymentLineCategory.CASH.name)
+        assertThat(pl.single().amount).isEqualTo(1500.0)
+
+        // cashbook mirrors the physical money (৳1500) — no separate advance INCOME
+        val income = cashbookDao.rows.single()
+        assertThat(income.type).isEqualTo("INCOME")
+        assertThat(income.amount).isEqualTo(1500.0)
+        assertThat(income.account).isEqualTo("CASH")
+    }
+
+    @Test
+    fun `multi-line overpayment posts the whole excess to khata - 600 cash plus 900 bKash on a 1000 bill`() = runTest {
+        val billId = repo.createBillWithPaymentLines(
+            tenantId = "t_1", customerId = "elias", customerNameBn = "ইলিয়াস", customerPhone = null,
+            userId = "u_1", lines = cart1000, discountAmount = 0.0, discountType = "FIXED",
+            paidLines = listOf(
+                PaymentLineSpec(PaymentLineCategory.CASH, null, 600.0),
+                PaymentLineSpec(PaymentLineCategory.MOBILE, MfsProvider.BKASH, 900.0),
+            ),
+        )
+
+        val bill = billDao.bills.single()
+        assertThat(bill.paidAmount).isEqualTo(1000.0)
+        assertThat(bill.dueAmount).isEqualTo(0.0)
+        assertThat(bill.status).isEqualTo("COMPLETED")
+
+        val entry = khataEntryDao.rows.single()
+        assertThat(entry.type).isEqualTo(KhataEntryType.PAYMENT.name)
+        assertThat(entry.amount).isEqualTo(500.0) // 1500 received − 1000 bill
+        assertThat(entry.referenceBillId).isEqualTo(billId)
+
+        val pl = billPaymentLineDao.getByBill(billId)
+        assertThat(pl).hasSize(2)
+        assertThat(pl.none { it.method == PaymentLineCategory.DUE.name }).isTrue()
+        assertThat(cashbookDao.rows.map { it.amount }.sorted()).containsExactly(600.0, 900.0).inOrder()
+    }
+
+    @Test
+    fun `cogs query sums quantity times purchase price across cash and credit bills`() = runTest {
+        // D94: COGS must count credit sales too — a CREDIT bill is still real revenue
+        // with real acquisition cost.
+        billDao.bookPrices["b1"] = 100.0
+        billDao.bookPrices["b2"] = 50.0
+        val cashCart = listOf(
+            BillLineInput(bookId = "b1", bookTitleBn = "ক", quantity = 2, unitPrice = 250.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
+        )
+        val creditCart = listOf(
+            BillLineInput(bookId = "b2", bookTitleBn = "খ", quantity = 4, unitPrice = 200.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
+        )
+        repo.createBillWithPaymentLines(
+            tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+            userId = "u_1", lines = cashCart, discountAmount = 0.0, discountType = "FIXED",
+            paidLines = listOf(PaymentLineSpec(PaymentLineCategory.CASH, null, 500.0)),
+        )
+        repo.createBillWithPaymentLines(
+            tenantId = "t_1", customerId = "elias", customerNameBn = "ইলিয়াস", customerPhone = null,
+            userId = "u_1", lines = creditCart, discountAmount = 0.0, discountType = "FIXED",
+            paidLines = emptyList(), // pure বাকি sale — ৳800 on khata
+        )
+
+        val cogs = repo.getCogsByDateRange("t_1", 0L, Long.MAX_VALUE)
+        assertThat(cogs).isEqualTo(2 * 100.0 + 4 * 50.0) // 400 — the CREDIT bill's cost is included
+
+        // revenue-side proof at the repository boundary: the credit bill is in the day's bills
+        val today = repo.getBillsByDate("t_1", 0L, Long.MAX_VALUE)
+        assertThat(today).hasSize(2)
+        assertThat(today.sumOf { it.totalAmount }).isEqualTo(1300.0)
+        val creditBill = today.single { it.dueAmount > 0.0 }
+        assertThat(creditBill.totalAmount).isEqualTo(800.0)
     }
 
     @Test

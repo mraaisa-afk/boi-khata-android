@@ -39,4 +39,6 @@
     <string name="mela_button">মেলা</string>
     <string name="remove_payment_line">বাদ দিন</string>
     <string name="remaining_due_preview">বাকি থাকবে:</string>
+    <string name="khata_advance_preview">ক্রেতার খাতায় জমা হবে:</string>
+    <string name="walk_in_overpay_error">হাটি ক্রেতার জন্য অতিরিক্ত জমা রাখা সম্ভব নয়। অতিরিক্ত ফেরত দিন।</string>
 </resources>

@@ -141,7 +141,8 @@ class SaleRepositoryImpl @Inject constructor(
      * Validation is fail-fast (IllegalArgumentException) BEFORE the transaction:
      * - every paid line amount > 0
      * - MOBILE lines must carry a provider; CASH/BANK must not
-     * - sum(paid) ≤ total (no overpay)
+     * - sum(paid) > total is allowed ONLY for a named customer — the excess
+     *   posts to their khata as a জমা entry (D93); walk-ins are rejected
      * - বাকি > 0 requires a customer (posts to that customer's খাতা)
      */
     override suspend fun createBillWithPaymentLines(
@@ -204,7 +205,14 @@ class SaleRepositoryImpl @Inject constructor(
             }
         }
         val sumPaid = paidLines.sumOf { it.amount }
-        require(sumPaid <= totalAmount + 0.01) { "জমা বিলের মোটের চেয়ে বেশি হতে পারে না" }
+        // D93 (owner ruling 2026-09-24): overpayment is ALLOWED for a named
+        // customer — the excess becomes a জমা (PAYMENT) entry on their khata
+        // (e.g. ৳1500 handed over for a ৳1000 book while an old ৳1200 due stands).
+        // For a walk-in (হাটি ক্রেতা) there is no khata to absorb the excess → reject.
+        val overpayment = (sumPaid - totalAmount).coerceAtLeast(0.0)
+        if (overpayment > 0.01) {
+            require(customerId != null) { "হাটি ক্রেতার জন্য অতিরিক্ত জমা রাখা সম্ভব নয়। অতিরিক্ত ফেরত দিন।" }
+        }
         val dueAmount = ((totalAmount - sumPaid).coerceAtLeast(0.0))
         if (dueAmount > 0.01) {
             require(customerId != null) { "বাকি থাকলে ক্রেতা নির্বাচন করুন" }
@@ -249,7 +257,9 @@ class SaleRepositoryImpl @Inject constructor(
             vatAmount = vatAmount,
             totalAmount = totalAmount,
             paymentMethod = summaryMethod.name,
-            paidAmount = sumPaid,
+            // "paid toward THIS bill" — capped at the total; the excess is the
+            // khata জমা written in the transaction below (D93).
+            paidAmount = sumPaid.coerceAtMost(totalAmount),
             dueAmount = dueAmount,
             khataEntryId = null, // set after khata entry creation if due > 0
             billDate = now,
@@ -301,6 +311,28 @@ class SaleRepositoryImpl @Inject constructor(
                 )
                 // Link khata entry back to bill
                 billDao.updateKhataEntryId(billId, khataEntryId)
+            }
+
+            // 4b. D93: overpayment → জমা (PAYMENT) entry on the customer's khata,
+            // reducing their outstanding balance — SAME D22 transaction (owner:
+            // the credit write must be inside this transaction, not a separate call).
+            // NO extra cashbook row: the money was already mirrored in full via the
+            // paid lines — a second INCOME would double-count the cash.
+            if (overpayment > 0.01 && customerId != null) {
+                khataEntryDao.insert(
+                    KhataEntryEntity(
+                        id = UUID.randomUUID().toString(),
+                        tenantId = tenantId,
+                        customerId = customerId,
+                        amount = overpayment,
+                        type = KhataEntryType.PAYMENT.name,
+                        description = "অতিরিক্ত জমা (খাতায়) ($billNumber)",
+                        referenceBillId = billId,
+                        collectedByUserId = userId,
+                        date = now,
+                        idempotencyKey = UUID.randomUUID().toString(),
+                    )
+                )
             }
 
             // 5. D34 per-line cashbook mirror + 6. P12 payment-line rows —
@@ -378,6 +410,11 @@ class SaleRepositoryImpl @Inject constructor(
                 amount = it.amount,
             )
         }
+    }
+
+    /** D94: COGS over all bills in the window (credit sales included). */
+    override suspend fun getCogsByDateRange(tenantId: String, start: Long, end: Long): Double {
+        return billDao.getCogsByDateRange(tenantId, start, end)
     }
 
     private fun BillEntity.toSummary() = BillSummary(

@@ -63,6 +63,8 @@
     <string name="cash_reconciliation">Cash Reconciliation</string>
     <string name="system_cash">System Cash</string>
     <string name="counted_cash">Counted Cash</string>
+    <string name="khata_advance">Khata Advance (overpayment)</string>
+    <string name="enter_amount_placeholder">Enter amount ৳</string>
     <string name="variance">Variance</string>
     <string name="share_close">Share on WhatsApp</string>
     <string name="share_hisab_pack">Share Hisab Pack</string>

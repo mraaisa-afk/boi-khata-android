@@ -31,6 +31,10 @@ object CashCloseCalculator {
         // P12/D92: authoritative payment lines when the bill has them (post-v7
         // checkout). Empty for legacy bills → the bill-level columns are used.
         val lines: List<LineForClose> = emptyList(),
+        // D93: the bill's total — lets the calculator split an overpaid line's
+        // excess into the khataAdvance bucket (money received ≠ sales). 0.0 =
+        // unknown (legacy callers) → no split.
+        val billTotal: Double = 0.0,
     )
 
     /** One bill_payment_lines row reduced for the calculator (pure values). */
@@ -69,6 +73,7 @@ object CashCloseCalculator {
         var bank = 0.0
         var mobileOther = 0.0
         var credit = 0.0
+        var khataAdvance = 0.0
         for (bill in bills) {
             if (bill.lines.isEmpty()) {
                 when (bill.paymentMethod) {
@@ -80,16 +85,26 @@ object CashCloseCalculator {
                     PaymentMethod.MOBILE -> mobileOther += bill.paidAmount
                 }
             } else {
+                // D93: lines record the ACTUAL money received. Cap each line at
+                // the bill's remaining total — the excess went to the customer's
+                // খাতা as a জমা, so it must NOT inflate the sales buckets.
+                var billRemaining = bill.billTotal
                 for (line in bill.lines) {
+                    val toSale = if (bill.billTotal > 0.0) {
+                        minOf(line.amount, billRemaining.coerceAtLeast(0.0))
+                    } else line.amount
+                    val toAdvance = line.amount - toSale
+                    billRemaining -= toSale
+                    khataAdvance += toAdvance
                     when (line.method) {
-                        PaymentLineCategory.CASH.name -> cash += line.amount
-                        PaymentLineCategory.BANK.name -> bank += line.amount
+                        PaymentLineCategory.CASH.name -> cash += toSale
+                        PaymentLineCategory.BANK.name -> bank += toSale
                         PaymentLineCategory.MOBILE.name -> when (line.provider) {
-                            MfsProvider.BKASH.name -> bkash += line.amount
-                            MfsProvider.NAGAD.name -> nagad += line.amount
-                            else -> mobileOther += line.amount
+                            MfsProvider.BKASH.name -> bkash += toSale
+                            MfsProvider.NAGAD.name -> nagad += toSale
+                            else -> mobileOther += toSale
                         }
-                        PaymentLineCategory.DUE.name -> credit += line.amount
+                        PaymentLineCategory.DUE.name -> credit += toSale
                     }
                 }
             }
@@ -98,6 +113,7 @@ object CashCloseCalculator {
         val salesByMethod = SalesByMethod(
             cash = cash, bkash = bkash, nagad = nagad, credit = credit,
             total = total, bank = bank, mobileOther = mobileOther,
+            khataAdvance = khataAdvance,
         )
 
         // Expenses by category

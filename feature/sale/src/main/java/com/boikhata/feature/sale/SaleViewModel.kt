@@ -225,15 +225,19 @@ class SaleViewModel @Inject constructor(
         // P12/D92: paid = sum of payment-line amounts. Blank input behaves like
         // the legacy field: a SINGLE blank line = full total (plain cash sale);
         // in a multi-line split every amount must be typed explicitly.
-        val paidAmount = state.paymentLines.sumOf { line ->
+        val sumPaidUncapped = state.paymentLines.sumOf { line ->
             val parsed = BengaliNormalizer.toAsciiDigits(line.amountInput).toDoubleOrNull()
             when {
                 parsed != null -> parsed.coerceAtLeast(0.0)
                 state.paymentLines.size == 1 && line.amountInput.isBlank() -> totalAmount
                 else -> 0.0
             }
-        }.coerceAtMost(totalAmount)
+        }
+        // D93: paid (toward the bill) is capped at the total; the excess is the
+        // খাতা জমা preview — valid ONLY when a named customer is selected.
+        val paidAmount = sumPaidUncapped.coerceAtMost(totalAmount)
         val dueAmount = (totalAmount - paidAmount).coerceAtLeast(0.0)
+        val overpaymentAmount = (sumPaidUncapped - totalAmount).coerceAtLeast(0.0)
 
         _cartState.value = state.copy(
             subtotal = subtotal,
@@ -242,6 +246,7 @@ class SaleViewModel @Inject constructor(
             totalAmount = totalAmount,
             paidAmount = paidAmount,
             dueAmount = dueAmount,
+            overpaymentAmount = overpaymentAmount,
         )
     }
 
@@ -345,13 +350,44 @@ class SaleViewModel @Inject constructor(
             try {
                 val bill = billRepository.getBill(currentTenantId, billId) ?: return@launch
                 val lines = billRepository.getBillLines(billId)
-                // P12/D92: per-line জমা rows on the receipt (paid + DUE); legacy
-                // bills have no lines → single জমা/মাধ্যম rows as before.
-                val paymentLines = billRepository.getPaymentLines(billId).map { pl ->
-                    ReceiptBuilder.PaymentLineDisplay(
-                        labelBn = ReceiptBuilder.paymentLineLabel(pl.category.name, pl.provider?.name),
-                        amount = pl.amount,
-                    )
+                val paymentLines = run {
+                    val raw = billRepository.getPaymentLines(billId)
+                    val sum = raw.sumOf { it.amount }
+                    if (sum > bill.totalAmount + 0.01 && raw.none { it.category == PaymentLineCategory.DUE }) {
+                        // D93: overpaid bill — cap the bill-facing জমা rows at the bill total
+                        // and show the excess as its own খাতা row (the amount went to the
+                        // customer's khata as a জমা, not to this bill).
+                        var remaining = bill.totalAmount
+                        raw.flatMap { pl ->
+                            val toBill = minOf(pl.amount, remaining.coerceAtLeast(0.0))
+                            remaining -= toBill
+                            buildList {
+                                add(
+                                    ReceiptBuilder.PaymentLineDisplay(
+                                        labelBn = ReceiptBuilder.paymentLineLabel(pl.category.name, pl.provider?.name),
+                                        amount = toBill,
+                                    )
+                                )
+                                if (pl.amount - toBill > 0.01) {
+                                    add(
+                                        ReceiptBuilder.PaymentLineDisplay(
+                                            labelBn = "জমা (খাতায়)",
+                                            amount = pl.amount - toBill,
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        // P12/D92: per-line জমা rows on the receipt (paid + DUE); legacy
+                        // bills have no lines → single জমা/মাধ্যম rows as before.
+                        raw.map { pl ->
+                            ReceiptBuilder.PaymentLineDisplay(
+                                labelBn = ReceiptBuilder.paymentLineLabel(pl.category.name, pl.provider?.name),
+                                amount = pl.amount,
+                            )
+                        }
+                    }
                 }
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
                 val text = ReceiptBuilder.buildReceiptText(
@@ -439,6 +475,9 @@ data class CartState(
     val totalAmount: Double = 0.0,
     val paidAmount: Double = 0.0,
     val dueAmount: Double = 0.0,
+    // D93: sum(entered জমা) − মোট — valid only for a named customer (khata জমা);
+    // a walk-in with an overpayment is blocked at checkout.
+    val overpaymentAmount: Double = 0.0,
 )
 
 /** P12/D92: one editable payment line in the POS checkout editor. */

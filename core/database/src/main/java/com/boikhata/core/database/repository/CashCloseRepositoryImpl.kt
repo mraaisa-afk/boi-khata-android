@@ -72,6 +72,8 @@ class CashCloseRepositoryImpl @Inject constructor(
                 paidAmount = bill.paidAmount,
                 dueAmount = bill.dueAmount,
                 lines = lines,
+                // D93: enables the khata-advance split for overpaid bills
+                billTotal = bill.totalAmount,
             )
         }
 

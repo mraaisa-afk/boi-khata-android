@@ -49,12 +49,12 @@
     <string name="over">সীমা অতিক্রান্ত</string>
 
     <string name="sales_by_method">বিক্রি (মাধ্যম অনুয়ায়ী)</string>
-    <string name="cash_sales">নগদ বিক্রি</string>
-    <string name="bkash_sales">বিকাশ বিক্রি</string>
-    <string name="nagad_sales">নগদ (Nagad) বিক্রি</string>
-    <string name="bank_sales">ব্যাঙ্ক বিক্রি</string>
-    <string name="mobile_other_sales">মোবাইল ব্যাঙ্কিং (অন্যান্য)</string>
-    <string name="credit_sales">বাকি বিক্রি</string>
+    <string name="cash_sales">নগদে বিক্রি</string>
+    <string name="bkash_sales">বিকাশ হতে বিক্রি</string>
+    <string name="nagad_sales">নগদ (Nagad) হতে বিক্রি</string>
+    <string name="bank_sales">ব্যাংক হতে বিক্রি</string>
+    <string name="mobile_other_sales">মোবাইল ব্যাংকিং (অন্যান্য) হতে বিক্রি</string>
+    <string name="credit_sales">বাকিতে বিক্রি</string>
     <string name="total_sales">মোট বিক্রি</string>
     <string name="expenses_by_category">খরচ (খাত অনুযায়ী)</string>
     <string name="total_expenses">মোট খরচ</string>
@@ -63,6 +63,8 @@
     <string name="cash_reconciliation">নগদ মিলান</string>
     <string name="system_cash">হিসাব-অনুয়ায়ী</string>
     <string name="counted_cash">গোনা নগদ</string>
+    <string name="khata_advance">খাতায় জমা (অতিরিক্ত)</string>
+    <string name="enter_amount_placeholder">৳ পরিমাণ লিখুন</string>
     <string name="variance">ফারাক</string>
     <string name="share_close">WhatsApp-এ শেয়ার</string>
     <string name="share_hisab_pack">হিসাব-প্যাক শেয়ার</string>
