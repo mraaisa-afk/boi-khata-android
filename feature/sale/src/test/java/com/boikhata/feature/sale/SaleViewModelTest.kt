@@ -45,8 +45,15 @@ class SaleViewModelTest {
         publisher = "", classLevel = "", subject = "", editionYear = 2024,
         category = BookCategory.GENERAL, condition = com.boikhata.core.domain.enums.BookCondition.NEW,
         purchasePrice = 200.0, sellingPrice = 350.0, initialStock = 40, lowStockThreshold = 5, isActive = true,
+        currentStock = 40,
     )
-    private val himu = misirAli.copy(id = "himu", titleBn = "হিমু", sellingPrice = 300.0, initialStock = 30)
+    private val himu = misirAli.copy(id = "himu", titleBn = "হিমু", sellingPrice = 300.0, initialStock = 30, currentStock = 30)
+
+    /** P14: a book whose live stock has reached 0 (the owner's device scenario). */
+    private val stockZeroBook = misirAli.copy(id = "stock-zero", titleBn = "শেষ কপি", currentStock = 0)
+
+    /** P14: a book with exactly 2 copies left. */
+    private val lowStockBook = misirAli.copy(id = "low-stock", titleBn = "দুই কপি", currentStock = 2)
 
     @Before
     fun setup() {
@@ -103,6 +110,39 @@ class SaleViewModelTest {
         var error: String? = null
         viewModel.checkout(tenantId = "", onDone = {}, onError = { error = it })
         assertThat(error).isEqualTo("টেনান্ট শনাক্ত করা যায়নি — অ্যাপ রিস্টার্ট করুন")
+    }
+
+    // ── P14: negative-stock cart guards (owner device finding: stock went to −9) ──
+
+    @Test
+    fun `addToCart of a zero-stock book is blocked with the exact owner warning`() = runTest {
+        viewModel.addToCart(stockZeroBook)
+        val s = viewModel.cartState.value
+        assertThat(s.items).isEmpty() // nothing entered the cart
+        assertThat(s.stockWarning).isEqualTo("স্টকে পর্যাপ্ত বই নেই")
+    }
+
+    @Test
+    fun `incrementing beyond available stock is blocked with the owner warning`() = runTest {
+        viewModel.addToCart(lowStockBook) // 1 of 2 — fine
+        assertThat(viewModel.cartState.value.items.single().quantity).isEqualTo(1)
+        viewModel.updateQuantity("low-stock", 2) // 2 of 2 — fine
+        assertThat(viewModel.cartState.value.items.single().quantity).isEqualTo(2)
+        viewModel.updateQuantity("low-stock", 3) // beyond stock — MUST be blocked
+        val s = viewModel.cartState.value
+        assertThat(s.items.single().quantity).isEqualTo(2) // unchanged
+        assertThat(s.stockWarning).isEqualTo("স্টকে পর্যাপ্ত বই নেই")
+    }
+
+    @Test
+    fun `repeated addToCart taps cannot exceed available stock`() = runTest {
+        viewModel.addToCart(lowStockBook) // 1
+        viewModel.addToCart(lowStockBook) // 2 — the last allowed copy
+        assertThat(viewModel.cartState.value.items.single().quantity).isEqualTo(2)
+        viewModel.addToCart(lowStockBook) // 3rd tap — beyond stock
+        val s = viewModel.cartState.value
+        assertThat(s.items.single().quantity).isEqualTo(2)
+        assertThat(s.stockWarning).isEqualTo("স্টকে পর্যাপ্ত বই নেই")
     }
 
     @Test

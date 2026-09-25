@@ -58,6 +58,7 @@ private val ColorHeroAmount = ColorAccentGold
 fun HomeScreen(
     tenantId: String,
     shopName: String,
+    phone: String = "",
     isLicensed: Boolean = false,
     onNavigate: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
@@ -81,6 +82,7 @@ fun HomeScreen(
         is HomeUiState.Success -> HomeContent(
             data = s.data,
             shopName = shopName,
+            phone = phone,
             isLicensed = isLicensed,
             amountVisible = amountVisible,
             onAmountToggle = { amountVisible = !amountVisible },
@@ -97,6 +99,7 @@ private val LargeTileHeight = SmallTileHeight * 2 + 8.dp
 private fun HomeContent(
     data: HomeData,
     shopName: String,
+    phone: String,
     isLicensed: Boolean,
     amountVisible: Boolean,
     onAmountToggle: () -> Unit,
@@ -106,7 +109,7 @@ private fun HomeContent(
         modifier = Modifier.fillMaxSize().background(ColorSurfaceIvory),
         contentPadding = PaddingValues(bottom = 88.dp),
     ) {
-        item(key = "app_bar") { HomeAppBar(shopName = shopName, isLicensed = isLicensed) }
+        item(key = "app_bar") { HomeAppBar(shopName = shopName, phone = phone, isLicensed = isLicensed) }
         item(key = "hero_card") {
             HeroCard(
                 data = data,
@@ -140,14 +143,15 @@ private fun HomeContent(
     }
 }
 
+/**
+ * P14 (owner device ruling — Issue: header text too small): the home header is the
+ * dashboard's formal identity block. The shop name was demoted to bodySmall (12sp)
+ * and the phone number was absent entirely; both now render as a prominent title
+ * pair — shop name = headlineSmall ExtraBold, phone = bodyMedium beneath it.
+ * D88 ruling untouched: ivory surface, maroon content (AAA 10.52:1).
+ */
 @Composable
-private fun HomeAppBar(shopName: String, isLicensed: Boolean) {
-    // D88 (owner ruling — supersedes D71 §1 "app bar = maroon" pending the owner's
-    // DECISIONS.md commit): header surface ivory #FDFAF6, all header content maroon
-    // #800000 = 10.52:1 (WCAG AAA). The previous white-on-maroon tokens already
-    // passed their thresholds (white #FFFFFF 10.95:1; white-80% #E6E6E6 7.23:1;
-    // white-60% #CCCCCC 4.48:1 — dropdown ICON, ≥3:1 graphics) — this remap removes
-    // the large-area maroon saturation reported as eye strain; not a contrast failure.
+private fun HomeAppBar(shopName: String, phone: String, isLicensed: Boolean) {
     Surface(modifier = Modifier.fillMaxWidth(), color = ColorSurfaceIvory, tonalElevation = 0.dp) {
         Column(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp),
@@ -176,10 +180,28 @@ private fun HomeAppBar(shopName: String, isLicensed: Boolean) {
                     Text(shopName.firstOrNull()?.toString() ?: stringResource(R.string.home_avatar_fallback), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = ColorBrandMaroon)
                 }
             }
-            Spacer(Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { }) {
-                Text(shopName, style = MaterialTheme.typography.bodySmall, color = ColorBrandMaroon, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f, fill = false))
-                Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = ColorBrandMaroon, modifier = Modifier.size(16.dp))
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        shopName,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = ColorBrandMaroon,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (phone.isNotBlank()) {
+                        Text(
+                            phone,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = ColorBrandMaroon.copy(alpha = 0.75f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
             }
         }
     }

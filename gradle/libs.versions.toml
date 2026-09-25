@@ -42,7 +42,10 @@ googleServices = "4.4.2"              # ⚠ VERIFY — mvnrepository.com/artifac
 coreKtx = "1.15.0"                    # ⚠ VERIFY
 activityCompose = "1.9.3"             # ⚠ VERIFY
 lifecycle = "2.8.7"                   # ⚠ VERIFY
-navigationCompose = "2.8.5"           # ⚠ VERIFY
+# P14: 2.8.5 → 2.8.9 (latest 2.8.x patch, verified on Maven 2026-09-25) — the owner
+# device round reported tabs silently not responding; 2.8.5 shipped multiple
+# navigation/lifecycle fixes across 2.8.6-2.8.9 (2.8.7 alone: "important issue" fix).
+navigationCompose = "2.8.9"           # ⚠ VERIFY — P14 bump from 2.8.5 (see above)
 biometric = "1.1.0"                   # বহাল
 
 # ── Serialization / coroutines ──────────────────────────────────────────────

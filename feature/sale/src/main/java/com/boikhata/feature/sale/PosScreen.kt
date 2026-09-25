@@ -43,9 +43,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.widget.Toast
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.boikhata.core.designsystem.format.DigitStyle
 import com.boikhata.core.designsystem.format.NumberFormatter
@@ -81,6 +83,17 @@ fun PosScreen(
     var showCustomerPicker by remember { mutableStateOf(false) }
     var showCheckoutConfirm by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // P14 (owner device ruling — «স্টকে পর্যাপ্ত বই নেই»): the cart guards emit a
+    // one-shot warning; surface it as a Toast and clear it so the same blocked tap
+    // can fire again later.
+    val context = LocalContext.current
+    LaunchedEffect(cartState.stockWarning) {
+        cartState.stockWarning?.let { warning ->
+            Toast.makeText(context, warning, Toast.LENGTH_SHORT).show()
+            viewModel.dismissStockWarning()
+        }
+    }
 
     Scaffold(
         topBar = {

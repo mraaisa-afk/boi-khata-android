@@ -4,12 +4,14 @@ import androidx.room.withTransaction
 import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BillPaymentLineDao
+import com.boikhata.core.database.dao.BookDao
 import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.StockLedgerDao
 import com.boikhata.core.database.entity.BillEntity
 import com.boikhata.core.database.entity.BillLineEntity
 import com.boikhata.core.database.entity.BillPaymentLineEntity
+import com.boikhata.core.database.entity.BookEntity
 import com.boikhata.core.database.entity.CashbookEntryEntity
 import com.boikhata.core.database.entity.KhataEntryEntity
 import com.boikhata.core.database.entity.StockLedgerEntity
@@ -22,6 +24,7 @@ import com.boikhata.core.domain.enums.PaymentMethod
 import com.boikhata.core.domain.license.LicenseWriteGuard
 import com.boikhata.core.domain.repository.BillLineInput
 import com.boikhata.core.domain.repository.PaymentLineSpec
+import com.boikhata.core.domain.sale.InsufficientStockException
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -121,6 +124,17 @@ class SaleRepositoryImplTest {
         override suspend fun getByBillDateRange(tenantId: String, startOfDay: Long, endOfDay: Long) = emptyList<BillPaymentLineEntity>()
     }
 
+    private class FakeBookDao : BookDao {
+        val books = mutableListOf<BookEntity>()
+        override suspend fun insert(book: BookEntity) { books.add(book) }
+        override suspend fun update(book: BookEntity) { books.replaceAll { if (it.id == book.id) book else it } }
+        override suspend fun getActiveByTenant(tenantId: String) = books.filter { it.tenantId == tenantId && it.isActive }
+        override suspend fun getAllByTenant(tenantId: String) = books.filter { it.tenantId == tenantId }
+        override suspend fun countForTenant(tenantId: String) = books.count { it.tenantId == tenantId }
+        override suspend fun getById(id: String) = books.firstOrNull { it.id == id }
+        override suspend fun search(tenantId: String, normalizedQuery: String) = emptyList<BookEntity>()
+    }
+
     private object NoLock : PeriodLockChecker {
         override suspend fun getLockedPeriods(tenantId: String): Set<PeriodLockGuard.LockedPeriod> = emptySet()
         override suspend fun assertNotLocked(tenantId: String, date: Long) { /* no-op */ }
@@ -131,6 +145,7 @@ class SaleRepositoryImplTest {
     private lateinit var stockLedgerDao: FakeStockLedgerDao
     private lateinit var khataEntryDao: FakeKhataEntryDao
     private lateinit var cashbookDao: FakeCashbookDao
+    private lateinit var bookDao: FakeBookDao
     private lateinit var repo: SaleRepositoryImpl
 
     private val lines = listOf(
@@ -150,6 +165,19 @@ class SaleRepositoryImplTest {
         stockLedgerDao = FakeStockLedgerDao()
         khataEntryDao = FakeKhataEntryDao()
         cashbookDao = FakeCashbookDao()
+        bookDao = FakeBookDao()
+        // P14: every pre-existing test book gets a generous opening stock (100) so the
+        // documented scenarios (মিসির আলী 40→37 etc.) keep exercising the WRITE path,
+        // not the new stock gate; the oversell tests below seed their own tight stock.
+        listOf(
+            Triple("misir-ali", "মিসির আলী", 100),
+            Triple("himu", "হিমু", 100),
+            Triple("boi-x", "বই", 100),
+            Triple("b1", "ক", 100),
+            Triple("b2", "খ", 100),
+        ).forEach { (id, title, stock) ->
+            bookDao.books.add(testBookEntity(id, title, stock))
+        }
         val db = mockk<BoiKhataDatabase>(relaxed = true)
         mockkStatic("androidx.room.RoomDatabaseKt")
         coEvery { db.withTransaction(any<suspend () -> Unit>()) } coAnswers {
@@ -160,6 +188,7 @@ class SaleRepositoryImplTest {
             db = db,
             billDao = billDao,
             billPaymentLineDao = billPaymentLineDao,
+            bookDao = bookDao,
             stockLedgerDao = stockLedgerDao,
             khataEntryDao = khataEntryDao,
             cashbookDao = cashbookDao,
@@ -167,6 +196,30 @@ class SaleRepositoryImplTest {
             periodLockChecker = NoLock,
         )
     }
+
+    /** P14: minimal BookEntity factory for the stock-gate tests. */
+    private fun testBookEntity(id: String, titleBn: String, initialStock: Int) = BookEntity(
+        id = id,
+        tenantId = "t_1",
+        isbn = null,
+        titleBn = titleBn,
+        titleEn = null,
+        author = "",
+        publisher = "",
+        classLevel = "",
+        subject = "",
+        editionYear = 2026,
+        category = "GENERAL",
+        condition = "NEW",
+        purchasePrice = 50.0,
+        sellingPrice = 100.0,
+        initialStock = initialStock,
+        lowStockThreshold = 3,
+        isActive = true,
+        titleBnNormalized = titleBn,
+        createdAt = 0L,
+        updatedAt = 0L,
+    )
 
     @After
     fun teardown() { unmockkAll() }
@@ -487,5 +540,72 @@ class SaleRepositoryImplTest {
         assertThat(cashbookDao.rows.single().account).isEqualTo("MOBILE")
         // denormalized summary stays legacy-parseable
         assertThat(billDao.bills.single().paymentMethod).isEqualTo("NAGAD")
+    }
+
+    // ── P14: negative-stock gate (owner device finding: stock went to −9) ──────
+
+    @Test
+    fun `oversell is blocked — quantity beyond live stock throws and writes nothing`() = runTest {
+        // স্টক ৫ কপি, বিলে ৮ কপি — অবশ্যই ব্লক (RED: pre-P14 createBill happily
+        // appended a −8 SALE row and let stock go negative)
+        bookDao.books.add(testBookEntity("low-stock", "চিকা সলিপ", initialStock = 5))
+        val over = listOf(
+            BillLineInput(bookId = "low-stock", bookTitleBn = "চিকা সলিপ", quantity = 8, unitPrice = 100.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
+        )
+
+        val thrown = runCatching {
+            repo.createBill(
+                tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+                userId = "u_1", lines = over, discountAmount = 0.0, discountType = "PERCENTAGE",
+                paymentMethod = PaymentMethod.CASH, paidAmount = 800.0,
+            )
+        }.exceptionOrNull()
+
+        assertThat(thrown).isInstanceOf(InsufficientStockException::class.java)
+        assertThat(thrown!!.message).contains("স্টকে পর্যাপ্ত বই নেই")
+        // atomicity: NOTHING was written
+        assertThat(billDao.bills).isEmpty()
+        assertThat(billDao.lines).isEmpty()
+        assertThat(stockLedgerDao.rows).isEmpty()
+        assertThat(cashbookDao.rows).isEmpty()
+    }
+
+    @Test
+    fun `oversell via multi-line payment path is blocked too`() = runTest {
+        bookDao.books.add(testBookEntity("low-stock-2", "সয়ং আক", initialStock = 2))
+        val over = listOf(
+            BillLineInput(bookId = "low-stock-2", bookTitleBn = "সয়ং আক", quantity = 3, unitPrice = 200.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
+        )
+
+        val thrown = runCatching {
+            repo.createBillWithPaymentLines(
+                tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+                userId = "u_1", lines = over, discountAmount = 0.0, discountType = "PERCENTAGE",
+                paidLines = listOf(PaymentLineSpec(PaymentLineCategory.CASH, null, 600.0)),
+            )
+        }.exceptionOrNull()
+
+        assertThat(thrown).isInstanceOf(InsufficientStockException::class.java)
+        assertThat(stockLedgerDao.rows).isEmpty()
+        assertThat(billPaymentLineDao.rows).isEmpty()
+    }
+
+    @Test
+    fun `selling the exact available stock still passes — gate allows selling all remaining copies`() = runTest {
+        bookDao.books.add(testBookEntity("exact-stock", "ঠাকুরমার ঝুলি", initialStock = 5))
+        val exact = listOf(
+            BillLineInput(bookId = "exact-stock", bookTitleBn = "ঠাকুরমার ঝুলি", quantity = 5, unitPrice = 100.0, category = com.boikhata.core.domain.enums.BookCategory.GENERAL),
+        )
+
+        val billId = repo.createBill(
+            tenantId = "t_1", customerId = null, customerNameBn = "হাটি ক্রেতা", customerPhone = null,
+            userId = "u_1", lines = exact, discountAmount = 0.0, discountType = "PERCENTAGE",
+            paymentMethod = PaymentMethod.CASH, paidAmount = 500.0,
+        )
+
+        assertThat(billId).isNotEmpty()
+        assertThat(stockLedgerDao.rows.single().changeQuantity).isEqualTo(-5)
+        // stock lands at exactly 0 — never negative
+        assertThat(stockLedgerDao.getStockQuantityForBook("exact-stock")).isEqualTo(-5)
     }
 }

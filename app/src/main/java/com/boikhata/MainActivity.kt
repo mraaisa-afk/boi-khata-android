@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.boikhata.core.cloud.work.BackupScheduler
 import com.boikhata.core.designsystem.theme.BoiKhataTheme
 import com.boikhata.core.domain.enums.Role
 import com.boikhata.core.domain.license.LicensePolicy
@@ -76,6 +77,12 @@ class MainActivity : ComponentActivity() {
                                 tenantId = state.tenantId,
                                 shopName = state.shopName,
                             )
+                            // P14 (forensics: BackupScheduler.scheduleDailyBackup had NO call
+                            // site on main — the D50 periodic cloud backup was never armed).
+                            // Armed here at every authenticated launch, KEEP policy. The
+                            // constructor is dependency-free (@Inject, no params), matching
+                            // the MonthlyDataCopyScheduler direct-construction pattern.
+                            BackupScheduler().scheduleDailyBackup(this@MainActivity)
                         }
                         Column(modifier = Modifier.fillMaxSize()) {
                             // D43: License banner (driven by synced state, never blocks reads)

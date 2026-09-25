@@ -86,4 +86,9 @@
     <string name="device_label">Device label</string>
     <string name="add_device">Add device</string>
     <string name="remove_device">Remove</string>
+    <string name="settings_sync_title">Cloud backup &amp; sync</string>
+    <string name="settings_sync_reassurance">All your data is saved to the cloud automatically. Even if the app is uninstalled, signing in with the same phone number brings everything back.</string>
+    <string name="settings_sync_now">Sync now</string>
+    <string name="settings_sync_started">Sync started — your data is being saved to the cloud</string>
+    <string name="settings_lite_mode_label">Lite mode (simple, large UI)</string>
 </resources>

@@ -133,6 +133,7 @@ fun BoiKhataMainScreen(
                 HomeScreen(
                     tenantId   = tenantId,
                     shopName   = shopName,
+                    phone      = phone, // P14: dashboard header shows the shop phone line
                     isLicensed = false, // §5.1 OPEN ITEM: pending Sakira ruling on license states
                     onNavigate = { route -> navController.navigate(route) },
                 )
@@ -282,7 +283,19 @@ private fun androidx.compose.foundation.layout.RowScope.NavBarTab(
     val label = stringResource(tab.labelRes)
     NavigationBarItem(
         selected = selected,
-        onClick = { navController.navigateToTab(tab.route, restoreState = tab.restoresState) },
+        onClick = {
+            // P14 (owner device finding): when the tab is ALREADY selected but its
+            // restored unit tops out on a child screen (e.g. খাতা → detail), the
+            // canonical restore-tap re-lands on the child — the tap looks dead.
+            // A re-tap on the active tab must always respond: land on the tab ROOT
+            // (children popped and DISCARDED so they cannot resurrect).
+            val onOwnChild = selected && currentRoute != tab.route
+            if (onOwnChild) {
+                navController.navigateToTabRoot(tab.route)
+            } else {
+                navController.navigateToTab(tab.route, restoreState = tab.restoresState)
+            }
+        },
         icon = { Icon(tab.icon, contentDescription = label) },
         label = { Text(label) },
         alwaysShowLabel = true,

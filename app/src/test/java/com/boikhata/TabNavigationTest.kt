@@ -130,4 +130,40 @@ class TabNavigationTest {
             assertThat(navController.currentDestination?.route).isEqualTo("more")
         }
     }
+
+    @Test
+    fun khataTab_reTapFromOwnChild_landsOnTabRoot_ownerDeviceFinding() {
+        // P14 owner device finding: a tab whose restored unit tops out on a CHILD
+        // (e.g. খাতা → detail) kept re-landing on that child — the tap appeared
+        // DEAD (screen unchanged) and only a BACK press "un-stuck" it. Re-tapping
+        // the ACTIVE tab must always respond by landing on the tab ROOT.
+        // RED (captured): the pre-fix listener call navigateToTab(..., restoreState = true)
+        // from khata_detail → Truth: "expected: khata but was: khata_detail/{customerId}".
+        // GREEN: the listener's re-tap path now uses navigateToTabRoot.
+        setUpGraph()
+        composeRule.runOnIdle {
+            navController.navigateToTab(khataTab.route, restoreState = khataTab.restoresState)
+            navController.navigate("khata_detail/cust-1")
+            assertThat(navController.currentDestination?.route)
+                .isEqualTo("khata_detail/{customerId}")
+            // re-tap the SAME (already-selected) tab while on its child
+            navController.navigateToTabRoot(khataTab.route)
+            assertThat(navController.currentDestination?.route).isEqualTo("khata")
+        }
+    }
+
+    @Test
+    fun khataTab_reTapRoot_landsRoot_again_andDoesNotResurrectChildren() {
+        setUpGraph()
+        composeRule.runOnIdle {
+            navController.navigateToTab(khataTab.route, restoreState = khataTab.restoresState)
+            navController.navigate("khata_detail/cust-1")
+            navController.navigateToTabRoot(khataTab.route)
+            assertThat(navController.currentDestination?.route).isEqualTo("khata")
+            // the discarded unit must not resurrect on the next canonical switch
+            navController.navigateToTab(homeTab.route)
+            navController.navigateToTab(khataTab.route, restoreState = khataTab.restoresState)
+            assertThat(navController.currentDestination?.route).isEqualTo("khata")
+        }
+    }
 }

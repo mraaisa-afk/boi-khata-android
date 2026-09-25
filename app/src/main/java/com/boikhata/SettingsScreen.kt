@@ -4,10 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.AlertDialog
@@ -18,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -26,6 +31,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.boikhata.core.cloud.work.BackupScheduler
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BookDao
@@ -78,6 +84,22 @@ data class TrialStatus(
     val decision: TrialPolicy.Decision,
 )
 
+/**
+ * P14 (owner device ruling — sync transparency): the settings screen must expose
+ * an explicit «ম্যানুয়ালি সিঙ্ক করুন» action that triggers the SAME WorkManager
+ * backup worker the daily schedule uses (DailyBackupWorker — no parallel path).
+ */
+@HiltViewModel
+class SyncSettingsViewModel @Inject constructor(
+    private val backupScheduler: BackupScheduler,
+    @ApplicationContext private val appContext: Context,
+) : ViewModel() {
+    fun syncNow(onStarted: () -> Unit) {
+        backupScheduler.syncNow(appContext) // one-time worker + self-heals D50 periodic
+        onStarted()
+    }
+}
+
 @Composable
 fun SettingsScreen(
     tenantId: String,
@@ -91,15 +113,38 @@ fun SettingsScreen(
     onDemoReset: () -> Unit,
     isOwner: Boolean,
     viewModel: TrialViewModel = hiltViewModel(),
+    syncViewModel: SyncSettingsViewModel = hiltViewModel(),
 ) {
     var showDemoResetConfirmation by remember { mutableStateOf(false) }
     androidx.compose.runtime.LaunchedEffect(tenantId, phone) { viewModel.ensureTrial(tenantId, phone) }
     val status = viewModel.status
+    val context = LocalContext.current
+    // B-015 (owner device finding): this Column was NOT scrollable — on real phone
+    // densities everything below the trial/device cards fell past the viewport and
+    // the লাইট UI toggle rendered clipped/labelless at the very bottom. verticalScroll
+    // is the fix; bottom padding keeps the last row clear of the nav bar.
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.settings_title))
+        // P14: cloud-backup reassurance card — the owner's exact wording, verbatim.
+        Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.settings_sync_title))
+            Text(stringResource(R.string.settings_sync_reassurance))
+            Button(onClick = {
+                syncViewModel.syncNow(
+                    onStarted = {
+                        Toast.makeText(context, R.string.settings_sync_started, Toast.LENGTH_SHORT).show()
+                    },
+                )
+            }) {
+                Text(stringResource(R.string.settings_sync_now))
+            }
+        } }
         Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.referral_title))
             Text(ReferralCodeGenerator.codeForTenant(tenantId))
@@ -120,7 +165,16 @@ fun SettingsScreen(
         Card { DeviceGroupCard(tenantId = tenantId, isOwner = isOwner) }
         Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.lite_ui))
-            Switch(checked = liteMode, onCheckedChange = onLiteModeChange)
+            // B-015 companion fix: the switch previously had no visible label beside it —
+            // the clipped bottom of the page showed a bare toggle. Row keeps the 48dp
+            // touch target and pairs the label with the switch.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.settings_lite_mode_label),
+                    modifier = Modifier.weight(1f),
+                )
+                Switch(checked = liteMode, onCheckedChange = onLiteModeChange)
+            }
             Button(onClick = onSpeakSetup) { Text(stringResource(R.string.repeat_voice_setup)) }
             Button(onClick = onShareCopy) { Text(stringResource(R.string.share_monthly_copy)) }
             Button(onClick = onMigration) { Text(stringResource(R.string.number_changed)) }

@@ -56,3 +56,17 @@ internal fun NavHostController.navigateToTab(route: String, restoreState: Boolea
         this.restoreState = restoreState
     }
 }
+
+/**
+ * P14 (owner device finding — "tab tap does nothing until back is pressed"): a tab
+ * whose restored unit tops out on a CHILD re-landed on that child on every tap, so
+ * the tab appeared dead and only BACK "un-stuck" it. This primitive is the re-tap
+ * path: pop the tab's stack WITHOUT saving (the stale unit is discarded, so the
+ * child can never resurrect) and land on a FRESH tab root, single-top.
+ */
+internal fun NavHostController.navigateToTabRoot(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id)
+        launchSingleTop = true
+    }
+}
