@@ -60,4 +60,14 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.turbine)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    // P15/A1: HomeAppBarPhoneRenderTest — JVM (Robolectric) Compose-UI test driving
+    // the real HomeAppBar. Aliases pre-declared in gradle/libs.versions.toml
+    // (same block as the app module's TabNavigationTest and feature:expense's
+    // ExpenseSheetsTest); no new dependency coordinates.
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.robolectric)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

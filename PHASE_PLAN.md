@@ -31,7 +31,8 @@
 | **P10** | Design rebuild + D79/D81 | Items done; exit-gate open (device) | D71–D84 | Yes (Design v2) |
 | **P11** | Crash-hardening + route-safety + device-gate automation | Open | D82–D84 (basis) | No |
 | **P12** | Multi-line payment model (bill_payment_lines) | **In progress — opened by owner override 2026-09-24 (P11 exit-gate still open)** | D92 (draft re-issued this round) | No |
-| **P14** | Device round 2 (6 owner issues: negative-stock gate, header, sync transparency, settings scroll, payment-medium label, tab re-tap) | Implemented on `agent/p14-device-round-2-fixes`; pending CI + device test + D95–D98 pastes | D95–D98 (drafts in PR body) | No |
+| **P14** | Device round 2 (6 owner issues: negative-stock gate, header, sync transparency, settings scroll, payment-medium label, tab re-tap) | **MERGED as PR #75 → main @ `2271ef6`**; device round found 2 follow-ups (A1/A2) → P15 | D95–D98 (drafts in PR #75 body — pastes pending) | No |
+| **P15** | Follow-up round (A1 duplicate-phone render, A2 on-screen payment-medium label, D97 restore-honesty ruling, Part C PR#73-item status audit) | Implemented on `agent/p15-followup-round-fixes`; pending CI + device test + D97 paste | D97 (draft in PR body); restore-wiring logged as a tracked pending feature (NOT wired) | No |
 | **Post-GA** | Speculative | Not in PROGRESS.md yet | TBD | Yes (Design v2) |
 
 ---
@@ -201,6 +202,18 @@ Owner device testing post-#74 surfaced 6 issues — all fixed per the mandatory 
 
 ---
 
+## P15 — Follow-up Round (2026-09-25, branch `agent/p15-followup-round-fixes`, base main @ 2271ef6)
+
+Owner device testing of the merged #75 build + two standing rulings — handled per the mandatory protocol:
+1. **A1 (fixed, RED→GREEN) — phone shown twice on the home header:** no second render existed; the duplicate came from the value chain `TenantInfoRepositoryImpl.kt:28-33` (null on missing doc/name-field or ANY exception) → `MainViewModel.kt:95` `?: state.phone` → shopName IS the phone → the large shop-name slot and the small phone line printed the same number. Fix: suppress the small line only when it duplicates the shop name (`HomeScreen.kt:204`); real shop names still pair with the phone line. New Robolectric compose test `HomeAppBarPhoneRenderTest` (feature:home's first UI test; pre-fix Truth `expected: 1 but was : 2`).
+2. **A2 (fixed, grep-zero) — on-screen payment-medium label (D96 completion):** PR #75 fixed only the shareable-text builder; the on-screen heading is `R.string.sales_by_method` (`CashCloseScreen.kt:127`). `sales_by_method` → «পেমেন্ট মাধ্যম অনুায়ী» in values + values-bn (+ values-en "By Payment Method"); the old string also carried a Bengali vowel-order typo (…য়ায়ী) — swept to zero repo-wide incl. the same-typo `system_cash` label.
+3. **D97 (owner ruling, implemented) — restore honesty:** the Settings card's «আনইন্সটল হলেও…ফিরে পাবেন» sentence promised unwired restore → replaced with «আপনার তথ্য স্বয়ংক্রিয়ভাবে ব্যাকআপ হয়। পুনরুদ্ধার সুবিধা আসছে।» (+ en). `checkAndRestore` deliberately NOT wired — logged as a tracked pending feature for its own future round.
+4. **Part C (audit, no code change needed):** all 5 PR#73 device-round items verified FIXED or no-defect on main @ 2271ef6 (D93 `SaleRepositoryImpl.kt:211-222` + 3 tests; row labels `values/strings.xml:52-57`; khata write-path + repair; `BillDao.getByCustomer:26` no-defect/owner-confirmation-pending; D94 `HomeViewModel.kt:85/95/103`).
+
+**D-decisions:** D97 (draft in the PR body for owner paste; D95–D98 pastes from PR #75 body still pending).
+
+---
+
 ## Next-Phase Eligibility Check
 
 Before starting any phase:
@@ -212,5 +225,5 @@ Before starting any phase:
 
 ---
 
-*Last updated: 2026-09-25 · Maintained by: Builder + Sakira Suva*
+*Last updated: 2026-09-25 (P15) · Maintained by: Builder + Sakira Suva*
 *Gate authority: PROGRESS.md (D66) · Phase numbering: P0 to P12 (P9 unused)*

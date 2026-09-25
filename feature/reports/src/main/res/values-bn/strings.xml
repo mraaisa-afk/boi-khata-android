@@ -43,7 +43,7 @@
     <string name="no_budget_alerts">কোনো বাজেট সতর্কতা নেই</string>
     <string name="warning">সতর্কতা</string>
     <string name="over">সীমা অতিক্রান্ত</string>
-    <string name="sales_by_method">বিক্রি (মাধ্যম অনুয়ায়ী)</string>
+    <string name="sales_by_method">পেমেন্ট মাধ্যম অনুযায়ী</string>
     <string name="cash_sales">নগদে বিক্রি</string>
     <string name="bkash_sales">বিকাশ হতে বিক্রি</string>
     <string name="nagad_sales">নগদ (Nagad) হতে বিক্রি</string>

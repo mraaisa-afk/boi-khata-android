@@ -149,9 +149,16 @@ private fun HomeContent(
  * and the phone number was absent entirely; both now render as a prominent title
  * pair — shop name = headlineSmall ExtraBold, phone = bodyMedium beneath it.
  * D88 ruling untouched: ivory surface, maroon content (AAA 10.52:1).
+ *
+ * P15 (A1, owner device ruling — regression: phone shown twice): MainViewModel:95
+ * falls back `fetchShopName() ?: phone` when the tenants doc has no name field (or
+ * the lookup fails offline), so shopName IS the phone — rendering both lines printed
+ * the same number twice (large + small). The small line is suppressed exactly when
+ * it would duplicate the shop-name line; a real shop name still pairs with the
+ * phone line (guarded by HomeAppBarPhoneRenderTest, both directions).
  */
 @Composable
-private fun HomeAppBar(shopName: String, phone: String, isLicensed: Boolean) {
+internal fun HomeAppBar(shopName: String, phone: String, isLicensed: Boolean) {
     Surface(modifier = Modifier.fillMaxWidth(), color = ColorSurfaceIvory, tonalElevation = 0.dp) {
         Column(
             modifier = Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp, vertical = 10.dp),
@@ -191,7 +198,10 @@ private fun HomeAppBar(shopName: String, phone: String, isLicensed: Boolean) {
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    if (phone.isNotBlank()) {
+                    // A1 (P15): when MainViewModel's fallback made shopName == phone,
+                    // this second line printed the same number twice — suppress it
+                    // only in that duplicate case.
+                    if (phone.isNotBlank() && phone != shopName) {
                         Text(
                             phone,
                             style = MaterialTheme.typography.bodyMedium,
