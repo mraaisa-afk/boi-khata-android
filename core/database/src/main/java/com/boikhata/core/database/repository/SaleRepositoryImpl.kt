@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.boikhata.core.database.BoiKhataDatabase
 import com.boikhata.core.database.dao.BillDao
 import com.boikhata.core.database.dao.BillPaymentLineDao
+import com.boikhata.core.database.dao.BookDao
 import com.boikhata.core.database.dao.CashbookDao
 import com.boikhata.core.database.dao.KhataEntryDao
 import com.boikhata.core.database.dao.StockLedgerDao
@@ -28,6 +29,7 @@ import com.boikhata.core.domain.repository.BillRepository
 import com.boikhata.core.domain.repository.PaymentLine
 import com.boikhata.core.domain.repository.PaymentLineSpec
 import com.boikhata.core.domain.sale.BillNumberGenerator
+import com.boikhata.core.domain.sale.InsufficientStockException
 import com.boikhata.core.domain.sale.VatCalculator
 import java.util.UUID
 import javax.inject.Inject
@@ -42,6 +44,7 @@ class SaleRepositoryImpl @Inject constructor(
     private val db: BoiKhataDatabase,
     private val billDao: BillDao,
     private val billPaymentLineDao: BillPaymentLineDao,
+    private val bookDao: BookDao, // P14: live-stock gate inside the D22 transaction
     private val stockLedgerDao: StockLedgerDao,
     private val khataEntryDao: KhataEntryDao,
     private val cashbookDao: CashbookDao,
@@ -269,6 +272,25 @@ class SaleRepositoryImpl @Inject constructor(
 
         // D22: Atomic transaction — bill + lines + stock + khata + payment lines
         db.withTransaction {
+            // 0. P14 (owner device ruling — «মাইনাস নয়»): negative-stock gate —
+            // FIRST statement in the transaction, before any write. LIVE stock =
+            // books.initialStock + stock_ledger delta (B-005 derivation). A sale
+            // line may never exceed it; throwing here aborts the WHOLE D22
+            // transaction — no bill, no lines, no ledger rows, no khata/cashbook.
+            // The device finding (stock driven to −9) is impossible after this gate.
+            for (line in billLines) {
+                val openingStock = bookDao.getById(line.bookId)?.initialStock ?: 0
+                val ledgerDelta = stockLedgerDao.getStockQuantityForBook(line.bookId)
+                val availableStock = openingStock + ledgerDelta
+                if (line.quantity > availableStock) {
+                    throw InsufficientStockException(
+                        bookTitleBn = line.bookTitleBn,
+                        availableStock = availableStock,
+                        requestedQuantity = line.quantity,
+                    )
+                }
+            }
+
             // 1. Insert bill
             billDao.insert(billEntity)
 

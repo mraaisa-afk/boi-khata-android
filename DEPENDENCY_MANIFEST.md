@@ -59,7 +59,7 @@ Bundle `compose-core` groups ui, ui-graphics, ui-tooling-preview, foundation, ma
 | `androidx.activity:activity-compose` | `1.9.3` | catalogue marks this VERIFY-pending |
 | `androidx.lifecycle:lifecycle-runtime-compose` | `2.8.7` | catalogue marks this VERIFY-pending |
 | `androidx.lifecycle:lifecycle-viewmodel-compose` | `2.8.7` | catalogue marks this VERIFY-pending |
-| `androidx.navigation:navigation-compose` | `2.8.5` | catalogue marks this VERIFY-pending |
+| `androidx.navigation:navigation-compose` | `2.8.9` | P14 bump from 2.8.5 (latest 2.8.x patch, Maven-verified 2026-09-25); catalogue marks this VERIFY-pending |
 | `androidx.biometric:biometric` | `1.1.0` | |
 
 ---

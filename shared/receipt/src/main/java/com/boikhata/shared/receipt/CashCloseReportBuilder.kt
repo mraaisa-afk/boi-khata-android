@@ -28,8 +28,11 @@ object CashCloseReportBuilder {
         sb.append("তারিখ: ${report.dateLabelBn}\n")
         sb.append("═══════════════════════════════\n\n")
 
-        // Sales by method
-        sb.append("── বিক্রি (মাধ্যম অনুযায়ী) ──\n")
+        // P14 (owner device ruling): the list below is the PAYMENT-MEDIUM breakdown
+        // (নগদ/বিকাশ/ব্যাংক/বাকি) — the old label («বিক্রি» + «মাধ্যম অনুযায়ী») read as
+        // a sales breakdown of something else. «পেমেন্ট মাধ্যম অনুযায়ী» names the list
+        // for what it is; parallel grammar with «খরচ (খাত অনুযায়ী)» below.
+        sb.append("── পেমেন্ট মাধ্যম অনুযায়ী ──\n")
         sb.append("নগদ: ${formatAmount(report.salesByMethod.cash)}\n")
         sb.append("বিকাশ: ${formatAmount(report.salesByMethod.bkash)}\n")
         sb.append("নগদ (Nagad): ${formatAmount(report.salesByMethod.nagad)}\n")

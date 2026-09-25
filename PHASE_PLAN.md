@@ -31,6 +31,7 @@
 | **P10** | Design rebuild + D79/D81 | Items done; exit-gate open (device) | D71–D84 | Yes (Design v2) |
 | **P11** | Crash-hardening + route-safety + device-gate automation | Open | D82–D84 (basis) | No |
 | **P12** | Multi-line payment model (bill_payment_lines) | **In progress — opened by owner override 2026-09-24 (P11 exit-gate still open)** | D92 (draft re-issued this round) | No |
+| **P14** | Device round 2 (6 owner issues: negative-stock gate, header, sync transparency, settings scroll, payment-medium label, tab re-tap) | Implemented on `agent/p14-device-round-2-fixes`; pending CI + device test + D95–D98 pastes | D95–D98 (drafts in PR body) | No |
 | **Post-GA** | Speculative | Not in PROGRESS.md yet | TBD | Yes (Design v2) |
 
 ---
@@ -186,6 +187,20 @@
 
 ---
 
+## P14 — Device Round 2 (2026-09-25, branch `agent/p14-device-round-2-fixes`, base main @ 53054f3)
+
+Owner device testing post-#74 surfaced 6 issues — all fixed per the mandatory verification protocol (file/line evidence → fix → RED→GREEN where a behavioral rule changed):
+1. **D95 (new ruling, implemented) — home dashboard header:** shop name was `bodySmall` (12sp) with the phone absent (`HomeScreen.kt:163/:181` pre-fix). Header is now a formal identity block: shop name `headlineSmall` ExtraBold + phone `bodyMedium` beneath (D88 ivory/maroon untouched); `phone` threaded from BoiKhataMainScreen.
+2. **B-016 (fixed) — negative stock («মাইনাস নয়»):** no stock check existed anywhere (cart or D22 transaction). Two layers: authoritative `InsufficientStockException` gate as step 0 of the D22 transaction (live stock = `initialStock + ledger delta`, B-005 basis) + cart guards with the owner's exact «স্টকে পর্যাপ্ত বই নেই» Toast. RED→GREEN at both layers (repo 13 tests, VM 13 tests).
+3. **B-018 (fixed) — sync transparency:** owner's verbatim reassurance text + «ম্যানুয়ালি সিঙ্ক করুন» button → one-time `DailyBackupWorker` (`manual_backup`, REPLACE). Forensic finding: **D50 `scheduleDailyBackup` had NO call site — the periodic cloud backup was never armed**; now armed at every authenticated launch (KEEP). `RestoreRepository.checkAndRestore` remains unwired — **flagged for an owner ruling** (a login-path data-write needs an explicit decision, not a silent fix).
+4. **B-015 (fixed) — settings truncation:** non-scrollable Column clipped the লাইট UI card on devices; `verticalScroll` + a labelled switch row (3 locales).
+5. **D96 (new ruling, implemented) — payment-medium label:** hardcoded «বিক্রি (মাধ্যম অনুযায়ী)» (`CashCloseReportBuilder.kt:32`) → «পেমেন্ট মাধ্যম অনুযায়ী»; grep-zero verified.
+6. **B-017 (fixed) — bottom-tab "stuck":** the owner-prescribed canonical flags were ALREADY present since 1b77e95 (P11) — "missing flags" disproven. Actual root cause (RED-proven): a tab whose restored unit tops out on a child re-landed on the child (Truth: "expected: khata but was: khata_detail/{customerId}"). Fix: `navigateToTabRoot` (pop WITHOUT save → child cannot resurrect) wired into `NavBarTab` for re-taps on the selected tab; `navigationCompose 2.8.5 → 2.8.9` (patch-line bump, Maven-verified) for the residual library-level class.
+
+**D-decisions:** D95–D98 (drafted in the PR body for owner paste).
+
+---
+
 ## Next-Phase Eligibility Check
 
 Before starting any phase:
@@ -197,5 +212,5 @@ Before starting any phase:
 
 ---
 
-*Last updated: 2026-09-24 · Maintained by: Builder + Sakira Suva*
+*Last updated: 2026-09-25 · Maintained by: Builder + Sakira Suva*
 *Gate authority: PROGRESS.md (D66) · Phase numbering: P0 to P12 (P9 unused)*

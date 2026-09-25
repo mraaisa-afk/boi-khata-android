@@ -85,6 +85,14 @@ class SaleViewModel @Inject constructor(
     fun addToCart(book: Book) {
         val current = _cartState.value
         val existing = current.items.find { it.bookId == book.id }
+        // P14 (owner device ruling — «মাইনাস নয়»): requested (existing + 1) may never
+        // exceed the book's LIVE stock. Block the add and surface the owner's exact
+        // device message; the D22 repo gate remains the authoritative backstop.
+        val requested = (existing?.quantity ?: 0) + 1
+        if (requested > book.currentStock) {
+            _cartState.value = current.copy(stockWarning = "স্টকে পর্যাপ্ত বই নেই")
+            return
+        }
         val items = if (existing != null) {
             current.items.map { if (it.bookId == book.id) it.copy(quantity = it.quantity + 1) else it }
         } else {
@@ -94,6 +102,7 @@ class SaleViewModel @Inject constructor(
                 unitPrice = book.sellingPrice,
                 quantity = 1,
                 category = book.category,
+                availableStock = book.currentStock,
             )
         }
         _cartState.value = current.copy(items = items)
@@ -102,6 +111,14 @@ class SaleViewModel @Inject constructor(
 
     fun updateQuantity(bookId: String, quantity: Int) {
         val current = _cartState.value
+        if (quantity > 0) {
+            val item = current.items.find { it.bookId == bookId }
+            // P14: block manual increments beyond the captured live stock.
+            if (item != null && quantity > item.availableStock) {
+                _cartState.value = current.copy(stockWarning = "স্টকে পর্যাপ্ত বই নেই")
+                return
+            }
+        }
         val items = if (quantity <= 0) {
             current.items.filterNot { it.bookId == bookId }
         } else {
@@ -109,6 +126,13 @@ class SaleViewModel @Inject constructor(
         }
         _cartState.value = current.copy(items = items)
         recalculateTotals()
+    }
+
+    /** P14: clears the «স্টকে পর্যাপ্ত বই নেই» warning after the UI has surfaced it. */
+    fun dismissStockWarning() {
+        if (_cartState.value.stockWarning != null) {
+            _cartState.value = _cartState.value.copy(stockWarning = null)
+        }
     }
 
     fun setDiscount(discountInput: String, isPercentage: Boolean) {
@@ -460,6 +484,8 @@ data class CartItem(
     val unitPrice: Double,
     val quantity: Int,
     val category: BookCategory,
+    /** P14: live stock captured from Book.currentStock when the item was added. */
+    val availableStock: Int = Int.MAX_VALUE,
 )
 
 data class CartState(
@@ -478,6 +504,9 @@ data class CartState(
     // D93: sum(entered জমা) − মোট — valid only for a named customer (khata জমা);
     // a walk-in with an overpayment is blocked at checkout.
     val overpaymentAmount: Double = 0.0,
+    // P14: one-shot «স্টকে পর্যাপ্ত বই নেই» warning — set by the cart guards,
+    // surfaced by PosScreen (Toast) and cleared via dismissStockWarning().
+    val stockWarning: String? = null,
 )
 
 /** P12/D92: one editable payment line in the POS checkout editor. */

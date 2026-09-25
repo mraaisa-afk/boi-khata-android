@@ -86,4 +86,9 @@
     <string name="device_label">ডিভাইসের নাম</string>
     <string name="add_device">ডিভাইস যোগ করুন</string>
     <string name="remove_device">সরিয়ে দিন</string>
+    <string name="settings_sync_title">ক্লাউড ব্যাকআপ ও সিঙ্ক</string>
+    <string name="settings_sync_reassurance">আপনার সব তথ্য ক্লাউডে অটোমেটিক সেভ হয়। অ্যাপ আনইন্সটল হলেও একই নাম্বার দিয়ে লগইন করলে সব তথ্য ফিরে পাবেন।</string>
+    <string name="settings_sync_now">ম্যানুয়ালি সিঙ্ক করুন</string>
+    <string name="settings_sync_started">সিঙ্ক শুরু হয়েছে — ইন্টারনেট সংযোগে ডেটা ক্লাউডে সেভ হচ্ছে</string>
+    <string name="settings_lite_mode_label">লাইট মোড (সহজ, বড় UI)</string>
 </resources>
