@@ -48,7 +48,7 @@
     <string name="warning">সতর্কতা</string>
     <string name="over">সীমা অতিক্রান্ত</string>
 
-    <string name="sales_by_method">বিক্রি (মাধ্যম অনুয়ায়ী)</string>
+    <string name="sales_by_method">পেমেন্ট মাধ্যম অনুযায়ী</string>
     <string name="cash_sales">নগদে বিক্রি</string>
     <string name="bkash_sales">বিকাশ হতে বিক্রি</string>
     <string name="nagad_sales">নগদ (Nagad) হতে বিক্রি</string>
@@ -61,7 +61,7 @@
     <string name="mfs_fee">MFS-ফি (আনুমানিক)</string>
     <string name="mfs_fee_rate">MFS-ফি হার (%)</string>
     <string name="cash_reconciliation">নগদ মিলান</string>
-    <string name="system_cash">হিসাব-অনুয়ায়ী</string>
+    <string name="system_cash">হিসাব-অনুযায়ী</string>
     <string name="counted_cash">গোনা নগদ</string>
     <string name="khata_advance">খাতায় জমা (অতিরিক্ত)</string>
     <string name="enter_amount_placeholder">৳ পরিমাণ লিখুন</string>

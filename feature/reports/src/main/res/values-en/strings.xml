@@ -48,7 +48,7 @@
     <string name="warning">Warning</string>
     <string name="over">Over Budget</string>
 
-    <string name="sales_by_method">Sales by Method</string>
+    <string name="sales_by_method">By Payment Method</string>
     <string name="cash_sales">Cash Sales</string>
     <string name="bkash_sales">bKash Sales</string>
     <string name="nagad_sales">Nagad Sales</string>

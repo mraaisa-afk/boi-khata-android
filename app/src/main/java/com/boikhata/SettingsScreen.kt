@@ -131,7 +131,11 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(stringResource(R.string.settings_title))
-        // P14: cloud-backup reassurance card — the owner's exact wording, verbatim.
+        // P14: cloud-backup reassurance card. P15/D97 (owner ruling): the
+        // second sentence promised install-time restore while
+        // RestoreRepository.checkAndRestore is NOT wired (tracked pending
+        // item) — replaced with honest auto-backup + "restore coming soon"
+        // wording. No restore wiring in this round by ruling.
         Card { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.settings_sync_title))
             Text(stringResource(R.string.settings_sync_reassurance))
